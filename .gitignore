@@ -1,0 +1,44 @@
+# Virtual environment
+.venv/
+venv/
+ENV/
+env/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Environment variables & secrets (CRITICAL)
+.env
+.env.local
+.env.*.local
+*.env
+!.env.example
+
+# Output & temp media
+output/
+temp/
+temp_media/
+*.mp4
+*.mp3
+*.ass
+*.wav
+*.log
+
+# Node / Frontend
+node_modules/
+web/node_modules/
+.next/
+web/.next/
+out/
+web/out/
+dist/
+web/dist/
+
+# OS / IDE
+.DS_Store
+.vscode/
+.idea/
+get-pip.py

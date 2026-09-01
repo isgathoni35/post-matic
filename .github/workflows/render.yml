@@ -1,0 +1,112 @@
+name: PostMatic Cloud Video Render & Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      topic:
+        description: 'Video prompt or topic'
+        required: true
+        type: string
+        default: '3 Mind-Blowing Facts About Deep Ocean'
+      duration:
+        description: 'Target duration in seconds'
+        required: false
+        type: number
+        default: 25
+      voice:
+        description: 'Voice identifier'
+        required: false
+        type: string
+        default: 'en-US-ChristopherNeural'
+      job_id:
+        description: 'Associated Supabase video_jobs UUID'
+        required: false
+        type: string
+      user_id:
+        description: 'Supabase User ID'
+        required: false
+        type: string
+      publish_youtube:
+        description: 'Publish rendered video to YouTube Shorts'
+        required: false
+        type: boolean
+        default: false
+      privacy:
+        description: 'YouTube privacy status (public, unlisted, private)'
+        required: false
+        type: choice
+        options:
+          - public
+          - unlisted
+          - private
+        default: 'public'
+
+  repository_dispatch:
+    types: [render_video]
+
+jobs:
+  render-and-publish:
+    name: FFmpeg Video Render & Social Publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install System Multimedia Engine (FFmpeg & Libass)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg libass-dev
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Execute Automated Video Pipeline & Social Publisher
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_REDIRECT_URI: ${{ secrets.GOOGLE_REDIRECT_URI || 'http://localhost:8000/api/social/youtube/callback' }}
+          FRONTEND_URL: ${{ secrets.FRONTEND_URL || 'http://localhost:3000' }}
+        run: |
+          if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
+            python cloud_render_and_publish.py \
+              --topic "${{ github.event.client_payload.topic }}" \
+              --duration "${{ github.event.client_payload.duration || 25 }}" \
+              --voice "${{ github.event.client_payload.voice || 'en-US-ChristopherNeural' }}" \
+              --job-id "${{ github.event.client_payload.job_id }}" \
+              --user-id "${{ github.event.client_payload.user_id }}" \
+              ${{ github.event.client_payload.publish_youtube && '--publish-youtube' || '' }} \
+              --privacy "${{ github.event.client_payload.privacy || 'public' }}"
+          else
+            python cloud_render_and_publish.py \
+              --topic "${{ inputs.topic }}" \
+              --duration "${{ inputs.duration }}" \
+              --voice "${{ inputs.voice }}" \
+              ${{ inputs.job_id && format('--job-id "{0}"', inputs.job_id) || '' }} \
+              ${{ inputs.user_id && format('--user-id "{0}"', inputs.user_id) || '' }} \
+              ${{ inputs.publish_youtube && '--publish-youtube' || '' }} \
+              --privacy "${{ inputs.privacy }}"
+          fi
+
+      - name: Upload Output Video Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-video-output
+          path: output/*.mp4
+          if-no-files-found: ignore
+          retention-days: 7
