@@ -3,11 +3,14 @@ import { cookies } from "next/headers";
 
 /**
  * Creates a Supabase client for Server Components, Server Actions, and Route Handlers.
+ * Includes build-safe fallback placeholders for Next.js prerendering.
  */
 export async function createServerSupabaseClient() {
   const cookieStore = await cookies();
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+  const supabaseUrl =
+    process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder-project.supabase.co";
+  const supabaseAnonKey =
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder-anon-key-for-prerender";
 
   return createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
