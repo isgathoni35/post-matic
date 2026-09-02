@@ -215,7 +215,30 @@ The GitHub Actions runner needs API keys to download stock media, generate scrip
 
 ---
 
-## Step 6: End-to-End Production Verification
+## Step 6: Keep-Alive Cron Setup (Prevent Render Inactivity Sleep)
+
+Render's free tier spins down the web service after **15 minutes of inactivity**, resulting in a 50-second cold-start delay when the next request arrives. You can prevent this using either or both methods below:
+
+### Method A: Built-in GitHub Actions Cron (Zero External Accounts)
+A scheduled workflow has been added to `.github/workflows/keep_alive.yml`.
+* It runs automatically every **14 minutes** (`*/14 * * * *`).
+* It sends a fast HTTP ping to `https://post-matic.onrender.com/health`.
+* To test it manually anytime:
+  1. Go to your repo -> **Actions** -> **Keep Render Backend Awake**.
+  2. Click **Run workflow** -> **Run workflow**.
+
+### Method B: External Pinger via Cron-Job.org (Recommended for 100% Uptime)
+External cron services have 0 jitter and run continuously 24/7 for free:
+1. Sign up for free at [https://cron-job.org/](https://cron-job.org/).
+2. Click **Create cronjob**.
+3. **Title:** `PostMatic Render Keep-Alive`
+4. **URL:** `https://post-matic.onrender.com/health`
+5. **Execution schedule:** Every `10 minutes` (or `14 minutes`).
+6. Click **Create**.
+
+---
+
+## Step 7: End-to-End Production Verification
 
 1. **Access Studio:** Navigate to your live Vercel URL (`https://your-app.vercel.app`).
 2. **Auth Verification:** Confirm unauthenticated users are redirected to `/login`. Sign in using Email/Password.

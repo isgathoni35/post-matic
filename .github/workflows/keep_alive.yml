@@ -1,0 +1,38 @@
+name: Keep Render Backend Awake
+
+on:
+  schedule:
+    # Runs every 14 minutes (Render free tier sleeps after 15 minutes of inactivity)
+    - cron: '*/14 * * * *'
+  workflow_dispatch: # Enables manual testing from the Actions UI
+
+jobs:
+  keep-alive:
+    name: Keep Render Service Active
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Render Backend Endpoint
+        run: |
+          TARGET_URL="${{ secrets.RENDER_BACKEND_URL || 'https://post-matic.onrender.com' }}"
+          # Ensure URL has protocol
+          if [[ ! "$TARGET_URL" =~ ^https?:// ]]; then
+            TARGET_URL="https://$TARGET_URL"
+          fi
+          # Strip trailing slash if present
+          TARGET_URL="${TARGET_URL%/}"
+          HEALTH_URL="$TARGET_URL/health"
+
+          echo "Target Health Check: $HEALTH_URL"
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 20 "$HEALTH_URL" || echo "000")
+
+          echo "Received HTTP status code: $HTTP_CODE"
+
+          if [ "$HTTP_CODE" -eq 200 ]; then
+            echo "SUCCESS: Render backend is awake and healthy!"
+          else
+            echo "WARNING: Backend returned status $HTTP_CODE. Waking up instance..."
+            # Wake up retry in case of cold-boot
+            sleep 5
+            RETRY_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$HEALTH_URL" || echo "000")
+            echo "Retry response: $RETRY_CODE"
+          fi
