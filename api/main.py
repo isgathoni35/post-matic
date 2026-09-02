@@ -52,7 +52,7 @@ api_router.include_router(social.router)
 app.include_router(api_router)
 
 
-@app.get("/", tags=["Root"])
+@app.api_route("/", methods=["GET", "HEAD"], tags=["Root"])
 async def root():
     """Root entrypoint returning API service status and links."""
     return {
@@ -65,7 +65,7 @@ async def root():
     }
 
 
-@app.get("/health", tags=["Health Check"])
+@app.api_route("/health", methods=["GET", "HEAD"], tags=["Health Check"])
 async def health_check():
     """Health check endpoint for API service monitoring."""
     github_offload = is_github_dispatch_enabled()
