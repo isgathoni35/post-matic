@@ -26,6 +26,7 @@ export default function StudioDashboard() {
   const [topic, setTopic] = useState("");
   const [targetDuration, setTargetDuration] = useState(25);
   const [selectedVoice, setSelectedVoice] = useState(VOICES[0].id);
+  const [autoPublishYouTube, setAutoPublishYouTube] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSocialModalOpen, setIsSocialModalOpen] = useState(false);
 
@@ -197,6 +198,7 @@ export default function StudioDashboard() {
         target_duration: targetDuration,
         voice: selectedVoice,
         user_id: user?.id,
+        publish_youtube: autoPublishYouTube,
       });
 
       setActiveJob(response);
@@ -254,6 +256,8 @@ export default function StudioDashboard() {
               setTargetDuration={setTargetDuration}
               selectedVoice={selectedVoice}
               setSelectedVoice={setSelectedVoice}
+              autoPublishYouTube={autoPublishYouTube}
+              setAutoPublishYouTube={setAutoPublishYouTube}
               isSubmitting={isSubmitting}
               activeJob={activeJob}
               onGenerate={handleGenerateVideo}
@@ -264,6 +268,8 @@ export default function StudioDashboard() {
           {activeView === "library" && (
             <RenderLibraryView
               jobs={jobs}
+              userId={user?.id}
+              onRefreshJobs={fetchUserJobs}
               onSelectVideo={handleSelectJobFromGalleryOrQueue}
               onNavigateToStudio={() => setActiveView("studio")}
               onOpenSocialModal={() => setIsSocialModalOpen(true)}

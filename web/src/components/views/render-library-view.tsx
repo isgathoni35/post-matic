@@ -19,11 +19,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { VideoJobResponse } from "@/lib/api";
+import { VideoJobResponse, publishVideoToYouTube } from "@/lib/api";
 import { toast } from "sonner";
 
 interface RenderLibraryViewProps {
   jobs: VideoJobResponse[];
+  userId?: string;
+  onRefreshJobs?: () => void;
   onSelectVideo: (job: VideoJobResponse) => void;
   onNavigateToStudio: () => void;
   onOpenSocialModal: () => void;
@@ -31,12 +33,15 @@ interface RenderLibraryViewProps {
 
 export function RenderLibraryView({
   jobs,
+  userId,
+  onRefreshJobs,
   onSelectVideo,
   onNavigateToStudio,
   onOpenSocialModal,
 }: RenderLibraryViewProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedModalVideo, setSelectedModalVideo] = useState<VideoJobResponse | null>(null);
+  const [isPublishing, setIsPublishing] = useState(false);
 
   const completedJobs = jobs.filter(
     (j) => j.status === "completed" && j.video_url
@@ -52,6 +57,31 @@ export function RenderLibraryView({
       : `${window.location.origin}${videoUrl}`;
     navigator.clipboard.writeText(fullUrl);
     toast.success("Video URL copied to clipboard!");
+  };
+
+  const handlePublishToYouTube = async (jobId: string) => {
+    setIsPublishing(true);
+    toast.loading("Publishing to YouTube Shorts...", { id: `publish-${jobId}` });
+    try {
+      const res = await publishVideoToYouTube(jobId, userId);
+      toast.success("Published to YouTube Shorts!", {
+        id: `publish-${jobId}`,
+        description: res.title || "Your video is live on YouTube.",
+        action: res.youtube_url ? {
+          label: "View Short",
+          onClick: () => window.open(res.youtube_url, "_blank"),
+        } : undefined,
+      });
+      if (onRefreshJobs) onRefreshJobs();
+      setSelectedModalVideo(null);
+    } catch (err: any) {
+      toast.error("Publishing Failed", {
+        id: `publish-${jobId}`,
+        description: err.message || "Failed to publish to YouTube. Make sure your channel is linked in Settings.",
+      });
+    } finally {
+      setIsPublishing(false);
+    }
   };
 
   return (
@@ -274,15 +304,34 @@ export function RenderLibraryView({
                     Download MP4
                   </Button>
                 </a>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  onClick={onOpenSocialModal}
-                  className="flex-1 sm:flex-none text-xs h-9 font-semibold"
-                >
-                  <Share2 className="h-3.5 w-3.5 mr-1.5" />
-                  Publish to YouTube
-                </Button>
+                {selectedModalVideo.video_url?.includes("youtube.com") ? (
+                  <a
+                    href={selectedModalVideo.video_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex-1 sm:flex-none"
+                  >
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      className="w-full text-xs h-9 font-semibold bg-red-600 hover:bg-red-700"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
+                      View on YouTube
+                    </Button>
+                  </a>
+                ) : (
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => handlePublishToYouTube(selectedModalVideo.job_id)}
+                    isLoading={isPublishing}
+                    className="flex-1 sm:flex-none text-xs h-9 font-semibold shadow-lg shadow-amber-500/20"
+                  >
+                    <Share2 className="h-3.5 w-3.5 mr-1.5" />
+                    Publish to YouTube
+                  </Button>
+                )}
               </div>
             </div>
           </div>

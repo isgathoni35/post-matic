@@ -143,6 +143,8 @@ In the Render Web Service settings, go to **Environment** and add the following 
 | `GOOGLE_CLIENT_SECRET` | Google OAuth Client Secret | `GOCSPX-...` |
 | `GOOGLE_REDIRECT_URI` | Render callback endpoint | `https://post-matic-backend.onrender.com/api/social/youtube/callback` |
 | `FRONTEND_URL` | Your Vercel frontend URL | `https://post-matic-frontend.vercel.app` |
+| `GITHUB_PAT` | GitHub Personal Access Token (for cloud compute offload) | `ghp_yourTokenHere...` |
+| `GITHUB_REPO` | GitHub repository path | `isgathoni35/post-matic` |
 
 Click **Save Changes** to trigger automatic build and deployment.
 
@@ -169,15 +171,33 @@ Add the following 3 Environment Variables under **Environment Variables**:
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase public anon key | `eyJhbGciOi...` |
 | `NEXT_PUBLIC_API_URL` | Your live Render backend URL | `https://post-matic-backend.onrender.com` |
 
-Click **Deploy**.
+> [!NOTE]
+> In Vercel, save these as standard **Environment Variables / Configuration** (not Sensitive/Secret). Next.js bundles variables prefixed with `NEXT_PUBLIC_` directly into the public browser client so the authentication and API clients can communicate with Supabase and FastAPI.
+
+Click **Deploy** (or **Redeploy** with *"Clear build cache"* if updating).
 
 ---
 
-## Step 5: GitHub Actions Secrets Configuration
+## Step 5: GitHub Actions Cloud Compute & Secrets Configuration
 
-For distributed heavy video encoding (FFmpeg) and YouTube publishing, configure repository secrets:
+To execute heavy FFmpeg video rendering without crashing Render's free 512 MB tier, PostMatic dispatches generation jobs to **GitHub Actions** (providing an ephemeral 7 GB RAM virtual machine).
 
-1. Open your GitHub repository: [https://github.com/isgathoni35/post-matic](https://github.com/isgathoni35/post-matic)
+### 5.1 Generate GitHub Personal Access Token (PAT)
+1. Go to [GitHub Developer Settings -> Personal access tokens (classic)](https://github.com/settings/tokens).
+2. Click **Generate new token** -> **Generate new token (classic)**.
+3. Note: `PostMatic Cloud Runner Dispatcher`.
+4. Expiration: Select `90 days` (or `No expiration`).
+5. Select the following scopes:
+   - [x] **`repo`** (Full control of private repositories)
+   - [x] **`workflow`** (Update GitHub Action workflows)
+6. Click **Generate token**.
+7. Copy the token string (e.g. `ghp_...`).
+8. Add this token as **`GITHUB_PAT`** and your repository (`isgathoni35/post-matic`) as **`GITHUB_REPO`** in your [Render Web Service Environment Settings](https://dashboard.render.com).
+
+### 5.2 Configure GitHub Repository Secrets
+The GitHub Actions runner needs API keys to download stock media, generate scripts, and upload to YouTube:
+
+1. Open your repository: [https://github.com/isgathoni35/post-matic](https://github.com/isgathoni35/post-matic)
 2. Click **Settings** -> **Secrets and variables** -> **Actions**.
 3. Under **Repository secrets**, click **New repository secret** for each item:
 

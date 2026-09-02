@@ -14,7 +14,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from api.routers import social, video
-from engine.config import OUTPUT_DIR
+from api.services.github_dispatcher import is_github_dispatch_enabled
+from engine.config import GITHUB_REPO, OUTPUT_DIR
 
 # Set up logging
 logging.basicConfig(
@@ -51,12 +52,28 @@ api_router.include_router(social.router)
 app.include_router(api_router)
 
 
+@app.get("/", tags=["Root"])
+async def root():
+    """Root entrypoint returning API service status and links."""
+    return {
+        "status": "online",
+        "service": "PostMatic Video Engine API",
+        "version": "1.0.0",
+        "documentation": "/docs",
+        "health_check": "/health",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }
+
+
 @app.get("/health", tags=["Health Check"])
 async def health_check():
     """Health check endpoint for API service monitoring."""
+    github_offload = is_github_dispatch_enabled()
     return {
         "status": "ok",
         "service": "postmatic-api",
+        "cloud_compute_offload": github_offload,
+        "github_repo": GITHUB_REPO if github_offload else None,
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
 

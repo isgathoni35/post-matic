@@ -40,6 +40,34 @@ class VideoGenerateRequest(BaseModel):
         le=10,
         description="Number of words displayed per animated subtitle line",
     )
+    publish_youtube: bool = Field(
+        default=False,
+        description="Whether to automatically publish rendered video to YouTube Shorts",
+    )
+    privacy: str = Field(
+        default="public",
+        description="YouTube privacy setting ('public', 'unlisted', 'private')",
+    )
+    user_id: Optional[str] = Field(
+        default=None,
+        description="Owner user UUID for social account credentials lookup",
+    )
+
+
+class PublishVideoRequest(BaseModel):
+    """Payload to trigger publishing an existing rendered video to social platforms."""
+    user_id: Optional[str] = Field(
+        default=None,
+        description="Owner user UUID for social account credentials lookup",
+    )
+    platform: str = Field(
+        default="youtube",
+        description="Target social platform ('youtube')",
+    )
+    privacy: str = Field(
+        default="public",
+        description="Privacy setting ('public', 'unlisted', 'private')",
+    )
 
 
 class VideoJobResponse(BaseModel):

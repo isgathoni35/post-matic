@@ -19,6 +19,18 @@ def clear_jobs_db():
     IN_MEMORY_JOBS.clear()
 
 
+def test_root_endpoint():
+    """Verify that / endpoint returns 200 OK and valid service links."""
+    response = client.get("/")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "online"
+    assert data["service"] == "PostMatic Video Engine API"
+    assert data["documentation"] == "/docs"
+    assert data["health_check"] == "/health"
+    assert "timestamp" in data
+
+
 def test_health_check():
     """Verify that /health endpoint returns 200 OK and valid service info."""
     response = client.get("/health")
@@ -26,6 +38,7 @@ def test_health_check():
     data = response.json()
     assert data["status"] == "ok"
     assert data["service"] == "postmatic-api"
+    assert "cloud_compute_offload" in data
     assert "timestamp" in data
 
 

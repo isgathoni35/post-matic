@@ -1,12 +1,17 @@
 """Background worker service executing the end-to-end video generation pipeline asynchronously."""
+import asyncio
 import logging
 from pathlib import Path
 import time
 import traceback
 from typing import Optional
 
-from api.db import update_video_job_record
+from api.db import get_social_accounts, update_video_job_record
 from api.schemas import VideoJobStatus
+from api.services.github_dispatcher import (
+    dispatch_github_render_job,
+    is_github_dispatch_enabled,
+)
 from engine.config import OUTPUT_DIR, TEMP_DIR
 from engine.media_downloader import fetch_script_media
 from engine.script_generator import generate_script
@@ -21,14 +26,52 @@ def execute_video_pipeline_job(
     topic: str,
     target_duration: int = 25,
     voice: Optional[str] = None,
+    user_id: Optional[str] = None,
+    publish_youtube: bool = False,
+    privacy: str = "public",
 ) -> None:
-    """Execute the end-to-end 5-stage video pipeline in a background task,
+    """Execute the end-to-end 5-stage video pipeline in a background task.
 
-    updating Supabase database status records at each completion stage.
+    If GitHub Actions cloud compute is configured (via GITHUB_PAT and GITHUB_REPO),
+    offloads heavy FFmpeg rendering to GitHub Actions' free 7 GB RAM runner.
+    Otherwise, executes the rendering locally with graceful fallback.
     """
     selected_voice = voice or DEFAULT_VOICE
     logger.info("Starting background video generation job '%s' for topic '%s'", job_id, topic)
 
+    # 1. Check if GitHub Actions Cloud Compute offloading is enabled
+    if is_github_dispatch_enabled():
+        logger.info("[%s] Cloud compute offload active. Dispatching to GitHub Actions...", job_id)
+        update_video_job_record(
+            job_id=job_id,
+            status=VideoJobStatus.SCRIPTING,
+            progress_pct=10,
+        )
+        try:
+            asyncio.run(
+                dispatch_github_render_job(
+                    job_id=job_id,
+                    topic=topic,
+                    duration=target_duration,
+                    voice=selected_voice,
+                    user_id=user_id,
+                    publish_youtube=publish_youtube,
+                    privacy=privacy,
+                )
+            )
+            logger.info(
+                "[%s] Successfully dispatched to GitHub Actions. Cloud runner will execute FFmpeg and update Supabase.",
+                job_id,
+            )
+            return
+        except Exception as dispatch_err:
+            logger.warning(
+                "[%s] GitHub dispatch failed: %s. Falling back to local execution...",
+                job_id,
+                dispatch_err,
+            )
+
+    # 2. Local Fallback Execution
     try:
         # STAGE 1: Scripting (15%)
         update_video_job_record(
@@ -112,6 +155,32 @@ def execute_video_pipeline_job(
 
         file_size = final_video_path.stat().st_size
         video_url = f"/output/{output_filename}"
+
+        # OPTIONAL: Direct Social Publishing (YouTube)
+        if publish_youtube:
+            logger.info("[%s] Auto-publishing rendered video to YouTube Shorts...", job_id)
+            try:
+                from api.services.token_manager import ensure_valid_access_token
+                from engine.social.youtube_uploader import upload_video_to_youtube
+
+                accounts = get_social_accounts(user_id=user_id)
+                yt_acc = next((a for a in accounts if a.get("platform") == "youtube"), None)
+                if yt_acc:
+                    access_token, was_refreshed = asyncio.run(ensure_valid_access_token(yt_acc))
+                    upload_res = upload_video_to_youtube(
+                        video_file_path=final_video_path,
+                        title=script.title,
+                        description=f"{script.description}\n\n#Shorts #{' #'.join(script.tags)}",
+                        tags=script.tags,
+                        access_token=access_token,
+                        privacy_status=privacy,
+                    )
+                    video_url = upload_res.youtube_url
+                    logger.info("[%s] Published to YouTube Shorts: %s", job_id, video_url)
+                else:
+                    logger.warning("[%s] No connected YouTube account found for user '%s'", job_id, user_id)
+            except Exception as pub_exc:
+                logger.error("[%s] YouTube upload failed: %s", job_id, pub_exc)
 
         # STAGE 5: Completed (100%)
         update_video_job_record(

@@ -31,3 +31,10 @@
 - [x] **Step 4.1:** Implement the YouTube OAuth 2.0 flow in the frontend, securely sending the refresh tokens to the backend Supabase database.
 - [x] **Step 4.2:** Write the backend cron/worker utility to verify token expiration and fetch fresh access tokens prior to publishing.
 - [x] **Step 4.3:** Set up the GitHub Actions workflow file (`.github/workflows/render.yml`) to accept a webhook, download assets, run the heavy FFmpeg encoding, and execute the final upload to the social APIs.
+
+---
+
+### Phase 5: Distributed Cloud Compute & 1-Click Publishing
+- [x] **Step 5.1:** Add root service health and metadata route (`GET /`) to FastAPI backend for Render deployment.
+- [x] **Step 5.2:** Connect FastAPI backend to GitHub Actions via `repository_dispatch` to offload heavy FFmpeg rendering to GitHub's free 7 GB RAM runner, avoiding Render 512 MB OOM crashes.
+- [x] **Step 5.3:** Implement autonomous 1-click & auto-publishing flow to YouTube Shorts (`POST /api/social/publish/{job_id}`) across both backend API and frontend Next.js console/library views.

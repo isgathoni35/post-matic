@@ -9,12 +9,13 @@ from fastapi.responses import RedirectResponse
 import httpx
 
 from api.db import delete_social_account, get_social_accounts, upsert_social_account
-from api.schemas import SocialAccountResponse, SocialAuthUrlResponse
+from api.schemas import PublishVideoRequest, SocialAccountResponse, SocialAuthUrlResponse
 from engine.config import (
     FRONTEND_URL,
     GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET,
     GOOGLE_REDIRECT_URI,
+    OUTPUT_DIR,
 )
 
 logger = logging.getLogger(__name__)
@@ -238,3 +239,103 @@ async def verify_all_tokens(
     from api.services.token_manager import verify_and_refresh_user_accounts
     results = await verify_and_refresh_user_accounts(user_id=user_id)
     return {"results": results}
+
+
+@router.post(
+    "/publish/{job_id}",
+    summary="Publish a rendered video to YouTube Shorts",
+    description="Uploads a previously rendered video to the user's connected YouTube channel.",
+)
+async def publish_video_to_social(
+    job_id: str,
+    payload: PublishVideoRequest = PublishVideoRequest(),
+):
+    """Publish a completed video to YouTube Shorts."""
+    from api.db import get_video_job_record, update_video_job_record, get_social_accounts
+    from api.services.token_manager import ensure_valid_access_token
+    from engine.social.youtube_uploader import upload_video_to_youtube
+
+    job = get_video_job_record(job_id)
+    if not job:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Video job '{job_id}' not found.",
+        )
+
+    if job.status.value != "completed":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Video job is not completed yet (current status: {job.status.value}).",
+        )
+
+    # Determine video file path
+    video_path = None
+    if job.video_url:
+        if job.video_url.startswith("http") and "youtube.com" in job.video_url:
+            return {
+                "message": "Video is already published to YouTube!",
+                "youtube_url": job.video_url,
+                "job_id": job_id,
+            }
+        filename = job.video_url.split("/")[-1]
+        local_candidate = OUTPUT_DIR / filename
+        if local_candidate.exists():
+            video_path = local_candidate
+
+    if not video_path or not video_path.exists():
+        local_candidate = OUTPUT_DIR / f"video_{job_id}.mp4"
+        if local_candidate.exists():
+            video_path = local_candidate
+
+    if not video_path or not video_path.exists():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Rendered video file not found on disk for upload.",
+        )
+
+    effective_user_id = payload.user_id or getattr(job, "user_id", None)
+    accounts = get_social_accounts(user_id=effective_user_id)
+    yt_acc = next((a for a in accounts if a.get("platform") == "youtube"), None)
+
+    if not yt_acc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No connected YouTube account found. Please connect your YouTube channel first.",
+        )
+
+    try:
+        access_token, was_refreshed = await ensure_valid_access_token(yt_acc)
+        title = job.topic[:100]
+        desc = f"{job.topic}\n\n#Shorts #Viral"
+        tags = ["shorts", "viral"]
+
+        upload_result = upload_video_to_youtube(
+            video_file_path=video_path,
+            title=title,
+            description=desc,
+            tags=tags,
+            access_token=access_token,
+            privacy_status=payload.privacy,
+        )
+
+        # Update video job with the live YouTube URL
+        update_video_job_record(
+            job_id=job_id,
+            status=job.status,
+            video_url=upload_result.youtube_url,
+        )
+
+        return {
+            "status": "success",
+            "message": "Video published successfully to YouTube Shorts!",
+            "video_id": upload_result.video_id,
+            "youtube_url": upload_result.youtube_url,
+            "title": upload_result.title,
+            "privacy_status": upload_result.privacy_status,
+        }
+    except Exception as exc:
+        logger.exception("Failed to publish video to YouTube: %s", exc)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"YouTube upload failed: {str(exc)}",
+        )

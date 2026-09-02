@@ -241,7 +241,7 @@ def get_social_accounts(user_id: Optional[str] = None) -> list:
             if user_id:
                 query = query.eq("user_id", user_id)
             res = query.order("created_at", desc=True).execute()
-            if res.data is not None:
+            if res.data:
                 return res.data
         except Exception as e:
             logger.warning("Supabase social_accounts query failed (using in-memory fallback): %s", e)

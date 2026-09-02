@@ -131,4 +131,38 @@ def test_api_generate_triggers_background_task():
             topic="Black hole physics",
             target_duration=20,
             voice=None,
+            user_id=None,
+            publish_youtube=False,
+            privacy="public",
         )
+
+
+@patch("api.worker.dispatch_github_render_job")
+@patch("api.worker.is_github_dispatch_enabled", return_value=True)
+def test_execute_video_pipeline_job_dispatches_to_github(mock_enabled, mock_dispatch):
+    """Verify that when GitHub dispatch is enabled, worker triggers GitHub Actions."""
+    job_id = str(uuid.uuid4())
+    topic = "Deep Ocean Secrets"
+
+    from api.db import create_video_job_record
+    create_video_job_record(job_id=job_id, topic=topic, target_duration=25)
+
+    execute_video_pipeline_job(
+        job_id=job_id,
+        topic=topic,
+        target_duration=25,
+        voice="guy",
+        user_id="usr-99",
+        publish_youtube=True,
+        privacy="unlisted",
+    )
+
+    mock_dispatch.assert_called_once_with(
+        job_id=job_id,
+        topic=topic,
+        duration=25,
+        voice="guy",
+        user_id="usr-99",
+        publish_youtube=True,
+        privacy="unlisted",
+    )

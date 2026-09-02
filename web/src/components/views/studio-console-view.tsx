@@ -75,6 +75,8 @@ interface StudioConsoleViewProps {
   setTargetDuration: (d: number) => void;
   selectedVoice: string;
   setSelectedVoice: (v: string) => void;
+  autoPublishYouTube?: boolean;
+  setAutoPublishYouTube?: (val: boolean) => void;
   isSubmitting: boolean;
   activeJob: VideoJobResponse | null;
   onGenerate: () => void;
@@ -88,6 +90,8 @@ export function StudioConsoleView({
   setTargetDuration,
   selectedVoice,
   setSelectedVoice,
+  autoPublishYouTube = false,
+  setAutoPublishYouTube,
   isSubmitting,
   activeJob,
   onGenerate,
@@ -335,6 +339,36 @@ export function StudioConsoleView({
                 ))}
               </div>
             </div>
+
+            {/* Auto-Publish Toggle to YouTube Shorts */}
+            {setAutoPublishYouTube && (
+              <div className="pt-3 border-t border-white/[0.06]">
+                <label className="flex items-center justify-between p-3 rounded-xl bg-black/30 border border-white/[0.06] hover:border-white/[0.12] transition-colors cursor-pointer group">
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-lg bg-red-600/15 border border-red-500/20 flex items-center justify-center text-red-500">
+                      <Share2 className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold text-white">Auto-Publish to YouTube Shorts</span>
+                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-red-500/10 text-red-400 font-semibold border border-red-500/20">
+                          1-Click
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-zinc-400 mt-0.5">
+                        Directly upload to your linked YouTube channel once rendering completes
+                      </p>
+                    </div>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={autoPublishYouTube}
+                    onChange={(e) => setAutoPublishYouTube(e.target.checked)}
+                    className="h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-amber-500 focus:ring-amber-500/30 accent-amber-500 cursor-pointer"
+                  />
+                </label>
+              </div>
+            )}
 
             {/* Primary Action Button */}
             <div className="pt-2">

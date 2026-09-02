@@ -9,6 +9,8 @@ export interface GenerateVideoPayload {
   target_duration?: number;
   voice?: string;
   user_id?: string;
+  publish_youtube?: boolean;
+  privacy?: string;
 }
 
 export interface VideoJobResponse {
@@ -131,4 +133,49 @@ export async function disconnectSocialAccount(accountId: string, userId?: string
   if (!response.ok) {
     throw new Error(`Failed to disconnect social account ${accountId}`);
   }
+}
+
+export interface PublishVideoResult {
+  status: string;
+  message: string;
+  video_id?: string;
+  youtube_url?: string;
+  title?: string;
+  privacy_status?: string;
+}
+
+/**
+ * Publishes an existing completed video to YouTube Shorts.
+ */
+export async function publishVideoToYouTube(
+  jobId: string,
+  userId?: string,
+  privacy: string = "public"
+): Promise<PublishVideoResult> {
+  const response = await fetch(`${API_BASE_URL}/api/social/publish/${jobId}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      user_id: userId,
+      platform: "youtube",
+      privacy,
+    }),
+  });
+
+  if (!response.ok) {
+    let errMsg = "Failed to publish video to YouTube";
+    try {
+      const errData = await response.json();
+      if (errData.detail) {
+        errMsg = typeof errData.detail === "string" ? errData.detail : JSON.stringify(errData.detail);
+      }
+    } catch {
+      // ignore
+    }
+    throw new Error(errMsg);
+  }
+
+  return response.json();
 }

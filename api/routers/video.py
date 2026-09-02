@@ -30,6 +30,7 @@ async def generate_video_job(
         topic=payload.topic,
         target_duration=payload.duration,
         voice=payload.voice,
+        user_id=payload.user_id,
     )
     # Enqueue background task
     background_tasks.add_task(
@@ -38,6 +39,9 @@ async def generate_video_job(
         topic=payload.topic,
         target_duration=payload.duration,
         voice=payload.voice,
+        user_id=payload.user_id,
+        publish_youtube=payload.publish_youtube,
+        privacy=payload.privacy,
     )
     return job
 

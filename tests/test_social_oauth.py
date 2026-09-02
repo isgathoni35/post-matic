@@ -104,3 +104,62 @@ def test_list_and_delete_social_accounts():
     # Verify deletion
     items_after = client.get("/api/social/accounts?user_id=user-999").json()
     assert len(items_after) == 0
+
+
+def test_publish_video_job_not_found():
+    """Verify 404 when publishing non-existent job."""
+    res = client.post("/api/social/publish/non-existent-job-uuid")
+    assert res.status_code == 404
+    assert "not found" in res.json()["detail"].lower()
+
+
+def test_publish_video_success(tmp_path):
+    """Verify publishing completed video uploads to YouTube and updates record."""
+    import uuid
+    from api.db import create_video_job_record, update_video_job_record
+    from api.schemas import VideoJobStatus
+    from engine.social.youtube_uploader import YouTubeUploadResult
+
+    job_id = str(uuid.uuid4())
+    user_id = str(uuid.uuid4())
+    create_video_job_record(job_id=job_id, topic="3 facts about deep space", user_id=user_id)
+
+    # Create dummy mp4 file
+    test_video = tmp_path / f"video_{job_id}.mp4"
+    test_video.write_bytes(b"dummy mp4 video bytes")
+
+    update_video_job_record(
+        job_id=job_id,
+        status=VideoJobStatus.COMPLETED,
+        video_url=f"/output/video_{job_id}.mp4",
+    )
+
+    # Seed connected YouTube account
+    upsert_social_account(
+        platform="youtube",
+        account_name="Space Facts Channel",
+        access_token="valid_access_tok",
+        refresh_token="ref_tok",
+        user_id=user_id,
+    )
+
+    mock_upload_res = YouTubeUploadResult(
+        video_id="yt_vid_123",
+        youtube_url="https://www.youtube.com/shorts/yt_vid_123",
+        title="3 facts about deep space",
+        privacy_status="public",
+    )
+
+    with patch("engine.social.youtube_uploader.upload_video_to_youtube", return_value=mock_upload_res), \
+         patch("api.routers.social.OUTPUT_DIR", tmp_path), \
+         patch("api.services.token_manager.ensure_valid_access_token", return_value=("valid_access_tok", False)):
+        
+        res = client.post(
+            f"/api/social/publish/{job_id}",
+            json={"user_id": user_id, "privacy": "public"},
+        )
+        assert res.status_code == 200
+        data = res.json()
+        assert data["status"] == "success"
+        assert data["video_id"] == "yt_vid_123"
+        assert data["youtube_url"] == "https://www.youtube.com/shorts/yt_vid_123"

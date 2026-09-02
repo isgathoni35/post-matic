@@ -28,6 +28,10 @@ GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET", "")
 GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI", "http://localhost:8000/api/social/youtube/callback")
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3001")
 
+# GitHub Actions Distributed Cloud Compute
+GITHUB_PAT = os.getenv("GITHUB_PAT", "")
+GITHUB_REPO = os.getenv("GITHUB_REPO", "isgathoni35/post-matic")
+
 # Gemini model fallback hierarchy
 GEMINI_MODELS = [
     "gemini-3.7-flash",
