@@ -1,17 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Film, Mail, Lock, User, Eye, EyeOff, Sparkles, ArrowRight, ShieldCheck } from "lucide-react";
+import { Film, Mail, Lock, User, Eye, EyeOff, Sparkles, ArrowRight, Loader2, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 
 export default function LoginPage() {
-  const router = useRouter();
   const { user, signInWithEmail, signUpWithEmail, signInWithOAuth } = useAuth();
 
   const [mode, setMode] = useState<"signin" | "signup">("signin");
@@ -21,26 +18,24 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // If user is already authenticated, allow quick navigation
+  // If user is already authenticated, immediately take them into Studio
+  useEffect(() => {
+    if (user) {
+      window.location.href = "/studio";
+    }
+  }, [user]);
+
   if (user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#090b0e] p-4">
-        <div className="studio-card p-8 rounded-2xl max-w-md w-full text-center space-y-4">
-          <div className="h-12 w-12 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mx-auto">
-            <ShieldCheck className="h-6 w-6" />
+      <div className="min-h-screen flex items-center justify-center bg-[#090b10] p-4 text-center">
+        <div className="flex flex-col items-center gap-3 animate-in fade-in duration-300">
+          <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-xl shadow-amber-500/20 text-black">
+            <Film className="h-6 w-6" />
           </div>
-          <h2 className="text-lg font-bold text-white">Already Authenticated</h2>
-          <p className="text-xs text-muted-foreground">
-            You are signed in as <span className="font-mono text-zinc-300">{user.email}</span>.
-          </p>
-          <Button
-            variant="primary"
-            className="w-full"
-            onClick={() => router.push("/")}
-          >
-            Go to Studio Console
-            <ArrowRight className="h-4 w-4 ml-1.5" />
-          </Button>
+          <div className="flex items-center gap-2 text-sm font-medium text-zinc-400">
+            <Loader2 className="h-4 w-4 animate-spin text-amber-500" />
+            <span>Taking you to your studio...</span>
+          </div>
         </div>
       </div>
     );
@@ -59,27 +54,30 @@ export default function LoginPage() {
       const { error } = await signInWithEmail(email, password);
       setIsLoading(false);
       if (!error) {
-        router.push("/");
+        toast.success("Welcome back!");
+        window.location.href = "/studio";
       }
     } else {
       const { error } = await signUpWithEmail(email, password, fullName);
       setIsLoading(false);
       if (!error) {
+        toast.success("Account created! Please sign in with your credentials.");
         setMode("signin");
       }
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-[#090b0e] text-zinc-100 selection:bg-amber-500/30 selection:text-amber-200">
-      {/* Left Feature & Architecture Panel (Visible on lg+) */}
-      <div className="hidden lg:flex flex-col justify-between w-1/2 p-12 xl:p-16 border-r border-white/[0.08] bg-[#0b0e14] relative overflow-hidden">
-        {/* Background Subtle Gradient */}
-        <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-amber-500/[0.03] to-transparent pointer-events-none" />
+    <div className="min-h-screen flex flex-col lg:flex-row bg-[#090b10] text-zinc-100 selection:bg-amber-500/30 selection:text-amber-200">
+      {/* Left Feature & Story Panel (Visible on lg+) */}
+      <div className="hidden lg:flex flex-col justify-between w-1/2 p-12 xl:p-16 border-r border-white/[0.08] bg-[#0d1017] relative overflow-hidden">
+        {/* Background Ambient Glows */}
+        <div className="absolute -top-24 -left-24 w-96 h-96 bg-amber-500/[0.08] rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-indigo-500/[0.06] rounded-full blur-3xl pointer-events-none" />
 
         {/* Brand */}
-        <div className="flex items-center gap-3 z-10">
-          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/20 border border-amber-300/30">
+        <Link href="/" className="flex items-center gap-3 z-10 group">
+          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/20 border border-amber-300/30 group-hover:scale-105 transition-transform">
             <Film className="h-5 w-5 text-black" />
           </div>
           <div>
@@ -89,47 +87,69 @@ export default function LoginPage() {
                 Studio
               </span>
             </div>
-            <p className="text-xs text-muted-foreground">Automated Short-Form Production Engine</p>
+            <p className="text-xs text-zinc-400">Automated Short-Form Production Engine</p>
           </div>
-        </div>
+        </Link>
 
-        {/* Middle Architecture Terminal Callout */}
-        <div className="space-y-6 z-10 my-auto">
-          <div className="space-y-2">
-            <Badge variant="primary" pulse>
-              Zero-OpEx Architecture
-            </Badge>
-            <h1 className="text-3xl font-bold tracking-tight text-white leading-tight">
-              Production-grade faceless videos, completely on autopilot.
+        {/* Middle Value Proposition Callout */}
+        <div className="space-y-8 z-10 my-auto max-w-lg">
+          <div className="space-y-3">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-semibold">
+              <Sparkles className="h-3.5 w-3.5" />
+              Creator Autopilot
+            </div>
+            <h1 className="text-3xl xl:text-4xl font-bold tracking-tight text-white leading-tight">
+              Create viral faceless videos in seconds, not hours.
             </h1>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Transform single-line prompts into fully edited, voice-narrated, and captioned 9:16 vertical videos with distributed compute.
+            <p className="text-sm text-zinc-400 leading-relaxed">
+              Generate high-retention 9:16 Shorts with realistic human narration, matched HD footage, and animated subtitles — ready to publish to YouTube.
             </p>
           </div>
 
-          {/* Engine Architecture Terminal */}
-          <div className="studio-card rounded-xl p-4 space-y-3 font-mono text-xs text-zinc-300 bg-[#090b0e]/80">
-            <div className="flex items-center justify-between pb-2 border-b border-white/[0.06] text-muted-foreground text-[11px]">
-              <span className="flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                orchestration-pipeline.log
-              </span>
-              <span>v1.0-fastapi</span>
+          {/* Feature Highlights List */}
+          <div className="space-y-3.5">
+            <div className="flex items-start gap-3 p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+              <div className="h-6 w-6 rounded-lg bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center text-emerald-400 shrink-0 mt-0.5">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-white">One-Prompt Creation</p>
+                <p className="text-[11px] text-zinc-400 mt-0.5">
+                  Type a topic or pick a viral niche. The engine writes scenes and synchronizes visuals automatically.
+                </p>
+              </div>
             </div>
-            <div className="space-y-1.5 text-[11px]">
-              <div className="text-emerald-400">[0.0s] [LLM] Scripting via Gemini 1.5 JSON schema</div>
-              <div className="text-amber-400">[1.2s] [TTS] edge-tts WebSocket word timestamps (.ass)</div>
-              <div className="text-sky-400">[2.8s] [Sourcing] Pexels vertical 1080x1920 HD footage</div>
-              <div className="text-purple-400">[4.5s] [FFmpeg] Lossless trim, concat & subtitle burning</div>
-              <div className="text-zinc-400">[6.1s] [Supabase] Job payload synced & ready</div>
+
+            <div className="flex items-start gap-3 p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+              <div className="h-6 w-6 rounded-lg bg-amber-500/15 border border-amber-500/25 flex items-center justify-center text-amber-400 shrink-0 mt-0.5">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-white">Hyper-Realistic Voices & Captions</p>
+                <p className="text-[11px] text-zinc-400 mt-0.5">
+                  Engaging neural voices paired with kinetic word-by-word subtitles styled for maximum watch-time.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+              <div className="h-6 w-6 rounded-lg bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center text-indigo-400 shrink-0 mt-0.5">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-white">1-Click Direct to YouTube Shorts</p>
+                <p className="text-[11px] text-zinc-400 mt-0.5">
+                  Connect your YouTube channel once. Publish videos with custom titles and hashtags instantly.
+                </p>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Footer info */}
-        <div className="flex items-center justify-between text-xs text-muted-foreground border-t border-white/[0.06] pt-6 z-10 font-mono">
-          <span>FastAPI + Supabase SSR</span>
-          <span>H.264 1080x1920 60FPS</span>
+        <div className="flex items-center justify-between text-xs text-zinc-500 border-t border-white/[0.06] pt-6 z-10 font-mono">
+          <span>Production-grade H.264 1080x1920</span>
+          <span>Zero-OpEx Architecture</span>
         </div>
       </div>
 
@@ -146,12 +166,12 @@ export default function LoginPage() {
 
           <div className="space-y-2 text-center lg:text-left">
             <h2 className="text-2xl font-bold tracking-tight text-white">
-              {mode === "signin" ? "Sign in to Studio Console" : "Create Studio Account"}
+              {mode === "signin" ? "Sign in to Studio" : "Create Your Account"}
             </h2>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-zinc-400">
               {mode === "signin"
-                ? "Enter your credentials or sign in with OAuth to manage video jobs."
-                : "Sign up to start generating automated vertical content."}
+                ? "Enter your credentials to access your studio workspace and video library."
+                : "Create a free account to start creating vertical video content on autopilot."}
             </p>
           </div>
 
@@ -163,7 +183,7 @@ export default function LoginPage() {
               className={`py-2 text-xs font-semibold rounded-lg transition-all ${
                 mode === "signin"
                   ? "bg-white/[0.1] text-white shadow-sm"
-                  : "text-muted-foreground hover:text-white"
+                  : "text-zinc-400 hover:text-white"
               }`}
             >
               Sign In
@@ -174,7 +194,7 @@ export default function LoginPage() {
               className={`py-2 text-xs font-semibold rounded-lg transition-all ${
                 mode === "signup"
                   ? "bg-white/[0.1] text-white shadow-sm"
-                  : "text-muted-foreground hover:text-white"
+                  : "text-zinc-400 hover:text-white"
               }`}
             >
               Create Account
@@ -214,7 +234,7 @@ export default function LoginPage() {
           {/* Divider */}
           <div className="relative flex items-center justify-center">
             <div className="w-full border-t border-white/[0.08]" />
-            <span className="absolute px-3 bg-[#090b0e] text-[11px] text-muted-foreground uppercase font-mono tracking-wider">
+            <span className="absolute px-3 bg-[#090b10] text-[11px] text-zinc-500 uppercase font-mono tracking-wider">
               or email
             </span>
           </div>
@@ -273,7 +293,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 text-muted-foreground hover:text-white transition-colors"
+                  className="absolute right-3 text-zinc-500 hover:text-white transition-colors"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -283,7 +303,7 @@ export default function LoginPage() {
             <Button
               type="submit"
               variant="primary"
-              className="w-full h-11 text-xs font-semibold mt-2"
+              className="w-full h-11 text-xs font-semibold mt-2 shadow-lg shadow-amber-500/20"
               isLoading={isLoading}
             >
               {mode === "signin" ? "Sign In to Studio" : "Create Free Account"}
@@ -295,9 +315,9 @@ export default function LoginPage() {
           <div className="text-center pt-2">
             <Link
               href="/"
-              className="text-xs text-muted-foreground hover:text-white transition-colors"
+              className="text-xs text-zinc-500 hover:text-white transition-colors"
             >
-              ← Return to Studio Console
+              ← Back to PostMatic Home
             </Link>
           </div>
         </div>

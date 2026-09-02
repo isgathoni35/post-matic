@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   Sparkles,
   Play,
@@ -16,56 +16,68 @@ import {
   Loader2,
   ExternalLink,
   Share2,
-  Maximize2,
   Volume2,
   VolumeX,
   RotateCcw,
-  Sparkle,
-  Radio,
-  Cpu,
+  Heart,
+  MessageCircle,
+  Bookmark,
+  Music2,
+  TrendingUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { VideoJobResponse } from "@/lib/api";
 
-const STARTER_TOPICS = [
-  { topic: "Why the Mariana Trench is terrifying", category: "Deep Ocean" },
-  { topic: "Ancient Roman concrete that self-heals over centuries", category: "History" },
-  { topic: "Dark psychology tricks salespeople use every day", category: "Psychology" },
-  { topic: "What actually happens when two supermassive black holes collide", category: "Cosmos" },
-  { topic: "The bizarre psychological illusion of the Mandela Effect", category: "Mysteries" },
+const TRENDING_NICHES = [
+  { topic: "Why the Mariana Trench is terrifying and what lurks at the bottom", label: "🌊 Deep Sea", color: "from-blue-500/20 to-cyan-500/20 text-cyan-400" },
+  { topic: "4 subtle psychological tricks that people with high emotional intelligence use", label: "🧠 Psychology", color: "from-purple-500/20 to-indigo-500/20 text-purple-400" },
+  { topic: "How ancient Roman concrete self-heals over thousands of years", label: "🏛️ Ancient Rome", color: "from-amber-500/20 to-orange-500/20 text-amber-400" },
+  { topic: "What actually happens if two supermassive black holes collide", label: "🌌 Cosmic Mystery", color: "from-violet-500/20 to-pink-500/20 text-pink-400" },
+  { topic: "The 3 morning habits of ultra-wealthy investors that cost zero dollars", label: "💰 Wealth Mindset", color: "from-emerald-500/20 to-teal-500/20 text-emerald-400" },
 ];
 
 export const VOICES = [
   {
     id: "en-US-ChristopherNeural",
     name: "Christopher",
-    role: "Deep Documentary Male",
-    desc: "Authoritative, cinematic, and captivating voice ideal for facts & documentaries.",
-    tag: "Recommended",
+    role: "Deep & Cinematic",
+    genre: "Documentary, Mystery, Crime",
+    badge: "Recommended",
+    initials: "C",
   },
   {
     id: "en-US-GuyNeural",
     name: "Guy",
-    role: "High Energy Male",
-    desc: "Dynamic, fast-paced voice tailored for viral TikTok & Shorts hooks.",
-    tag: "Viral",
+    role: "High-Energy & Dynamic",
+    genre: "Viral TikTok, Hooks, Tech",
+    badge: "Viral",
+    initials: "G",
   },
   {
     id: "en-US-JennyNeural",
     name: "Jenny",
-    role: "Warm & Natural Female",
-    desc: "Clear, conversational, and highly engaging tone for lifestyle and education.",
-    tag: "Popular",
+    role: "Warm & Conversational",
+    genre: "Storytelling, Lifestyle, Facts",
+    badge: "Popular",
+    initials: "J",
   },
   {
     id: "en-GB-SoniaNeural",
     name: "Sonia",
-    role: "British Storyteller Female",
-    desc: "Sophisticated and articulate narration with an authentic British cadence.",
-    tag: "Narrative",
+    role: "British Storyteller",
+    genre: "History, Philosophy, Lore",
+    badge: "Narrative",
+    initials: "S",
   },
+];
+
+const DURATIONS = [
+  { value: 15, label: "15s", role: "Quick Hook" },
+  { value: 25, label: "25s", role: "Viral Standard" },
+  { value: 45, label: "45s", role: "Story Mode" },
+  { value: 60, label: "60s", role: "Deep Dive" },
 ];
 
 interface StudioConsoleViewProps {
@@ -99,7 +111,7 @@ export function StudioConsoleView({
 }: StudioConsoleViewProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
-  const videoRef = React.useRef<HTMLVideoElement | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
 
   const getStageStatus = (stage: "scripting" | "tts" | "sourcing" | "assembly") => {
     if (!activeJob) return "pending";
@@ -126,34 +138,6 @@ export function StudioConsoleView({
     return "pending";
   };
 
-  const getStageBadge = (stageStatus: "pending" | "active" | "done" | "failed") => {
-    if (stageStatus === "active") {
-      return (
-        <span className="flex items-center text-amber-400 text-[11px] font-mono font-medium">
-          <Loader2 className="h-3 w-3 animate-spin mr-1 text-amber-400" />
-          Processing
-        </span>
-      );
-    }
-    if (stageStatus === "done") {
-      return (
-        <span className="flex items-center text-emerald-400 text-[11px] font-mono font-medium">
-          <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
-          Done
-        </span>
-      );
-    }
-    if (stageStatus === "failed") {
-      return (
-        <span className="flex items-center text-red-400 text-[11px] font-mono font-medium">
-          <AlertCircle className="h-3.5 w-3.5 mr-1" />
-          Failed
-        </span>
-      );
-    }
-    return <span className="text-zinc-500 text-[11px] font-mono">Standby</span>;
-  };
-
   const videoSrc = activeJob?.video_url
     ? activeJob.video_url.startsWith("http")
       ? activeJob.video_url
@@ -178,21 +162,23 @@ export function StudioConsoleView({
     }
   };
 
+  const isRendering = activeJob && !["completed", "failed"].includes(activeJob.status);
+
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
       {/* View Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/[0.06]">
         <div>
           <div className="flex items-center gap-2.5 mb-1">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
-              Studio Video Composer
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+              Create Vertical Video
             </h1>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
-              9:16 Vertical Engine
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+              9:16 Shorts
             </span>
           </div>
           <p className="text-xs text-zinc-400">
-            Generate high-retention vertical videos orchestrated via Gemini 1.5/3.7, edge-tts, Pexels HD clips, and FFmpeg.
+            Type an idea or choose a viral niche. The engine writes scenes, narrates, and edits your video in the cloud.
           </p>
         </div>
 
@@ -204,112 +190,103 @@ export function StudioConsoleView({
             className="text-xs h-9 bg-white/[0.03] hover:bg-white/[0.07] border-white/[0.08]"
           >
             <Share2 className="h-3.5 w-3.5 mr-1.5 text-amber-400" />
-            Publishing Channels
+            Social Channels
           </Button>
           <Button
             variant="primary"
             size="sm"
             onClick={onGenerate}
-            isLoading={isSubmitting}
+            isLoading={isSubmitting || !!isRendering}
             className="text-xs h-9 font-semibold shadow-lg shadow-amber-500/20"
           >
             <Sparkles className="h-3.5 w-3.5 mr-1.5" />
-            Render Video
+            Generate Video
           </Button>
         </div>
       </div>
 
-      {/* Main Studio Grid */}
+      {/* Main Studio Grid: Creation Parameters (Left) + Interactive Live Preview Canvas (Right) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left Column: Input Studio Form (7 Cols) */}
+        {/* Left Column: Input Form Controls */}
         <div className="lg:col-span-7 space-y-6">
-          {/* Prompt Studio Card */}
-          <div className="rounded-2xl p-6 bg-[#0f131a] border border-white/[0.08] shadow-xl space-y-5">
+          {/* Card: Topic & Prompt */}
+          <div className="studio-card rounded-2xl p-6 space-y-5">
             <div className="flex items-center justify-between">
-              <div>
-                <label className="text-sm font-semibold text-white tracking-tight flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-amber-400" />
-                  Video Topic & Creative Prompt
-                </label>
-                <p className="text-xs text-zinc-400 mt-0.5">
-                  Enter a theme, factual mystery, or script prompt. The engine writes scenes and synchronizes visuals.
-                </p>
-              </div>
-              <span className="text-[11px] font-mono text-zinc-500">
-                {topic.length}/300
-              </span>
-            </div>
-
-            <div className="space-y-3">
-              <Textarea
-                placeholder="e.g. 3 terrifying facts about the deep sea midnight zone that science still cannot explain..."
-                rows={4}
-                value={topic}
-                onChange={(e) => setTopic(e.target.value)}
-                maxLength={300}
-                className="w-full bg-black/40 border-white/[0.08] focus:border-amber-500/50 rounded-xl text-sm text-zinc-100 placeholder:text-zinc-600 focus:ring-1 focus:ring-amber-500/30 p-3.5"
-              />
-
-              {/* Curated Prompt Inspirations */}
-              <div className="space-y-1.5 pt-1">
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
-                  Curated Inspirations
-                </span>
-                <div className="flex flex-wrap gap-2">
-                  {STARTER_TOPICS.map((item) => (
-                    <button
-                      key={item.topic}
-                      type="button"
-                      onClick={() => setTopic(item.topic)}
-                      className="text-xs bg-white/[0.03] hover:bg-white/[0.08] hover:border-amber-500/30 text-zinc-300 px-3 py-1.5 rounded-lg border border-white/[0.06] transition-all text-left flex items-center gap-1.5"
-                    >
-                      <span className="text-[10px] font-mono text-amber-400 font-semibold">
-                        {item.category}:
-                      </span>
-                      <span className="truncate max-w-[240px]">{item.topic}</span>
-                    </button>
-                  ))}
+              <div className="flex items-center gap-2">
+                <div className="h-7 w-7 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+                  <Sparkles className="h-4 w-4" />
+                </div>
+                <div>
+                  <h2 className="text-sm font-bold text-white">Video Topic & Concept</h2>
+                  <p className="text-[11px] text-zinc-400">What is this video about?</p>
                 </div>
               </div>
+              <span className="text-[11px] font-mono text-zinc-500">{topic.length}/300</span>
             </div>
 
-            {/* Target Duration Preset Selector */}
-            <div className="pt-4 border-t border-white/[0.06] space-y-3">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-zinc-200 flex items-center gap-1.5">
-                  <Clock className="h-3.5 w-3.5 text-amber-400" />
-                  Target Duration
-                </label>
-                <span className="text-[11px] font-mono text-zinc-400">
-                  {targetDuration} seconds (~{Math.round(targetDuration * 2.6)} spoken words)
-                </span>
+            <Textarea
+              placeholder="e.g. 3 terrifying facts about the deep sea midnight zone that science still cannot explain..."
+              value={topic}
+              onChange={(e) => setTopic(e.target.value)}
+              className="min-h-[110px] text-sm bg-black/40 border-white/[0.08] focus:border-amber-500/40 focus:ring-amber-500/20 resize-none rounded-xl leading-relaxed"
+              maxLength={300}
+            />
+
+            {/* Trending Niches Presets */}
+            <div className="space-y-2.5 pt-1">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-zinc-300">
+                <TrendingUp className="h-3.5 w-3.5 text-amber-400" />
+                <span>Trending Niche Ideas (Click to use)</span>
               </div>
-              <div className="grid grid-cols-4 gap-2.5">
-                {[15, 25, 45, 60].map((sec) => (
+              <div className="flex flex-wrap gap-2">
+                {TRENDING_NICHES.map((niche) => (
                   <button
-                    key={sec}
+                    key={niche.label}
                     type="button"
-                    onClick={() => setTargetDuration(sec)}
-                    className={`py-2.5 px-3 rounded-xl border text-xs font-semibold transition-all flex flex-col items-center justify-center gap-0.5 ${
-                      targetDuration === sec
-                        ? "bg-amber-500/15 border-amber-500/50 text-amber-300 shadow-md shadow-amber-500/10"
-                        : "bg-white/[0.02] border-white/[0.06] text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]"
-                    }`}
+                    onClick={() => setTopic(niche.topic)}
+                    className="px-3 py-1.5 rounded-xl text-xs font-medium bg-white/[0.04] border border-white/[0.08] hover:border-amber-500/30 hover:bg-white/[0.07] text-zinc-300 hover:text-white transition-all text-left flex items-center gap-1.5"
                   >
-                    <span className="text-sm font-bold">{sec}s</span>
-                    <span className="text-[10px] font-mono text-zinc-500">
-                      {sec === 15 ? "Quick Hook" : sec === 25 ? "Viral Standard" : sec === 45 ? "Story" : "Deep Dive"}
-                    </span>
+                    <span>{niche.label}</span>
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Voice Actor Selector Cards */}
-            <div className="pt-4 border-t border-white/[0.06] space-y-3">
-              <label className="text-xs font-semibold text-zinc-200 flex items-center gap-1.5">
+            {/* Target Duration Selector */}
+            <div className="space-y-3 pt-3 border-t border-white/[0.06]">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
+                  <Clock className="h-3.5 w-3.5 text-amber-400" />
+                  Target Duration
+                </label>
+                <span className="text-xs font-mono text-amber-400 font-semibold">
+                  ~{targetDuration}s runtime
+                </span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                {DURATIONS.map((d) => (
+                  <button
+                    key={d.value}
+                    type="button"
+                    onClick={() => setTargetDuration(d.value)}
+                    className={`py-3 px-3 rounded-xl border text-center transition-all ${
+                      targetDuration === d.value
+                        ? "bg-amber-500/10 border-amber-500 text-white shadow-sm"
+                        : "bg-black/30 border-white/[0.06] text-zinc-400 hover:text-white hover:border-white/[0.12]"
+                    }`}
+                  >
+                    <p className="text-sm font-bold">{d.label}</p>
+                    <p className="text-[10px] text-zinc-400 mt-0.5">{d.role}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Voice Actor Selector */}
+            <div className="space-y-3 pt-3 border-t border-white/[0.06]">
+              <label className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
                 <Mic className="h-3.5 w-3.5 text-amber-400" />
-                Voice Synthesis Actor (edge-tts)
+                Narrator Voice Talent
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {VOICES.map((v) => (
@@ -317,24 +294,25 @@ export function StudioConsoleView({
                     key={v.id}
                     type="button"
                     onClick={() => setSelectedVoice(v.id)}
-                    className={`p-3 rounded-xl border text-left transition-all space-y-1.5 ${
+                    className={`p-3.5 rounded-xl border text-left transition-all ${
                       selectedVoice === v.id
-                        ? "bg-amber-500/10 border-amber-500/40 shadow-sm"
-                        : "bg-white/[0.02] border-white/[0.06] hover:border-white/[0.12] hover:bg-white/[0.03]"
+                        ? "bg-amber-500/10 border-amber-500 shadow-sm"
+                        : "bg-black/30 border-white/[0.06] hover:border-white/[0.14] text-zinc-300"
                     }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-white">{v.name}</span>
-                      <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${
-                        selectedVoice === v.id
-                          ? "bg-amber-500/20 text-amber-300 font-semibold"
-                          : "bg-white/[0.04] text-zinc-400"
-                      }`}>
-                        {v.tag}
+                    <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex items-center gap-2">
+                        <div className="h-6 w-6 rounded-full bg-gradient-to-tr from-amber-500 to-amber-700 flex items-center justify-center text-[10px] font-bold text-black">
+                          {v.initials}
+                        </div>
+                        <span className="text-xs font-bold text-white">{v.name}</span>
+                      </div>
+                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/[0.06] text-zinc-400">
+                        {v.badge}
                       </span>
                     </div>
-                    <p className="text-[11px] font-medium text-amber-400">{v.role}</p>
-                    <p className="text-[10px] text-zinc-400 line-clamp-2 leading-relaxed">{v.desc}</p>
+                    <p className="text-[11px] font-semibold text-amber-400">{v.role}</p>
+                    <p className="text-[10px] text-zinc-400 mt-0.5">{v.genre}</p>
                   </button>
                 ))}
               </div>
@@ -343,9 +321,9 @@ export function StudioConsoleView({
             {/* Auto-Publish Toggle to YouTube Shorts */}
             {setAutoPublishYouTube && (
               <div className="pt-3 border-t border-white/[0.06]">
-                <label className="flex items-center justify-between p-3 rounded-xl bg-black/30 border border-white/[0.06] hover:border-white/[0.12] transition-colors cursor-pointer group">
+                <label className="flex items-center justify-between p-3.5 rounded-xl bg-black/40 border border-white/[0.06] hover:border-white/[0.12] transition-colors cursor-pointer group">
                   <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-lg bg-red-600/15 border border-red-500/20 flex items-center justify-center text-red-500">
+                    <div className="h-8 w-8 rounded-lg bg-red-600/15 border border-red-500/20 flex items-center justify-center text-red-500 shrink-0">
                       <Share2 className="h-4 w-4" />
                     </div>
                     <div>
@@ -356,7 +334,7 @@ export function StudioConsoleView({
                         </span>
                       </div>
                       <p className="text-[10px] text-zinc-400 mt-0.5">
-                        Directly upload to your linked YouTube channel once rendering completes
+                        Directly upload to your connected YouTube channel once rendering completes
                       </p>
                     </div>
                   </div>
@@ -376,208 +354,230 @@ export function StudioConsoleView({
                 variant="primary"
                 className="w-full h-12 text-sm font-semibold shadow-xl shadow-amber-500/20 rounded-xl"
                 onClick={onGenerate}
-                isLoading={isSubmitting}
+                isLoading={isSubmitting || !!isRendering}
               >
                 <Sparkles className="h-4 w-4 mr-2" />
-                Generate & Render 9:16 Video
+                {isRendering ? "Rendering Video in Cloud..." : "Generate & Render 9:16 Video"}
               </Button>
             </div>
           </div>
 
-          {/* Real-time Pipeline Orchestration Stages Card */}
-          <div className="rounded-2xl p-5 bg-[#0f131a] border border-white/[0.08] shadow-xl space-y-4">
+          {/* Creation Pipeline Stage Tracker */}
+          <div className="studio-card rounded-2xl p-5 space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Cpu className="h-4 w-4 text-amber-400" />
-                <span className="text-xs font-bold text-white tracking-tight uppercase tracking-wider">
-                  Pipeline Execution Monitor
-                </span>
+                <div className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
+                <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+                  Creation Progress
+                </h3>
               </div>
-              {activeJob?.status === "completed" ? (
-                <Badge variant="success" className="text-[10px] font-mono">100% Completed</Badge>
-              ) : activeJob?.status === "failed" ? (
-                <Badge variant="destructive" className="text-[10px] font-mono">Failed</Badge>
-              ) : activeJob ? (
-                <Badge variant="primary" pulse className="text-[10px] font-mono">
-                  Processing ({activeJob.progress_pct}%)
-                </Badge>
-              ) : (
-                <Badge variant="outline" className="text-[10px] font-mono">Idle</Badge>
+              {activeJob && (
+                <span className="text-xs font-mono font-semibold text-amber-400">
+                  {activeJob.progress_pct}%
+                </span>
               )}
             </div>
 
-            {/* 4 Execution Steps */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-              <div className="p-3 rounded-xl bg-black/40 border border-white/[0.04] space-y-1">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono text-zinc-400">1. SCRIPT</span>
-                  {getStageBadge(getStageStatus("scripting"))}
-                </div>
-                <p className="text-xs font-semibold text-white">Gemini LLM</p>
-                <p className="text-[10px] text-zinc-500">Pydantic Schema</p>
-              </div>
-
-              <div className="p-3 rounded-xl bg-black/40 border border-white/[0.04] space-y-1">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono text-zinc-400">2. AUDIO</span>
-                  {getStageBadge(getStageStatus("tts"))}
-                </div>
-                <p className="text-xs font-semibold text-white">edge-tts</p>
-                <p className="text-[10px] text-zinc-500">.ASS Offsets</p>
-              </div>
-
-              <div className="p-3 rounded-xl bg-black/40 border border-white/[0.04] space-y-1">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono text-zinc-400">3. MEDIA</span>
-                  {getStageBadge(getStageStatus("sourcing"))}
-                </div>
-                <p className="text-xs font-semibold text-white">Pexels 4K</p>
-                <p className="text-[10px] text-zinc-500">Vertical HD</p>
-              </div>
-
-              <div className="p-3 rounded-xl bg-black/40 border border-white/[0.04] space-y-1">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono text-zinc-400">4. RENDER</span>
-                  {getStageBadge(getStageStatus("assembly"))}
-                </div>
-                <p className="text-xs font-semibold text-white">FFmpeg 9:16</p>
-                <p className="text-[10px] text-zinc-500">Burn Captions</p>
-              </div>
+            {/* Progress Bar */}
+            <div className="w-full h-2 rounded-full bg-white/[0.06] overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-amber-500 to-orange-500 transition-all duration-500 rounded-full"
+                style={{ width: `${activeJob ? activeJob.progress_pct : 0}%` }}
+              />
             </div>
 
-            {activeJob?.error_message && (
-              <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-300 text-xs font-mono">
-                Pipeline Error: {activeJob.error_message}
+            {/* Stage Steps */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 text-xs">
+              <div className="p-2.5 rounded-xl bg-black/30 border border-white/[0.04] space-y-1">
+                <span className="text-[10px] text-zinc-500 font-mono">01. Script</span>
+                <p className="text-[11px] font-semibold text-zinc-300">Viral Hook</p>
+                <span className={`text-[10px] font-mono ${getStageStatus("scripting") === "done" ? "text-emerald-400" : getStageStatus("scripting") === "active" ? "text-amber-400 animate-pulse" : "text-zinc-600"}`}>
+                  {getStageStatus("scripting") === "done" ? "✓ Done" : getStageStatus("scripting") === "active" ? "Writing..." : "Standby"}
+                </span>
               </div>
-            )}
+
+              <div className="p-2.5 rounded-xl bg-black/30 border border-white/[0.04] space-y-1">
+                <span className="text-[10px] text-zinc-500 font-mono">02. Voice</span>
+                <p className="text-[11px] font-semibold text-zinc-300">Narration</p>
+                <span className={`text-[10px] font-mono ${getStageStatus("tts") === "done" ? "text-emerald-400" : getStageStatus("tts") === "active" ? "text-amber-400 animate-pulse" : "text-zinc-600"}`}>
+                  {getStageStatus("tts") === "done" ? "✓ Done" : getStageStatus("tts") === "active" ? "Recording..." : "Standby"}
+                </span>
+              </div>
+
+              <div className="p-2.5 rounded-xl bg-black/30 border border-white/[0.04] space-y-1">
+                <span className="text-[10px] text-zinc-500 font-mono">03. Footage</span>
+                <p className="text-[11px] font-semibold text-zinc-300">4K B-Roll</p>
+                <span className={`text-[10px] font-mono ${getStageStatus("sourcing") === "done" ? "text-emerald-400" : getStageStatus("sourcing") === "active" ? "text-amber-400 animate-pulse" : "text-zinc-600"}`}>
+                  {getStageStatus("sourcing") === "done" ? "✓ Done" : getStageStatus("sourcing") === "active" ? "Curating..." : "Standby"}
+                </span>
+              </div>
+
+              <div className="p-2.5 rounded-xl bg-black/30 border border-white/[0.04] space-y-1">
+                <span className="text-[10px] text-zinc-500 font-mono">04. Assembly</span>
+                <p className="text-[11px] font-semibold text-zinc-300">Captions & Edit</p>
+                <span className={`text-[10px] font-mono ${getStageStatus("assembly") === "done" ? "text-emerald-400" : getStageStatus("assembly") === "active" ? "text-amber-400 animate-pulse" : "text-zinc-600"}`}>
+                  {getStageStatus("assembly") === "done" ? "✓ Done" : getStageStatus("assembly") === "active" ? "Editing..." : "Standby"}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Right Column: Pro 9:16 Smartphone Preview (5 Cols) */}
-        <div className="lg:col-span-5 space-y-4">
-          <div className="rounded-2xl p-6 bg-[#0f131a] border border-white/[0.08] shadow-2xl flex flex-col items-center">
-            <div className="w-full flex items-center justify-between mb-4 pb-3 border-b border-white/[0.06]">
-              <span className="text-xs font-bold text-white flex items-center gap-2">
-                <Film className="h-4 w-4 text-amber-400" />
-                Live 9:16 Video Canvas
-              </span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/[0.05] text-zinc-400">
-                1080 × 1920 MP4
-              </span>
-            </div>
-
-            {/* Smartphone Device Frame */}
-            <div className="relative w-full max-w-[280px] aspect-[9/16] rounded-[32px] border-4 border-zinc-800 bg-black shadow-2xl shadow-black/80 flex flex-col items-center justify-between p-2.5 overflow-hidden group">
-              {/* Dynamic Island / Top Notch */}
-              <div className="w-20 h-4 bg-zinc-950 rounded-full border border-white/[0.06] z-30 absolute top-3 flex items-center justify-end px-2">
-                <div className="h-2 w-2 rounded-full bg-emerald-500/80 animate-pulse" />
-              </div>
-
-              {/* Video Player or Interactive State */}
-              {videoSrc && activeJob?.status === "completed" ? (
-                <div className="w-full h-full rounded-[24px] overflow-hidden relative flex items-center justify-center bg-zinc-950">
-                  <video
-                    ref={videoRef}
-                    key={videoSrc}
-                    src={videoSrc}
-                    playsInline
-                    autoPlay
-                    loop
-                    className="w-full h-full object-cover rounded-[24px]"
-                    onPlay={() => setIsPlaying(true)}
-                    onPause={() => setIsPlaying(false)}
-                  />
-
-                  {/* Video Control Overlays */}
-                  <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-4 z-20 pointer-events-none">
-                    <div className="flex justify-end pointer-events-auto">
-                      <button
-                        type="button"
-                        onClick={toggleMute}
-                        className="p-2 rounded-full bg-black/60 backdrop-blur-md text-white hover:bg-black/80 transition-colors"
-                      >
-                        {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-                      </button>
-                    </div>
-
-                    <div className="flex items-center justify-center pointer-events-auto">
-                      <button
-                        type="button"
-                        onClick={togglePlay}
-                        className="h-12 w-12 rounded-full bg-amber-500/90 text-black flex items-center justify-center hover:scale-105 transition-transform shadow-lg shadow-amber-500/30"
-                      >
-                        {isPlaying ? <Pause className="h-5 w-5 fill-current" /> : <Play className="h-5 w-5 fill-current ml-0.5" />}
-                      </button>
-                    </div>
-
-                    <div className="flex items-center justify-between text-[11px] font-mono text-zinc-300 pointer-events-auto">
-                      <span>{activeJob.duration_seconds?.toFixed(1)}s</span>
-                      <span className="text-amber-400 font-semibold">1080x1920</span>
-                    </div>
-                  </div>
+        {/* Right Column: Realistic Shorts Smartphone Canvas */}
+        <div className="lg:col-span-5 flex flex-col items-center">
+          <div className="w-full max-w-[340px] space-y-4">
+            {/* Phone Bezel */}
+            <div className="relative w-full aspect-[9/18] rounded-[48px] p-3.5 bg-gradient-to-b from-[#252b3b] via-[#141824] to-[#0a0d14] shadow-[0_24px_64px_-12px_rgba(0,0,0,0.8)] border border-white/[0.14]">
+              {/* Inner Screen */}
+              <div className="relative w-full h-full rounded-[38px] overflow-hidden bg-black flex flex-col justify-between p-4 select-none">
+                {/* Dynamic Island */}
+                <div className="relative z-30 mx-auto w-24 h-5 rounded-full bg-black flex items-center justify-end px-2 border border-white/[0.08]">
+                  <div className="h-2 w-2 rounded-full bg-emerald-500/80" />
                 </div>
-              ) : (
-                <div className="w-full h-full rounded-[24px] bg-gradient-to-b from-zinc-900/60 via-black to-zinc-950 flex flex-col items-center justify-center p-4 text-center space-y-4">
-                  {activeJob && ["scripting", "synthesizing", "sourcing_media", "rendering", "pending"].includes(activeJob.status) ? (
-                    <div className="space-y-3">
-                      <div className="h-14 w-14 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 mx-auto animate-pulse">
-                        <Loader2 className="h-7 w-7 animate-spin" />
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-white uppercase tracking-wider">
-                          {activeJob.status.replace("_", " ")}
-                        </p>
-                        <p className="text-[11px] font-mono text-amber-400 mt-1">
-                          {activeJob.progress_pct}% Completed
-                        </p>
+
+                {/* Video Playback or Standby State */}
+                {videoSrc && activeJob?.status === "completed" ? (
+                  <>
+                    <video
+                      ref={videoRef}
+                      src={videoSrc}
+                      loop
+                      playsInline
+                      className="absolute inset-0 w-full h-full object-cover z-10 cursor-pointer"
+                      onClick={togglePlay}
+                    />
+
+                    {/* Play/Pause Overlay */}
+                    {!isPlaying && (
+                      <button
+                        onClick={togglePlay}
+                        className="absolute inset-0 m-auto z-20 h-16 w-16 rounded-full bg-black/60 backdrop-blur-md flex items-center justify-center text-white border border-white/20 hover:scale-110 transition-transform"
+                      >
+                        <Play className="h-7 w-7 fill-white ml-1" />
+                      </button>
+                    )}
+
+                    {/* Sound Toggle */}
+                    <button
+                      onClick={toggleMute}
+                      className="absolute top-12 right-4 z-20 h-8 w-8 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center text-white border border-white/10"
+                    >
+                      {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+                    </button>
+                  </>
+                ) : isRendering ? (
+                  /* Active Cloud Rendering Screen */
+                  <div className="absolute inset-0 bg-gradient-to-b from-[#131722] via-[#0d1017] to-black flex flex-col items-center justify-center p-6 text-center z-10 space-y-4">
+                    <div className="relative">
+                      <div className="h-16 w-16 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                        <Loader2 className="h-8 w-8 animate-spin text-amber-400" />
                       </div>
                     </div>
-                  ) : (
-                    <>
-                      <div className="h-14 w-14 rounded-full bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
-                        <Play className="h-6 w-6 fill-current ml-0.5" />
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-white">Live Canvas Standby</p>
-                        <p className="text-[11px] text-zinc-400 max-w-[180px] mt-1">
-                          Rendered video with synchronized ASS subtitles will play here automatically.
-                        </p>
-                      </div>
-                    </>
-                  )}
-
-                  {/* Simulated Dynamic Subtitles */}
-                  <div className="w-full bg-black/80 backdrop-blur-md rounded-xl p-2.5 border border-white/[0.08] text-center mt-auto">
-                    <span className="text-[10px] font-mono text-amber-400 font-bold tracking-wider uppercase">
-                      [DYNAMIC WORD SUBTITLES]
+                    <div className="space-y-1">
+                      <p className="text-sm font-bold text-white">Rendering Your Video</p>
+                      <p className="text-[11px] text-zinc-400">
+                        Offloaded to 7 GB cloud runner
+                      </p>
+                    </div>
+                    <span className="text-xs font-mono text-amber-400 font-semibold px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20">
+                      {activeJob?.progress_pct}% Completed
                     </span>
                   </div>
+                ) : (
+                  /* Idle Standby Screen (Simulated Aesthetic Preview) */
+                  <>
+                    <div className="absolute inset-0 bg-gradient-to-b from-blue-950/70 via-slate-900 to-black z-0">
+                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(245,158,11,0.12),transparent_60%)] animate-pulse" />
+                    </div>
+
+                    <div className="relative z-10 my-auto text-center px-4 space-y-3">
+                      <span className="inline-block px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-400 text-[10px] font-bold tracking-wider uppercase border border-amber-500/30">
+                        Live Preview Canvas
+                      </span>
+                      <div className="text-lg font-black text-white leading-tight uppercase tracking-tight">
+                        "Your rendered video will play here automatically with animated subtitles."
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* Realistic Shorts UI Overlay */}
+                <div className="relative z-20 flex items-end justify-between gap-3 mt-auto">
+                  <div className="space-y-1 text-left">
+                    <div className="flex items-center gap-2">
+                      <div className="h-7 w-7 rounded-full bg-gradient-to-tr from-amber-400 to-orange-500 flex items-center justify-center text-black font-bold text-[10px]">
+                        P
+                      </div>
+                      <p className="text-xs font-bold text-white">@postmatic.studio</p>
+                    </div>
+                    <p className="text-[10px] text-zinc-300 line-clamp-1">
+                      {topic || "Generated high-retention vertical Short"}
+                    </p>
+                    <div className="flex items-center gap-1.5 text-[9px] text-zinc-300">
+                      <Music2 className="h-3 w-3 text-amber-400 animate-spin-slow" />
+                      <span>Original Audio • Neural Voice</span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col items-center gap-2.5 text-white">
+                    <div className="flex flex-col items-center gap-0.5">
+                      <div className="h-8 w-8 rounded-full bg-white/[0.15] backdrop-blur-md flex items-center justify-center">
+                        <Heart className="h-4 w-4 text-red-500 fill-red-500" />
+                      </div>
+                      <span className="text-[9px] font-bold">142K</span>
+                    </div>
+                    <div className="flex flex-col items-center gap-0.5">
+                      <div className="h-8 w-8 rounded-full bg-white/[0.15] backdrop-blur-md flex items-center justify-center">
+                        <MessageCircle className="h-4 w-4" />
+                      </div>
+                      <span className="text-[9px] font-bold">1.8K</span>
+                    </div>
+                    <div className="flex flex-col items-center gap-0.5">
+                      <div className="h-8 w-8 rounded-full bg-white/[0.15] backdrop-blur-md flex items-center justify-center">
+                        <Share2 className="h-4 w-4 text-amber-400" />
+                      </div>
+                      <span className="text-[9px] font-bold">Share</span>
+                    </div>
+                  </div>
                 </div>
-              )}
+              </div>
             </div>
 
-            {/* Download & Export CTA */}
-            <div className="w-full max-w-[280px] mt-4 space-y-2">
-              {videoSrc && activeJob?.status === "completed" ? (
+            {/* Bottom Actions under Phone */}
+            {activeJob && activeJob.status === "completed" && videoSrc && (
+              <div className="flex items-center gap-2 w-full pt-1">
                 <a
                   href={videoSrc}
                   download={`video_${activeJob.job_id.slice(0, 8)}.mp4`}
                   target="_blank"
                   rel="noreferrer"
-                  className="w-full block"
+                  className="flex-1"
                 >
-                  <Button variant="primary" size="sm" className="w-full text-xs font-semibold h-10 shadow-lg shadow-amber-500/20">
-                    <Download className="h-4 w-4 mr-1.5" />
-                    Download 1080x1920 MP4
+                  <Button variant="secondary" size="sm" className="w-full text-xs h-10 rounded-xl">
+                    <Download className="h-3.5 w-3.5 mr-1.5" />
+                    Download MP4
                   </Button>
                 </a>
-              ) : (
-                <Button variant="secondary" size="sm" disabled className="w-full text-xs h-10 bg-white/[0.02] border-white/[0.06]">
-                  <Download className="h-4 w-4 mr-1.5" />
-                  Export Disabled (Idle)
-                </Button>
-              )}
-            </div>
+                {videoSrc.includes("youtube.com") ? (
+                  <a href={videoSrc} target="_blank" rel="noreferrer" className="flex-1">
+                    <Button variant="primary" size="sm" className="w-full text-xs h-10 rounded-xl bg-red-600 hover:bg-red-700">
+                      <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
+                      View on YouTube
+                    </Button>
+                  </a>
+                ) : (
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={onOpenSocialModal}
+                    className="flex-1 text-xs h-10 rounded-xl"
+                  >
+                    <Share2 className="h-3.5 w-3.5 mr-1.5" />
+                    Publish to YouTube
+                  </Button>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>

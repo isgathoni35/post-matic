@@ -2,8 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Film, Activity, HelpCircle, LogIn, LogOut, User as UserIcon, Shield } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Film, LogIn, LogOut, ExternalLink, Sparkles, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -22,7 +21,7 @@ export function Header({ onOpenSocialModal }: HeaderProps = {}) {
       <div className="flex items-center gap-6">
         {/* Brand */}
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/20 border border-amber-300/30 group-hover:scale-105 transition-transform">
+          <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/20 border border-amber-300/30 group-hover:scale-105 transition-transform">
             <Film className="h-5 w-5 text-black" />
           </div>
           <div className="flex flex-col">
@@ -32,34 +31,30 @@ export function Header({ onOpenSocialModal }: HeaderProps = {}) {
                 Studio
               </span>
             </div>
-            <span className="text-[11px] text-muted-foreground hidden sm:inline">
-              Automated Faceless Video Pipeline
+            <span className="text-[11px] text-zinc-400 hidden sm:inline">
+              Short-Form Video Creator
             </span>
           </div>
         </Link>
       </div>
 
       {/* Center / Status */}
-      <div className="hidden md:flex items-center gap-3">
-        <Badge variant="success" pulse className="px-3 py-1 text-xs">
-          <Activity className="h-3 w-3 mr-1" />
-          FFmpeg & FastAPI Online
-        </Badge>
-        <span className="text-zinc-600 text-xs">•</span>
-        <span className="text-xs text-muted-foreground font-mono">
-          Free-Tier Distributed Compute
-        </span>
+      <div className="hidden md:flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-xs text-zinc-300">
+        <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+        <span className="font-medium text-white">Engine Active</span>
+        <span className="text-zinc-600">•</span>
+        <span className="text-zinc-400">9:16 HD 60FPS</span>
       </div>
 
       {/* Right side actions */}
       <div className="flex items-center gap-3">
-        <button
-          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-white px-2.5 py-1.5 rounded-md hover:bg-white/[0.04] transition-colors"
-          title="Architecture Documentation"
+        <Link
+          href="/"
+          className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white px-2.5 py-1.5 rounded-lg hover:bg-white/[0.04] transition-colors"
         >
-          <HelpCircle className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">Docs</span>
-        </button>
+          <Home className="h-3.5 w-3.5" />
+          <span className="hidden sm:inline">Home</span>
+        </Link>
 
         <div className="h-4 w-[1px] bg-white/[0.08]" />
 
@@ -71,45 +66,57 @@ export function Header({ onOpenSocialModal }: HeaderProps = {}) {
             <button
               type="button"
               onClick={() => setShowDropdown(!showDropdown)}
-              className="flex items-center gap-2.5 p-1 rounded-lg hover:bg-white/[0.05] transition-colors"
+              className="flex items-center gap-2.5 p-1 rounded-xl hover:bg-white/[0.05] transition-colors border border-transparent hover:border-white/[0.08]"
             >
-              <div className="h-7 w-7 rounded-full bg-gradient-to-tr from-amber-500 to-amber-700 flex items-center justify-center text-xs font-bold text-black border border-amber-400/40">
+              <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-amber-500 to-amber-700 flex items-center justify-center text-xs font-bold text-black border border-amber-400/40 shadow-sm">
                 {userInitial}
               </div>
               <div className="hidden sm:flex flex-col text-left">
-                <span className="text-xs font-medium text-white max-w-[130px] truncate leading-none">
+                <span className="text-xs font-semibold text-white max-w-[130px] truncate leading-none">
                   {user.email?.split("@")[0]}
                 </span>
-                <span className="text-[10px] text-muted-foreground font-mono mt-0.5">
-                  Authenticated
+                <span className="text-[10px] text-zinc-400 font-medium mt-0.5">
+                  Creator Account
                 </span>
               </div>
             </button>
 
             {/* Dropdown Menu */}
             {showDropdown && (
-              <div className="absolute right-0 mt-2 w-56 rounded-xl studio-card p-2 shadow-2xl z-50 space-y-1 bg-[#12161f] border border-white/[0.1]">
+              <div className="absolute right-0 mt-2 w-56 rounded-2xl studio-card p-2 shadow-2xl z-50 space-y-1 bg-[#121622] border border-white/[0.1] animate-in fade-in zoom-in-95 duration-150">
                 <div className="px-3 py-2 border-b border-white/[0.06]">
                   <p className="text-xs font-medium text-white truncate">{user.email}</p>
-                  <span className="text-[10px] font-mono text-emerald-400">Supabase Session Active</span>
+                  <span className="text-[10px] text-emerald-400 flex items-center gap-1 mt-0.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                    Authenticated
+                  </span>
                 </div>
+                <Link
+                  href="/"
+                  onClick={() => setShowDropdown(false)}
+                  className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-zinc-300 hover:text-white hover:bg-white/[0.06] transition-colors"
+                >
+                  <Home className="h-3.5 w-3.5" />
+                  PostMatic Home
+                </Link>
                 <button
                   type="button"
-                  onClick={() => {
+                  onClick={async () => {
                     setShowDropdown(false);
-                    signOut();
+                    await signOut();
+                    window.location.href = "/";
                   }}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-rose-400 hover:bg-rose-500/10 transition-colors"
+                  className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-rose-400 hover:bg-rose-500/10 transition-colors"
                 >
                   <LogOut className="h-3.5 w-3.5" />
-                  Sign Out of Studio
+                  Sign Out
                 </button>
               </div>
             )}
           </div>
         ) : (
           <Link href="/login">
-            <Button variant="secondary" size="sm" className="h-8 text-xs font-semibold">
+            <Button variant="primary" size="sm" className="h-9 px-4 text-xs font-semibold rounded-xl shadow-lg shadow-amber-500/20">
               <LogIn className="h-3.5 w-3.5 mr-1" />
               Sign In
             </Button>
