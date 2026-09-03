@@ -2,6 +2,7 @@
 from dataclasses import dataclass
 import logging
 from pathlib import Path
+import shutil
 import sys
 import time
 from typing import List, Optional
@@ -19,6 +20,20 @@ from engine.tts_engine import DEFAULT_VOICE, TTSResult, synthesize_script
 from engine.video_renderer import render_video
 
 logger = logging.getLogger(__name__)
+
+
+def cleanup_temp_dir() -> None:
+    """Safely cleans up intermediate cached media and audio clips from TEMP_DIR."""
+    try:
+        if TEMP_DIR.exists():
+            for item in TEMP_DIR.iterdir():
+                if item.is_file():
+                    item.unlink(missing_ok=True)
+                elif item.is_dir():
+                    shutil.rmtree(item, ignore_errors=True)
+            logger.info("Temporary render files cleaned up successfully.")
+    except Exception as e:
+        logger.warning("Could not clean temp directory: %s", e)
 
 
 @dataclass
@@ -43,6 +58,7 @@ def generate_faceless_video(
     pexels_api_key: Optional[str] = None,
     preferred_model: Optional[str] = None,
     words_per_subtitle_line: int = 3,
+    cleanup_temp: bool = True,
 ) -> VideoGenerationResult:
     """Execute the entire 5-stage automated video generation pipeline.
 
@@ -111,6 +127,9 @@ def generate_faceless_video(
     print(f" Title:    {script.title}")
     print(f" Tags:     {', '.join(script.tags)}")
     print(f"=======================================================\n")
+
+    if cleanup_temp:
+        cleanup_temp_dir()
 
     return VideoGenerationResult(
         video_path=final_video,
