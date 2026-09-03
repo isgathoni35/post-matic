@@ -41,8 +41,11 @@ YOUTUBE_CHANNELS_API = "https://www.googleapis.com/youtube/v3/channels"
 async def get_youtube_auth_url(user_id: Optional[str] = None) -> SocialAuthUrlResponse:
     """Generate the Google OAuth consent URL."""
     if not GOOGLE_CLIENT_ID:
-        # Fallback or informative notice
-        logger.warning("GOOGLE_CLIENT_ID is not configured in environment.")
+        logger.error("GOOGLE_CLIENT_ID is not configured in backend environment.")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="GOOGLE_CLIENT_ID is not configured on the backend server. Please add your GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET to your Render environment variables.",
+        )
 
     state_data = json.dumps({"user_id": user_id or "", "platform": "youtube"})
     params = {
