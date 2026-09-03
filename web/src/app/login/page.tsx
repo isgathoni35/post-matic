@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Film, Mail, Lock, User, Eye, EyeOff, Sparkles, ArrowRight, Loader2, CheckCircle2 } from "lucide-react";
+import { Film, Mail, Lock, User, Eye, EyeOff, Sparkles, ArrowRight, ArrowLeft, Loader2, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/use-auth";
@@ -154,10 +154,22 @@ export default function LoginPage() {
       </div>
 
       {/* Right Form Console */}
-      <div className="flex-1 flex flex-col justify-center items-center p-6 sm:p-12 lg:p-16">
-        <div className="max-w-md w-full space-y-8">
+      <div className="flex-1 flex flex-col justify-center items-center p-6 sm:p-12 lg:p-16 relative">
+        <div className="max-w-md w-full space-y-6">
+          {/* Prominent Back to Home Link */}
+          <div className="flex items-center justify-between pb-2">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-xs font-medium text-zinc-300 hover:text-white transition-all group shadow-sm"
+            >
+              <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform text-amber-400" />
+              <span>Back to Home</span>
+            </Link>
+            <span className="text-[11px] font-mono text-zinc-500">POST-MATIC</span>
+          </div>
+
           {/* Header Mobile Brand (lg:hidden) */}
-          <div className="flex lg:hidden items-center gap-3 justify-center mb-6">
+          <div className="flex lg:hidden items-center gap-3 justify-center mb-4">
             <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-black">
               <Film className="h-5 w-5" />
             </div>
