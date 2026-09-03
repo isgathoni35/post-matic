@@ -118,30 +118,29 @@ export function Sidebar({
         </div>
       </div>
 
-      {/* Compute & Resource Telemetry Card at Bottom */}
-      <div className="rounded-2xl p-4 space-y-3 bg-[#0f131a] border border-white/[0.08] shadow-lg">
+      {/* Creator Channel & Cloud Quota Card */}
+      <div className="creator-surface rounded-2xl p-4 space-y-3 shadow-lg">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Cpu className="h-4 w-4 text-amber-400" />
-            <span className="text-xs font-semibold text-white">Engine Health</span>
+            <Sparkles className="h-4 w-4 text-amber-400" />
+            <span className="text-xs font-semibold text-white">Creator Studio</span>
           </div>
-          <span className="text-[10px] font-mono text-emerald-400 font-semibold flex items-center gap-1">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping" />
-            100% OK
+          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-semibold border border-emerald-500/20">
+            Free Tier
           </span>
         </div>
         <div className="space-y-1.5 text-[11px] text-zinc-400">
           <div className="flex justify-between">
-            <span>FastAPI Orchestrator</span>
-            <span className="font-mono text-zinc-300">v1.0 Online</span>
+            <span>Resolution</span>
+            <span className="font-semibold text-zinc-300">1080x1920 HD</span>
           </div>
           <div className="flex justify-between">
-            <span>Video Stitcher</span>
-            <span className="font-mono text-zinc-300">FFmpeg 9:16</span>
+            <span>Cloud Compute</span>
+            <span className="font-semibold text-emerald-400">Unlimited Free</span>
           </div>
           <div className="flex justify-between">
-            <span>Database</span>
-            <span className="font-mono text-zinc-300">Supabase RLS</span>
+            <span>Direct Publishing</span>
+            <span className="font-semibold text-zinc-300">YouTube Shorts</span>
           </div>
         </div>
       </div>

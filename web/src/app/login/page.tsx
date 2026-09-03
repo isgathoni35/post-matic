@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Film, Mail, Lock, User, Eye, EyeOff, Sparkles, ArrowRight, ArrowLeft, Loader2, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { BrandLogo } from "@/components/ui/brand-logo";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 
@@ -84,20 +85,9 @@ export default function LoginPage() {
         <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-indigo-500/[0.06] rounded-full blur-3xl pointer-events-none" />
 
         {/* Brand */}
-        <Link href="/" className="flex items-center gap-3 z-10 group">
-          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/20 border border-amber-300/30 group-hover:scale-105 transition-transform">
-            <Film className="h-5 w-5 text-black" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-bold tracking-tight text-white text-lg">POST-MATIC</span>
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 font-semibold border border-amber-500/20 uppercase">
-                Studio
-              </span>
-            </div>
-            <p className="text-xs text-zinc-400">Automated Short-Form Production Engine</p>
-          </div>
-        </Link>
+        <div className="z-10">
+          <BrandLogo size="lg" badgeText="Studio" />
+        </div>
 
         {/* Middle Value Proposition Callout */}
         <div className="space-y-8 z-10 my-auto max-w-lg">
@@ -177,11 +167,8 @@ export default function LoginPage() {
           </div>
 
           {/* Header Mobile Brand (lg:hidden) */}
-          <div className="flex lg:hidden items-center gap-3 justify-center mb-4">
-            <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-black">
-              <Film className="h-5 w-5" />
-            </div>
-            <span className="font-bold tracking-tight text-white text-lg">POST-MATIC Studio</span>
+          <div className="flex lg:hidden items-center justify-center mb-4">
+            <BrandLogo size="md" badgeText="Studio" />
           </div>
 
           <div className="space-y-2 text-center lg:text-left">

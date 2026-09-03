@@ -6,6 +6,8 @@ import { Film, LogIn, LogOut, ExternalLink, Sparkles, Home } from "lucide-react"
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 
+import { BrandLogo } from "@/components/ui/brand-logo";
+
 interface HeaderProps {
   onOpenSocialModal?: () => void;
 }
@@ -19,23 +21,7 @@ export function Header({ onOpenSocialModal }: HeaderProps = {}) {
   return (
     <header className="sticky top-0 z-40 w-full h-16 studio-glass border-b border-white/[0.08] px-4 sm:px-8 flex items-center justify-between">
       <div className="flex items-center gap-6">
-        {/* Brand */}
-        <Link href="/" className="flex items-center gap-3 group">
-          <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/20 border border-amber-300/30 group-hover:scale-105 transition-transform">
-            <Film className="h-5 w-5 text-black" />
-          </div>
-          <div className="flex flex-col">
-            <div className="flex items-center gap-2">
-              <span className="font-bold tracking-tight text-white text-base">POST-MATIC</span>
-              <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 font-semibold border border-amber-500/20">
-                Studio
-              </span>
-            </div>
-            <span className="text-[11px] text-zinc-400 hidden sm:inline">
-              Short-Form Video Creator
-            </span>
-          </div>
-        </Link>
+        <BrandLogo size="sm" badgeText="Studio" />
       </div>
 
       {/* Center / Status */}
