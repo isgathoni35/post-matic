@@ -135,11 +135,22 @@ export default function LandingPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
           {/* Hero Left Content */}
           <div className="lg:col-span-7 space-y-8 text-center lg:text-left">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-xs font-medium text-zinc-300 backdrop-blur-sm">
-              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Autonomous Short-Form Video Platform</span>
-              <span className="text-amber-400 font-semibold">• 100% Free Compute</span>
-            </div>
+            {user ? (
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/25 text-xs font-medium text-amber-300 backdrop-blur-sm">
+                <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
+                <span>Welcome back, {user.email?.split("@")[0]}</span>
+                <span className="text-zinc-500">•</span>
+                <Link href="/studio" className="underline hover:text-white font-semibold">
+                  Resume studio session →
+                </Link>
+              </div>
+            ) : (
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-xs font-medium text-zinc-300 backdrop-blur-sm">
+                <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span>Autonomous Short-Form Video Platform</span>
+                <span className="text-amber-400 font-semibold">• 100% Free Compute</span>
+              </div>
+            )}
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.1]">
               Turn any idea into <br className="hidden sm:inline" />

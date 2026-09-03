@@ -18,10 +18,18 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // If user is already authenticated, immediately take them into Studio
+  const getRedirectTarget = () => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("next") || params.get("redirect") || "/studio";
+    }
+    return "/studio";
+  };
+
+  // If user is already authenticated, immediately take them to their destination or Studio
   useEffect(() => {
     if (user) {
-      window.location.href = "/studio";
+      window.location.href = getRedirectTarget();
     }
   }, [user]);
 
@@ -55,7 +63,7 @@ export default function LoginPage() {
       setIsLoading(false);
       if (!error) {
         toast.success("Welcome back!");
-        window.location.href = "/studio";
+        window.location.href = getRedirectTarget();
       }
     } else {
       const { error } = await signUpWithEmail(email, password, fullName);

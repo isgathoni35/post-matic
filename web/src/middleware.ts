@@ -64,20 +64,20 @@ export async function middleware(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
 
-  // If user is not signed in and trying to access protected route (anything other than /login, /auth)
-  const isAuthRoute = pathname.startsWith("/login") || pathname.startsWith("/auth");
+  // Protected routes: Only /studio routes require active authentication
+  const isProtectedRoute = pathname.startsWith("/studio");
 
-  if (!user && !isAuthRoute) {
+  // 1. If user is not signed in and attempts to access protected /studio workspace
+  if (!user && isProtectedRoute) {
     const loginUrl = new URL("/login", request.url);
-    if (pathname !== "/") {
-      loginUrl.searchParams.set("next", pathname);
-    }
+    loginUrl.searchParams.set("next", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  // If user is already signed in and visits /login, redirect to /
+  // 2. If user is already authenticated and visits /login, redirect to /studio (or next parameter)
   if (user && pathname === "/login") {
-    return NextResponse.redirect(new URL("/", request.url));
+    const nextDestination = request.nextUrl.searchParams.get("next") || "/studio";
+    return NextResponse.redirect(new URL(nextDestination, request.url));
   }
 
   return response;

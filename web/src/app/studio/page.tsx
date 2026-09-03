@@ -29,8 +29,25 @@ export default function StudioPage() {
     }
   }, [user, isLoading, router]);
 
-  // Active Workspace Navigation View
+  // Active Workspace Navigation View (persisted across sessions)
   const [activeView, setActiveView] = useState<ActiveWorkspaceView>("studio");
+
+  // Restore previous active workspace tab on load
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("postmatic_active_view") as ActiveWorkspaceView | null;
+      if (saved && ["studio", "library", "queue", "social", "logs", "settings"].includes(saved)) {
+        setActiveView(saved);
+      }
+    }
+  }, []);
+
+  const handleViewChange = (view: ActiveWorkspaceView) => {
+    setActiveView(view);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("postmatic_active_view", view);
+    }
+  };
 
   // Form Parameters
   const [topic, setTopic] = useState("");
@@ -147,7 +164,7 @@ export default function StudioPage() {
       });
 
       setActiveJob(response);
-      setActiveView("studio");
+      handleViewChange("studio");
 
       toast.success("Creation Pipeline Started!", {
         description: `Video job #${response.job_id.slice(0, 8)} is now rendering in the cloud.`,
@@ -165,7 +182,7 @@ export default function StudioPage() {
 
   const handleSelectJobFromGalleryOrQueue = (job: VideoJobResponse) => {
     setActiveJob(job);
-    setActiveView("studio");
+    handleViewChange("studio");
   };
 
   // Loading / Auth Guard State
@@ -201,7 +218,7 @@ export default function StudioPage() {
         {/* Workspace Sidebar */}
         <Sidebar
           activeView={activeView}
-          onViewChange={setActiveView}
+          onViewChange={handleViewChange}
           activeJobsCount={activeJobsCount}
           completedJobsCount={completedJobsCount}
         />
@@ -231,7 +248,7 @@ export default function StudioPage() {
               userId={user?.id}
               onRefreshJobs={fetchUserJobs}
               onSelectVideo={handleSelectJobFromGalleryOrQueue}
-              onNavigateToStudio={() => setActiveView("studio")}
+              onNavigateToStudio={() => handleViewChange("studio")}
               onOpenSocialModal={() => setIsSocialModalOpen(true)}
             />
           )}
@@ -240,7 +257,7 @@ export default function StudioPage() {
             <JobQueueView
               jobs={jobs}
               onSelectJob={handleSelectJobFromGalleryOrQueue}
-              onNavigateToStudio={() => setActiveView("studio")}
+              onNavigateToStudio={() => handleViewChange("studio")}
             />
           )}
 
