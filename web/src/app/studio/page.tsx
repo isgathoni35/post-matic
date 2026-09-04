@@ -6,7 +6,7 @@ import { Header } from "@/components/layout/header";
 import { Sidebar, ActiveWorkspaceView } from "@/components/layout/sidebar";
 import { useAuth } from "@/hooks/use-auth";
 import { createClient } from "@/lib/supabase/client";
-import { generateVideoJob, getVideoJobStatus, VideoJobResponse } from "@/lib/api";
+import { generateVideoJob, getVideoJobStatus, VideoJobResponse, normalizeJob } from "@/lib/api";
 import { SocialAccountsModal } from "@/components/social/social-accounts-modal";
 import { StudioConsoleView, VOICES } from "@/components/views/studio-console-view";
 import { RenderLibraryView } from "@/components/views/render-library-view";
@@ -14,6 +14,7 @@ import { JobQueueView } from "@/components/views/job-queue-view";
 import { SocialChannelsView } from "@/components/views/social-channels-view";
 import { EngineLogsView } from "@/components/views/engine-logs-view";
 import { SettingsView } from "@/components/views/settings-view";
+import { WorkspaceErrorBoundary } from "@/components/ui/error-boundary";
 import { toast } from "sonner";
 import { Film, Loader2 } from "lucide-react";
 
@@ -99,7 +100,8 @@ export default function StudioPage() {
 
       if (error) throw error;
       if (data) {
-        setJobs(data as unknown as VideoJobResponse[]);
+        const normalized = data.map(normalizeJob);
+        setJobs(normalized);
       }
     } catch (err: any) {
       console.warn("Could not fetch user jobs from Supabase:", err.message);
@@ -117,14 +119,18 @@ export default function StudioPage() {
     if (!activeJob) return;
     if (activeJob.status === "completed" || activeJob.status === "failed") return;
 
+    const targetJobId = activeJob.job_id || (activeJob as any).id;
+    if (!targetJobId) return;
+
     const intervalId = setInterval(async () => {
       try {
-        const updated = await getVideoJobStatus(activeJob.job_id);
+        const updatedRaw = await getVideoJobStatus(targetJobId);
+        const updated = normalizeJob(updatedRaw);
         setActiveJob(updated);
 
         // Update in list
         setJobs((prev) =>
-          prev.map((j) => (j.job_id === updated.job_id ? updated : j))
+          prev.map((j) => ((j.job_id || (j as any).id) === updated.job_id ? updated : j))
         );
 
         if (updated.status === "completed") {
@@ -163,11 +169,13 @@ export default function StudioPage() {
         publish_youtube: autoPublishYouTube,
       });
 
-      setActiveJob(response);
+      const normalizedResponse = normalizeJob(response);
+      setActiveJob(normalizedResponse);
       handleViewChange("studio");
 
+      const displayId = normalizedResponse.job_id ? normalizedResponse.job_id.slice(0, 8) : "new";
       toast.success("Creation Pipeline Started!", {
-        description: `Video job #${response.job_id.slice(0, 8)} is now rendering in the cloud.`,
+        description: `Video job #${displayId} is now rendering in the cloud.`,
       });
 
       fetchUserJobs();
@@ -181,7 +189,7 @@ export default function StudioPage() {
   };
 
   const handleSelectJobFromGalleryOrQueue = (job: VideoJobResponse) => {
-    setActiveJob(job);
+    setActiveJob(normalizeJob(job));
     handleViewChange("studio");
   };
 
@@ -225,65 +233,68 @@ export default function StudioPage() {
 
         {/* Dynamic Workspace View Container */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 min-w-0 overflow-y-auto">
-          {activeView === "studio" && (
-            <StudioConsoleView
-              topic={topic}
-              setTopic={setTopic}
-              targetDuration={targetDuration}
-              setTargetDuration={setTargetDuration}
-              selectedVoice={selectedVoice}
-              setSelectedVoice={setSelectedVoice}
-              autoPublishYouTube={autoPublishYouTube}
-              setAutoPublishYouTube={setAutoPublishYouTube}
-              isSubmitting={isSubmitting}
-              activeJob={activeJob}
-              onGenerate={handleGenerateVideo}
-              onOpenSocialModal={() => setIsSocialModalOpen(true)}
-            />
-          )}
+          <WorkspaceErrorBoundary key={activeView} onReset={() => handleViewChange("studio")}>
+            {activeView === "studio" && (
+              <StudioConsoleView
+                topic={topic}
+                setTopic={setTopic}
+                targetDuration={targetDuration}
+                setTargetDuration={setTargetDuration}
+                selectedVoice={selectedVoice}
+                setSelectedVoice={setSelectedVoice}
+                autoPublishYouTube={autoPublishYouTube}
+                setAutoPublishYouTube={setAutoPublishYouTube}
+                isSubmitting={isSubmitting}
+                activeJob={activeJob}
+                onGenerate={handleGenerateVideo}
+                onOpenSocialModal={() => setIsSocialModalOpen(true)}
+              />
+            )}
 
-          {activeView === "library" && (
-            <RenderLibraryView
-              jobs={jobs}
-              userId={user?.id}
-              onRefreshJobs={fetchUserJobs}
-              onSelectVideo={handleSelectJobFromGalleryOrQueue}
-              onNavigateToStudio={() => handleViewChange("studio")}
-              onOpenSocialModal={() => setIsSocialModalOpen(true)}
-            />
-          )}
+            {activeView === "library" && (
+              <RenderLibraryView
+                jobs={jobs}
+                userId={user?.id}
+                onRefreshJobs={fetchUserJobs}
+                onSelectVideo={handleSelectJobFromGalleryOrQueue}
+                onNavigateToStudio={() => handleViewChange("studio")}
+                onOpenSocialModal={() => setIsSocialModalOpen(true)}
+              />
+            )}
 
-          {activeView === "queue" && (
-            <JobQueueView
-              jobs={jobs}
-              onSelectJob={handleSelectJobFromGalleryOrQueue}
-              onNavigateToStudio={() => handleViewChange("studio")}
-            />
-          )}
+            {activeView === "queue" && (
+              <JobQueueView
+                jobs={jobs}
+                onSelectJob={handleSelectJobFromGalleryOrQueue}
+                onNavigateToStudio={() => handleViewChange("studio")}
+              />
+            )}
 
-          {activeView === "social" && (
-            <SocialChannelsView
-              userId={user?.id}
-              onOpenSocialModal={() => setIsSocialModalOpen(true)}
-            />
-          )}
+            {activeView === "social" && (
+              <SocialChannelsView
+                userId={user?.id}
+                onOpenSocialModal={() => setIsSocialModalOpen(true)}
+              />
+            )}
 
-          {activeView === "logs" && (
-            <EngineLogsView activeJobId={activeJob?.job_id} />
-          )}
+            {activeView === "logs" && (
+              <EngineLogsView activeJobId={activeJob?.job_id || (activeJob as any)?.id} />
+            )}
 
-          {activeView === "settings" && (
-            <SettingsView
-              userEmail={user?.email}
-              userId={user?.id}
-              defaultDuration={targetDuration}
-              setDefaultDuration={setTargetDuration}
-              defaultVoice={selectedVoice}
-              setDefaultVoice={setSelectedVoice}
-            />
-          )}
+            {activeView === "settings" && (
+              <SettingsView
+                userEmail={user?.email}
+                userId={user?.id}
+                defaultDuration={targetDuration}
+                setDefaultDuration={setTargetDuration}
+                defaultVoice={selectedVoice}
+                setDefaultVoice={setSelectedVoice}
+              />
+            )}
+          </WorkspaceErrorBoundary>
         </main>
       </div>
+
 
       {/* Global OAuth / Social Connect Modal */}
       <SocialAccountsModal

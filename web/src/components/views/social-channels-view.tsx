@@ -1,20 +1,16 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   Share2,
   CheckCircle2,
-  ExternalLink,
   Trash2,
   Plus,
   RefreshCw,
-  Sparkles,
-  ShieldCheck,
-  Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { SocialAccount, getYouTubeAuthUrl, getConnectedSocialAccounts, disconnectSocialAccount } from "@/lib/api";
+import { SocialAccount, getConnectedSocialAccounts, disconnectSocialAccount } from "@/lib/api";
 import { toast } from "sonner";
 
 interface SocialChannelsViewProps {
@@ -26,7 +22,7 @@ export function SocialChannelsView({ userId, onOpenSocialModal }: SocialChannels
   const [accounts, setAccounts] = useState<SocialAccount[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const loadAccounts = async () => {
+  const loadAccounts = useCallback(async () => {
     setIsLoading(true);
     try {
       const data = await getConnectedSocialAccounts(userId);
@@ -36,10 +32,25 @@ export function SocialChannelsView({ userId, onOpenSocialModal }: SocialChannels
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [userId]);
 
   useEffect(() => {
-    loadAccounts();
+    let isMounted = true;
+    getConnectedSocialAccounts(userId)
+      .then((data) => {
+        if (isMounted) {
+          setAccounts(data);
+          setIsLoading(false);
+        }
+      })
+      .catch((e) => {
+        console.error("Failed to load accounts:", e);
+        if (isMounted) setIsLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, [userId]);
 
   const handleDisconnect = async (accountId: string) => {
@@ -47,10 +58,11 @@ export function SocialChannelsView({ userId, onOpenSocialModal }: SocialChannels
       await disconnectSocialAccount(accountId, userId);
       toast.success("Account disconnected.");
       loadAccounts();
-    } catch (e) {
+    } catch {
       toast.error("Failed to disconnect account.");
     }
   };
+
 
   const ytAccount = accounts.find((a) => a.platform === "youtube");
 

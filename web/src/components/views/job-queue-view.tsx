@@ -147,56 +147,70 @@ export function JobQueueView({
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/[0.04]">
-                {filteredJobs.map((job) => (
-                  <tr
-                    key={job.job_id}
-                    className="hover:bg-white/[0.02] transition-colors group"
-                  >
-                    <td className="py-4 px-4 font-mono text-zinc-400 font-medium">
-                      #{job.job_id.slice(0, 8)}
-                    </td>
-                    <td className="py-4 px-4 font-medium text-white max-w-xs truncate">
-                      {job.topic}
-                    </td>
-                    <td className="py-4 px-4">
-                      {getStatusBadge(job.status)}
-                    </td>
-                    <td className="py-4 px-4 font-mono text-zinc-300">
-                      <div className="flex items-center gap-2">
-                        <div className="w-16 h-1.5 rounded-full bg-white/[0.08] overflow-hidden">
-                          <div
-                            className="h-full bg-gradient-to-r from-amber-500 to-amber-300 transition-all duration-300"
-                            style={{ width: `${job.progress_pct}%` }}
-                          />
-                        </div>
-                        <span className="text-[10px]">{job.progress_pct}%</span>
-                      </div>
-                    </td>
-                    <td className="py-4 px-4 font-mono text-zinc-400">
-                      {job.duration_seconds ? `${job.duration_seconds.toFixed(1)}s` : "-"}
-                    </td>
-                    <td className="py-4 px-4 font-mono text-zinc-500 text-[11px]">
-                      {new Date(job.created_at).toLocaleTimeString([], {
+                {filteredJobs.map((job, idx) => {
+                  const jobId = job.job_id || (job as any).id || "";
+                  const displayId = jobId ? jobId.slice(0, 8) : `job-${idx}`;
+                  let timeStr = "-";
+                  try {
+                    if (job.created_at) {
+                      timeStr = new Date(job.created_at).toLocaleTimeString([], {
                         hour: "2-digit",
                         minute: "2-digit",
                         second: "2-digit",
-                      })}
-                    </td>
-                    <td className="py-4 px-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => onSelectJob(job)}
-                          className="h-7 px-2.5 text-[11px] bg-white/[0.03] border-white/[0.06]"
-                        >
-                          <Film className="h-3 w-3 mr-1" />
-                          Inspect
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                      });
+                    }
+                  } catch {
+                    timeStr = "-";
+                  }
+
+                  return (
+                    <tr
+                      key={jobId || `job-${idx}`}
+                      className="hover:bg-white/[0.02] transition-colors group"
+                    >
+                      <td className="py-4 px-4 font-mono text-zinc-400 font-medium">
+                        #{displayId}
+                      </td>
+                      <td className="py-4 px-4 font-medium text-white max-w-xs truncate">
+                        {job.topic}
+                      </td>
+                      <td className="py-4 px-4">
+                        {getStatusBadge(job.status)}
+                      </td>
+                      <td className="py-4 px-4 font-mono text-zinc-300">
+                        <div className="flex items-center gap-2">
+                          <div className="w-16 h-1.5 rounded-full bg-white/[0.08] overflow-hidden">
+                            <div
+                              className="h-full bg-gradient-to-r from-amber-500 to-amber-300 transition-all duration-300"
+                              style={{ width: `${job.progress_pct}%` }}
+                            />
+                          </div>
+                          <span className="text-[10px]">{job.progress_pct}%</span>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4 font-mono text-zinc-400">
+                        {job.duration_seconds ? `${job.duration_seconds.toFixed(1)}s` : "-"}
+                      </td>
+                      <td className="py-4 px-4 font-mono text-zinc-500 text-[11px]">
+                        {timeStr}
+                      </td>
+                      <td className="py-4 px-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => onSelectJob(job)}
+                            className="h-7 px-2.5 text-[11px] bg-white/[0.03] border-white/[0.06]"
+                          >
+                            <Film className="h-3 w-3 mr-1" />
+                            Inspect
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+
               </tbody>
             </table>
           </div>

@@ -495,7 +495,7 @@ export function StudioConsoleView({
                         Live Preview Canvas
                       </span>
                       <div className="text-lg font-black text-white leading-tight uppercase tracking-tight">
-                        "Your rendered video will play here automatically with animated subtitles."
+                        &ldquo;Your rendered video will play here automatically with animated subtitles.&rdquo;
                       </div>
                     </div>
                   </>
@@ -508,10 +508,10 @@ export function StudioConsoleView({
                       <div className="h-7 w-7 rounded-full bg-gradient-to-tr from-amber-400 to-orange-500 flex items-center justify-center text-black font-bold text-[10px]">
                         P
                       </div>
-                      <p className="text-xs font-bold text-white">@postmatic.studio</p>
+                      <span className="text-xs font-bold text-white shadow-sm">@postmatic</span>
                     </div>
-                    <p className="text-[10px] text-zinc-300 line-clamp-1">
-                      {topic || "Generated high-retention vertical Short"}
+                    <p className="text-[11px] text-zinc-200 line-clamp-2 leading-snug drop-shadow-md">
+                      {topic.trim() ? topic : "Autonomous multi-scene video generation engine."}
                     </p>
                     <div className="flex items-center gap-1.5 text-[9px] text-zinc-300">
                       <Music2 className="h-3 w-3 text-amber-400 animate-spin-slow" />
@@ -548,7 +548,8 @@ export function StudioConsoleView({
               <div className="flex items-center gap-2 w-full pt-1">
                 <a
                   href={videoSrc}
-                  download={`video_${activeJob.job_id.slice(0, 8)}.mp4`}
+                  download={`video_${(activeJob.job_id || activeJob.id || "export").slice(0, 8)}.mp4`}
+
                   target="_blank"
                   rel="noreferrer"
                   className="flex-1"
@@ -558,6 +559,7 @@ export function StudioConsoleView({
                     Download MP4
                   </Button>
                 </a>
+
                 {videoSrc.includes("youtube.com") ? (
                   <a href={videoSrc} target="_blank" rel="noreferrer" className="flex-1">
                     <Button variant="primary" size="sm" className="w-full text-xs h-10 rounded-xl bg-red-600 hover:bg-red-700">

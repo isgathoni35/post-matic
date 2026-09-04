@@ -153,14 +153,19 @@ export function RenderLibraryView({
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {filteredJobs.map((job) => {
-            const videoSrc = job.video_url?.startsWith("http")
-              ? job.video_url
-              : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}${job.video_url}`;
+          {filteredJobs.map((job, idx) => {
+            const jobId = job.job_id || (job as any).id || "";
+            const displayId = jobId ? jobId.slice(0, 8) : `video-${idx}`;
+            const rawUrl = job.video_url || "";
+            const videoSrc = rawUrl.startsWith("http")
+              ? rawUrl
+              : rawUrl
+              ? `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}${rawUrl}`
+              : "";
 
             return (
               <div
-                key={job.job_id}
+                key={jobId || `job-${idx}`}
                 className="rounded-2xl bg-[#0f131a] border border-white/[0.08] hover:border-amber-500/40 transition-all duration-300 overflow-hidden group flex flex-col justify-between shadow-xl"
               >
                 {/* 9:16 Video Poster Card */}
@@ -205,13 +210,13 @@ export function RenderLibraryView({
                 {/* Footer Action Bar */}
                 <div className="p-3 bg-white/[0.01] border-t border-white/[0.06] flex items-center justify-between gap-2 text-xs">
                   <span className="text-[10px] font-mono text-zinc-500 truncate">
-                    #{job.job_id.slice(0, 8)}
+                    #{displayId}
                   </span>
 
                   <div className="flex items-center gap-1.5">
                     <a
                       href={videoSrc}
-                      download={`video_${job.job_id.slice(0, 8)}.mp4`}
+                      download={`video_${displayId}.mp4`}
                       target="_blank"
                       rel="noreferrer"
                       title="Download MP4"
@@ -241,6 +246,7 @@ export function RenderLibraryView({
             );
           })}
         </div>
+
       )}
 
       {/* Video Playback Modal */}
@@ -288,51 +294,63 @@ export function RenderLibraryView({
               </span>
 
               <div className="flex items-center gap-2.5 w-full sm:w-auto">
-                <a
-                  href={
-                    selectedModalVideo.video_url?.startsWith("http")
-                      ? selectedModalVideo.video_url
-                      : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}${selectedModalVideo.video_url}`
-                  }
-                  download={`video_${selectedModalVideo.job_id.slice(0, 8)}.mp4`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex-1 sm:flex-none"
-                >
-                  <Button variant="secondary" size="sm" className="w-full text-xs h-9 bg-white/[0.04] border-white/[0.08]">
-                    <Download className="h-3.5 w-3.5 mr-1.5" />
-                    Download MP4
-                  </Button>
-                </a>
-                {selectedModalVideo.video_url?.includes("youtube.com") ? (
-                  <a
-                    href={selectedModalVideo.video_url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex-1 sm:flex-none"
-                  >
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      className="w-full text-xs h-9 font-semibold bg-red-600 hover:bg-red-700"
-                    >
-                      <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
-                      View on YouTube
-                    </Button>
-                  </a>
-                ) : (
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={() => handlePublishToYouTube(selectedModalVideo.job_id)}
-                    isLoading={isPublishing}
-                    className="flex-1 sm:flex-none text-xs h-9 font-semibold shadow-lg shadow-amber-500/20"
-                  >
-                    <Share2 className="h-3.5 w-3.5 mr-1.5" />
-                    Publish to YouTube
-                  </Button>
-                )}
+                {(() => {
+                  const modalJobId = selectedModalVideo.job_id || (selectedModalVideo as any).id || "";
+                  const modalDisplayId = modalJobId ? modalJobId.slice(0, 8) : "video";
+                  const modalRawUrl = selectedModalVideo.video_url || "";
+                  const modalVideoSrc = modalRawUrl.startsWith("http")
+                    ? modalRawUrl
+                    : modalRawUrl
+                    ? `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}${modalRawUrl}`
+                    : "";
+
+                  return (
+                    <>
+                      <a
+                        href={modalVideoSrc}
+                        download={`video_${modalDisplayId}.mp4`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex-1 sm:flex-none"
+                      >
+                        <Button variant="secondary" size="sm" className="w-full text-xs h-9 bg-white/[0.04] border-white/[0.08]">
+                          <Download className="h-3.5 w-3.5 mr-1.5" />
+                          Download MP4
+                        </Button>
+                      </a>
+                      {modalRawUrl.includes("youtube.com") ? (
+                        <a
+                          href={modalRawUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex-1 sm:flex-none"
+                        >
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            className="w-full text-xs h-9 font-semibold bg-red-600 hover:bg-red-700"
+                          >
+                            <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
+                            View on YouTube
+                          </Button>
+                        </a>
+                      ) : (
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          onClick={() => handlePublishToYouTube(modalJobId)}
+                          isLoading={isPublishing}
+                          className="flex-1 sm:flex-none text-xs h-9 font-semibold shadow-lg shadow-amber-500/20"
+                        >
+                          <Share2 className="h-3.5 w-3.5 mr-1.5" />
+                          Publish to YouTube
+                        </Button>
+                      )}
+                    </>
+                  );
+                })()}
               </div>
+
             </div>
           </div>
         </div>

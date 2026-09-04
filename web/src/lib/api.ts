@@ -15,6 +15,7 @@ export interface GenerateVideoPayload {
 
 export interface VideoJobResponse {
   job_id: string;
+  id?: string;
   topic: string;
   status: "pending" | "scripting" | "synthesizing" | "sourcing_media" | "rendering" | "completed" | "failed";
   progress_pct: number;
@@ -25,6 +26,31 @@ export interface VideoJobResponse {
   file_size_bytes?: number | null;
   error_message?: string | null;
 }
+
+/**
+ * Normalizes a video job record coming from Supabase or the FastAPI backend,
+ * ensuring that both job_id and id are reliably populated.
+ */
+export function normalizeJob(raw: Partial<VideoJobResponse> | { [key: string]: unknown }): VideoJobResponse {
+  const item = raw as Partial<VideoJobResponse> & { [key: string]: unknown };
+  const resolvedId = String(item.job_id || item.id || "");
+  return {
+    job_id: resolvedId,
+    id: resolvedId,
+    topic: (item.topic as string) || "Untitled Video",
+    status: (item.status as VideoJobResponse["status"]) || "pending",
+    progress_pct: typeof item.progress_pct === "number" ? item.progress_pct : 0,
+    created_at: (item.created_at as string) || new Date().toISOString(),
+    updated_at: (item.updated_at as string) || new Date().toISOString(),
+    video_url: (item.video_url as string) || null,
+    duration_seconds: typeof item.duration_seconds === "number" ? item.duration_seconds : null,
+    file_size_bytes: typeof item.file_size_bytes === "number" ? item.file_size_bytes : null,
+    error_message: (item.error_message as string) || null,
+  };
+}
+
+
+
 
 /**
  * Dispatches a new automated video generation job to the FastAPI backend.

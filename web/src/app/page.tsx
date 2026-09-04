@@ -477,8 +477,9 @@ export default function LandingPage() {
                       key={i}
                       className="flex-1 bg-gradient-to-t from-amber-500 to-orange-400 rounded-full"
                       style={{
-                        height: `${Math.max(15, Math.sin(i * 0.45) * 85 + 15)}%`,
+                        height: `${Math.round(Math.max(15, Math.sin(i * 0.45) * 85 + 15))}%`,
                         opacity: i % 2 === 0 ? 0.9 : 0.6,
+
                       }}
                     />
                   ))}
