@@ -182,6 +182,16 @@ def execute_video_pipeline_job(
             except Exception as pub_exc:
                 logger.error("[%s] YouTube upload failed: %s", job_id, pub_exc)
 
+        # Persistent storage upload to Supabase CDN
+        try:
+            from api.services.storage import upload_video_to_supabase, prune_expired_storage_videos
+            storage_url = upload_video_to_supabase(final_video_path, job_id=job_id)
+            if storage_url and not video_url.startswith("http"):
+                video_url = storage_url
+            prune_expired_storage_videos(max_age_days=7, max_videos=20)
+        except Exception as storage_err:
+            logger.warning("[%s] Storage upload/prune fallback: %s", job_id, storage_err)
+
         # STAGE 5: Completed (100%)
         update_video_job_record(
             job_id=job_id,
@@ -191,6 +201,7 @@ def execute_video_pipeline_job(
             duration_seconds=tts_result.total_duration,
             file_size_bytes=file_size,
         )
+
         logger.info(
             "[%s] SUCCESS! Video generated at %s (Size: %.2f MB, Duration: %.2fs)",
             job_id,

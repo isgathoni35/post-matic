@@ -22,6 +22,7 @@ def clear_db():
     IN_MEMORY_JOBS.clear()
 
 
+@patch("api.worker.is_github_dispatch_enabled", return_value=False)
 @patch("api.worker.render_video")
 @patch("api.worker.fetch_script_media")
 @patch("api.worker.synthesize_script")
@@ -31,8 +32,10 @@ def test_execute_video_pipeline_job_success(
     mock_synth_script,
     mock_fetch_media,
     mock_render_video,
+    mock_dispatch_enabled,
     tmp_path,
 ):
+
     """Verify background worker status transitions on successful video generation."""
     job_id = str(uuid.uuid4())
     topic = "Test Worker Topic"
@@ -90,13 +93,14 @@ def test_execute_video_pipeline_job_success(
     assert job is not None
     assert job.status == VideoJobStatus.COMPLETED
     assert job.progress_pct == 100
-    assert job.video_url == f"/output/video_{job_id}.mp4"
+    assert job.video_url.startswith("http") or job.video_url == f"/output/video_{job_id}.mp4"
     assert job.duration_seconds == 10.0
     assert job.file_size_bytes == 100000
 
 
+@patch("api.worker.is_github_dispatch_enabled", return_value=False)
 @patch("api.worker.generate_script")
-def test_execute_video_pipeline_job_failure(mock_gen_script):
+def test_execute_video_pipeline_job_failure(mock_gen_script, mock_dispatch_enabled):
     """Verify background worker handles exception and marks job status as failed."""
     job_id = str(uuid.uuid4())
     topic = "Failing Job Topic"
@@ -111,6 +115,7 @@ def test_execute_video_pipeline_job_failure(mock_gen_script):
     job = get_video_job_record(job_id)
     assert job is not None
     assert job.status == VideoJobStatus.FAILED
+
     assert "API key quota exceeded" in job.error_message
 
 
