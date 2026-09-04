@@ -1,10 +1,14 @@
-"""Voice synthesis and ASS subtitle generation using edge-tts."""
 import asyncio
 from dataclasses import dataclass, field
 import logging
+import os
 from pathlib import Path
+import re
+import shutil
+import subprocess
 import sys
-from typing import List, Optional
+import time
+from typing import List, Optional, Union
 
 # Ensure project root is on sys.path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -12,6 +16,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 import edge_tts
+import imageio_ffmpeg
 from engine.config import TEMP_DIR
 from engine.schema import VideoScript
 
@@ -60,6 +65,75 @@ class TTSResult:
     scene_results: List[SceneAudioResult] = field(default_factory=list)
 
 
+def get_audio_duration(file_path: Path, fallback_duration: float = 0.0) -> float:
+    """Probe the exact decoded audio duration in seconds using FFmpeg."""
+    if not file_path.exists():
+        return fallback_duration
+
+    try:
+        ffmpeg_bin = shutil.which("ffmpeg") or imageio_ffmpeg.get_ffmpeg_exe()
+        cmd = [ffmpeg_bin, "-i", str(file_path), "-f", "null", "-"]
+        r = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+        # Match Duration line: "Duration: 00:00:04.25, start: ..."
+        m = re.search(r"Duration:\s*(\d+):(\d+):(\d+\.\d+)", r.stderr)
+        if m:
+            return int(m.group(1)) * 3600 + int(m.group(2)) * 60 + float(m.group(3))
+
+        # Fallback to last time marker: "time=00:00:04.25"
+        m2 = re.findall(r"time=(\d+):(\d+):(\d+\.\d+)", r.stderr)
+        if m2:
+            last = m2[-1]
+            return int(last[0]) * 3600 + int(last[1]) * 60 + float(last[2])
+    except Exception as err:
+        logger.warning("Could not probe exact duration for %s: %s", file_path, err)
+
+    return fallback_duration
+
+
+def concatenate_audio_files(audio_files: List[Path], output_file: Path) -> Path:
+    """Concatenate individual scene audio MP3s into a seamless master track via FFmpeg.
+
+    Prevents raw byte stitching corruptions, clicks, and decoder drift.
+    """
+    output_file.parent.mkdir(parents=True, exist_ok=True)
+    if not audio_files:
+        raise ValueError("Cannot concatenate an empty list of audio files.")
+
+    if len(audio_files) == 1:
+        shutil.copyfile(audio_files[0], output_file)
+        return output_file
+
+    ffmpeg_bin = shutil.which("ffmpeg") or imageio_ffmpeg.get_ffmpeg_exe()
+    timestamp = int(time.time() * 1000)
+    list_file = output_file.parent / f"concat_audio_{timestamp}.txt"
+
+    with open(list_file, "w", encoding="utf-8") as f:
+        for p in audio_files:
+            escaped = str(p.resolve()).replace("'", "'\\''")
+            f.write(f"file '{escaped}'\n")
+
+    cmd = [
+        ffmpeg_bin,
+        "-y",
+        "-f", "concat",
+        "-safe", "0",
+        "-i", str(list_file),
+        "-c:a", "libmp3lame",
+        "-q:a", "2",
+        str(output_file),
+    ]
+    try:
+        subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    except Exception as exc:
+        logger.error("FFmpeg audio concatenation failed: %s", exc)
+        raise
+    finally:
+        list_file.unlink(missing_ok=True)
+
+    return output_file
+
+
 def format_ass_time(seconds: float) -> str:
     """Format seconds into ASS subtitle timestamp: H:MM:SS.cc"""
     if seconds < 0:
@@ -76,12 +150,12 @@ def format_ass_time(seconds: float) -> str:
 
 def create_ass_header(
     font_name: str = "Arial Black",
-    font_size: int = 72,
-    primary_color: str = "&H00FFFFFF",    # White (ABGR)
-    highlight_color: str = "&H0000FFFF",  # Yellow (ABGR)
+    font_size: int = 76,
+    primary_color: str = "&H00FFFFFF",    # Crisp White (ABGR)
+    highlight_color: str = "&H0000FFFF",  # Bright Yellow (ABGR)
     outline_color: str = "&H00000000",    # Black (ABGR)
     back_color: str = "&H80000000",       # Semi-transparent black
-    margin_v: int = 500,                  # Vertical margin from bottom
+    margin_v: int = 580,                  # Safe zone: centered above Shorts/TikTok overlays
 ) -> str:
     """Generate ASS subtitle header and style definitions for 1080x1920 canvas."""
     return f"""[Script Info]
@@ -95,8 +169,8 @@ PlayResY: 1920
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,{font_name},{font_size},{primary_color},&H000000FF,{outline_color},{back_color},-1,0,0,0,100,100,0,0,1,6,3,2,60,60,{margin_v},1
-Style: Highlight,{font_name},{font_size},{highlight_color},&H000000FF,{outline_color},{back_color},-1,0,0,0,100,100,0,0,1,6,3,2,60,60,{margin_v},1
+Style: Default,{font_name},{font_size},{primary_color},&H000000FF,{outline_color},{back_color},-1,0,0,0,100,100,0,0,1,5,3,2,60,60,{margin_v},1
+Style: Highlight,{font_name},{font_size},{highlight_color},&H000000FF,{outline_color},{back_color},-1,0,0,0,100,100,0,0,1,5,3,2,60,60,{margin_v},1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -104,22 +178,22 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 
 
 def generate_ass_subtitles(
-    words: List[WordTiming],
+    words: Union[List[WordTiming], List[List[WordTiming]]],
     output_file: Path,
     words_per_line: int = 3,
     font_name: str = "Arial Black",
-    font_size: int = 72,
+    font_size: int = 76,
     highlight_color: str = "&H0000FFFF",  # Bright Yellow (ABGR)
     primary_color: str = "&H00FFFFFF",    # Crisp White (ABGR)
-    margin_v: int = 500,
+    margin_v: int = 580,                  # Safe zone clearance
 ) -> Path:
-    """Generate animated, word-highlighted ASS subtitles from word timings.
+    """Generate animated, word-highlighted ASS subtitles with strict scene boundary isolation.
 
-    Groups words into short phrases (2-4 words) and highlights the currently
-    spoken word in real-time for high-engagement dynamic captions.
+    Groups words into short phrases (2-4 words) strictly within each scene,
+    preventing captions from straddling two distinct scenes across cuts.
     """
     if not words:
-        output_file.write_text(create_ass_header(), encoding="utf-8")
+        output_file.write_text(create_ass_header(margin_v=margin_v), encoding="utf-8")
         return output_file
 
     lines = [create_ass_header(
@@ -130,26 +204,35 @@ def generate_ass_subtitles(
         margin_v=margin_v,
     )]
 
-    # Group words into chunks of `words_per_line`
-    chunks = [words[i:i + words_per_line] for i in range(0, len(words), words_per_line)]
+    # Normalize input: support either flat list of WordTiming or list of scene word lists
+    if isinstance(words[0], WordTiming):
+        scenes_words_list: List[List[WordTiming]] = [words]  # type: ignore
+    else:
+        scenes_words_list = words  # type: ignore
 
-    for chunk in chunks:
-        for active_idx, active_word in enumerate(chunk):
-            start_str = format_ass_time(active_word.start)
-            end_str = format_ass_time(active_word.end)
+    for scene_words in scenes_words_list:
+        if not scene_words:
+            continue
 
-            # Build formatted chunk text with active word highlighted
-            formatted_words = []
-            for idx, w in enumerate(chunk):
-                cleaned_text = w.text.strip().upper()
-                if idx == active_idx:
-                    # Highlight active word with highlight color and slight pop
-                    formatted_words.append(f"{{\\c{highlight_color}&}}{cleaned_text}{{\\c{primary_color}&}}")
-                else:
-                    formatted_words.append(cleaned_text)
+        # Group words strictly within THIS scene
+        chunks = [scene_words[i:i + words_per_line] for i in range(0, len(scene_words), words_per_line)]
 
-            line_text = " ".join(formatted_words)
-            lines.append(f"Dialogue: 0,{start_str},{end_str},Default,,0,0,0,,{line_text}\n")
+        for chunk in chunks:
+            for active_idx, active_word in enumerate(chunk):
+                start_str = format_ass_time(active_word.start)
+                end_str = format_ass_time(active_word.end)
+
+                formatted_words = []
+                for idx, w in enumerate(chunk):
+                    cleaned_text = w.text.strip().upper()
+                    if idx == active_idx:
+                        # Highlight active word in bright yellow with crisp white baseline
+                        formatted_words.append(f"{{\\c{highlight_color}&}}{cleaned_text}{{\\c{primary_color}&}}")
+                    else:
+                        formatted_words.append(cleaned_text)
+
+                line_text = " ".join(formatted_words)
+                lines.append(f"Dialogue: 0,{start_str},{end_str},Default,,0,0,0,,{line_text}\n")
 
     output_file.parent.mkdir(parents=True, exist_ok=True)
     output_file.write_text("".join(lines), encoding="utf-8")
@@ -209,7 +292,7 @@ def synthesize_scene(
     voice: str = DEFAULT_VOICE,
     output_dir: Optional[Path] = None,
 ) -> SceneAudioResult:
-    """Synthesize audio for a single scene."""
+    """Synthesize audio for a single scene with exact duration probing."""
     target_dir = output_dir or (TEMP_DIR / "tts")
     audio_path = target_dir / f"scene_{scene_id}.mp3"
 
@@ -221,11 +304,13 @@ def synthesize_scene(
         )
     )
 
-    duration = words[-1].end if words else 0.0
+    fallback_duration = words[-1].end if words else 0.0
+    exact_duration = get_audio_duration(audio_path, fallback_duration=fallback_duration)
+
     return SceneAudioResult(
         scene_id=scene_id,
         audio_path=audio_path,
-        duration=duration,
+        duration=exact_duration,
         words=words,
     )
 
@@ -238,15 +323,15 @@ def synthesize_script(
 ) -> TTSResult:
     """Synthesize complete narration for all scenes in a VideoScript.
 
-    Produces individual scene audio files, a concatenated full audio file,
-    and a fully synchronized ASS subtitle file with word-level highlight animations.
+    Produces individual scene audio files, a concatenated master audio file via FFmpeg,
+    and a fully synchronized ASS subtitle file with sample-accurate offsets.
     """
     target_dir = output_dir or (TEMP_DIR / "tts")
     target_dir.mkdir(parents=True, exist_ok=True)
 
-    all_words: List[WordTiming] = []
+    scenes_words_nested: List[List[WordTiming]] = []
+    scene_audio_paths: List[Path] = []
     scene_results: List[SceneAudioResult] = []
-    full_audio_bytes = bytearray()
     time_offset = 0.0
 
     for scene in script.scenes:
@@ -258,9 +343,11 @@ def synthesize_script(
                 output_audio_path=scene_audio_path,
             )
         )
+        scene_audio_paths.append(scene_audio_path)
 
-        full_audio_bytes.extend(audio_bytes)
-        scene_duration = scene_words[-1].end if scene_words else 0.0
+        # Probe exact audio duration from decoded file
+        fallback_dur = scene_words[-1].end if scene_words else 0.0
+        exact_duration = get_audio_duration(scene_audio_path, fallback_duration=fallback_dur)
 
         # Adjust word timings by cumulative time offset for the master subtitle track
         adjusted_words = []
@@ -272,31 +359,32 @@ def synthesize_script(
                     end=w.end + time_offset,
                 )
             )
-        all_words.extend(adjusted_words)
+        scenes_words_nested.append(adjusted_words)
 
         scene_results.append(
             SceneAudioResult(
                 scene_id=scene.scene_id,
                 audio_path=scene_audio_path,
-                duration=scene_duration,
+                duration=exact_duration,
                 words=scene_words,
             )
         )
-        time_offset += scene_duration
+        time_offset += exact_duration
 
-    # Write master audio file
+    # Produce clean, pop-free master audio using FFmpeg concat
     master_audio_path = target_dir / "narration_master.mp3"
-    master_audio_path.write_bytes(full_audio_bytes)
+    concatenate_audio_files(scene_audio_paths, master_audio_path)
 
-    # Write master ASS subtitle file
+    # Master ASS subtitles with scene boundary isolation
     master_sub_path = target_dir / "subtitles.ass"
     generate_ass_subtitles(
-        words=all_words,
+        words=scenes_words_nested,
         output_file=master_sub_path,
         words_per_line=words_per_line,
+        margin_v=580,
     )
 
-    total_duration = all_words[-1].end if all_words else 0.0
+    total_duration = get_audio_duration(master_audio_path, fallback_duration=time_offset)
 
     return TTSResult(
         audio_path=master_audio_path,

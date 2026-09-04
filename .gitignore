@@ -23,6 +23,7 @@ temp/
 temp_media/
 *.mp4
 *.mp3
+!web/public/audio/samples/*.mp3
 *.ass
 *.wav
 *.log

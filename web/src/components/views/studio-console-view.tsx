@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Sparkles,
   Play,
@@ -24,18 +24,49 @@ import {
   Bookmark,
   Music2,
   TrendingUp,
+  Sliders,
+  Smartphone,
+  Eye,
+  EyeOff,
+  Check,
+  Compass,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { VideoJobResponse } from "@/lib/api";
 
-const TRENDING_NICHES = [
-  { topic: "Why the Mariana Trench is terrifying and what lurks at the bottom", label: "🌊 Deep Sea", color: "from-blue-500/20 to-cyan-500/20 text-cyan-400" },
-  { topic: "4 subtle psychological tricks that people with high emotional intelligence use", label: "🧠 Psychology", color: "from-purple-500/20 to-indigo-500/20 text-purple-400" },
-  { topic: "How ancient Roman concrete self-heals over thousands of years", label: "🏛️ Ancient Rome", color: "from-amber-500/20 to-orange-500/20 text-amber-400" },
-  { topic: "What actually happens if two supermassive black holes collide", label: "🌌 Cosmic Mystery", color: "from-violet-500/20 to-pink-500/20 text-pink-400" },
-  { topic: "The 3 morning habits of ultra-wealthy investors that cost zero dollars", label: "💰 Wealth Mindset", color: "from-emerald-500/20 to-teal-500/20 text-emerald-400" },
+const EDITORIAL_TOPICS = [
+  {
+    category: "Extreme Earth",
+    title: "The Mariana Abyss",
+    topic: "Why the Mariana Trench is terrifying and what lurks at the deepest point on Earth",
+    runtimeHint: "45s",
+  },
+  {
+    category: "Cognitive Science",
+    title: "High-EQ Biases",
+    topic: "4 subtle psychological tricks that people with high emotional intelligence use daily",
+    runtimeHint: "25s",
+  },
+  {
+    category: "Ancient Engineering",
+    title: "Roman Megastructures",
+    topic: "How ancient Roman concrete self-heals underwater over thousands of years",
+    runtimeHint: "25s",
+  },
+  {
+    category: "Astrophysics",
+    title: "Singularity Collisions",
+    topic: "What actually happens at the event horizon if two supermassive black holes collide",
+    runtimeHint: "45s",
+  },
+  {
+    category: "Asymmetric Wealth",
+    title: "Generational Capital",
+    topic: "The 3 counter-intuitive capital allocation rules followed by generational wealth builders",
+    runtimeHint: "25s",
+  },
 ];
 
 export const VOICES = [
@@ -43,24 +74,32 @@ export const VOICES = [
     id: "en-US-ChristopherNeural",
     name: "Christopher",
     role: "Deep & Cinematic",
-    genre: "Documentary, Mystery, Crime",
-    badge: "Recommended",
+    genre: "Documentary, Mystery, True Crime",
+    badge: "Cinema Pro",
     initials: "C",
   },
   {
     id: "en-US-GuyNeural",
     name: "Guy",
     role: "High-Energy & Dynamic",
-    genre: "Viral TikTok, Hooks, Tech",
-    badge: "Viral",
+    genre: "Viral TikTok, Modern Hooks, Tech",
+    badge: "Viral Punch",
     initials: "G",
+  },
+  {
+    id: "en-US-EricNeural",
+    name: "Eric",
+    role: "Authoritative & Deep",
+    genre: "Finance, Deep Tech, Investigative",
+    badge: "Authority",
+    initials: "E",
   },
   {
     id: "en-US-JennyNeural",
     name: "Jenny",
     role: "Warm & Conversational",
-    genre: "Storytelling, Lifestyle, Facts",
-    badge: "Popular",
+    genre: "Storytelling, Psychology, Lifestyle",
+    badge: "Editorial",
     initials: "J",
   },
   {
@@ -74,9 +113,9 @@ export const VOICES = [
 ];
 
 const DURATIONS = [
-  { value: 15, label: "15s", role: "Quick Hook" },
+  { value: 15, label: "15s", role: "Punchy Hook" },
   { value: 25, label: "25s", role: "Viral Standard" },
-  { value: 45, label: "45s", role: "Story Mode" },
+  { value: 45, label: "45s", role: "Narrative Arc" },
   { value: 60, label: "60s", role: "Deep Dive" },
 ];
 
@@ -111,7 +150,40 @@ export function StudioConsoleView({
 }: StudioConsoleViewProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [showSafeZoneOverlay, setShowSafeZoneOverlay] = useState(false);
+  const [auditionVoiceId, setAuditionVoiceId] = useState<string | null>(null);
+  const [mobileTab, setMobileTab] = useState<"controls" | "canvas">("controls");
+
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const auditionAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Stop audition audio on unmount
+  useEffect(() => {
+    return () => {
+      if (auditionAudioRef.current) {
+        auditionAudioRef.current.pause();
+      }
+    };
+  }, []);
+
+  const togglePlayVoiceSample = (voiceId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (auditionVoiceId === voiceId) {
+      auditionAudioRef.current?.pause();
+      setAuditionVoiceId(null);
+    } else {
+      if (auditionAudioRef.current) {
+        auditionAudioRef.current.pause();
+      }
+      const audio = new Audio(`/audio/samples/${voiceId}.mp3`);
+      auditionAudioRef.current = audio;
+      audio.play().catch((err) => {
+        console.warn("Audio audition error:", err);
+      });
+      setAuditionVoiceId(voiceId);
+      audio.onended = () => setAuditionVoiceId(null);
+    }
+  };
 
   const getStageStatus = (stage: "scripting" | "tts" | "sourcing" | "assembly") => {
     if (!activeJob) return "pending";
@@ -166,19 +238,19 @@ export function StudioConsoleView({
 
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
-      {/* View Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/[0.06]">
+      {/* Studio View Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-white/[0.08]">
         <div>
-          <div className="flex items-center gap-2.5 mb-1">
+          <div className="flex items-center gap-2.5 mb-1.5">
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
-              Create Vertical Video
+              Studio Director
             </h1>
             <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
-              9:16 Shorts
+              9:16 Shorts Engine
             </span>
           </div>
-          <p className="text-xs text-zinc-400">
-            Type an idea or choose a viral niche. The engine writes scenes, narrates, and edits your video in the cloud.
+          <p className="text-xs text-zinc-400 max-w-xl">
+            Direct multi-scene vertical videos with sample-accurate audio-caption sync, 4K b-roll curation, and zero-loss FFmpeg encoding.
           </p>
         </div>
 
@@ -187,10 +259,10 @@ export function StudioConsoleView({
             variant="secondary"
             size="sm"
             onClick={onOpenSocialModal}
-            className="text-xs h-9 bg-white/[0.03] hover:bg-white/[0.07] border-white/[0.08]"
+            className="text-xs h-9 bg-white/[0.03] hover:bg-white/[0.07] border-white/[0.08] text-zinc-300"
           >
             <Share2 className="h-3.5 w-3.5 mr-1.5 text-amber-400" />
-            Social Channels
+            Social Distribution
           </Button>
           <Button
             variant="primary"
@@ -200,25 +272,53 @@ export function StudioConsoleView({
             className="text-xs h-9 font-semibold shadow-lg shadow-amber-500/20"
           >
             <Sparkles className="h-3.5 w-3.5 mr-1.5" />
-            Generate Video
+            {isRendering ? "Rendering..." : "Generate Video"}
           </Button>
         </div>
       </div>
 
-      {/* Main Studio Grid: Creation Parameters (Left) + Interactive Live Preview Canvas (Right) */}
+      {/* Adaptive Mobile Stepper Tab (Visible on < lg viewports) */}
+      <div className="lg:hidden flex items-center p-1 rounded-xl bg-[#121622] border border-white/[0.08]">
+        <button
+          type="button"
+          onClick={() => setMobileTab("controls")}
+          className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-semibold rounded-lg transition-all ${
+            mobileTab === "controls"
+              ? "bg-amber-500/15 text-amber-400 border border-amber-500/30 shadow-sm"
+              : "text-zinc-400 hover:text-white"
+          }`}
+        >
+          <Sliders className="h-3.5 w-3.5" />
+          <span>Console Controls</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setMobileTab("canvas")}
+          className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-semibold rounded-lg transition-all ${
+            mobileTab === "canvas"
+              ? "bg-amber-500/15 text-amber-400 border border-amber-500/30 shadow-sm"
+              : "text-zinc-400 hover:text-white"
+          }`}
+        >
+          <Smartphone className="h-3.5 w-3.5" />
+          <span>Preview Canvas</span>
+        </button>
+      </div>
+
+      {/* Main Studio Grid: Controls Deck (Left) + Hardware Canvas (Right) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left Column: Input Form Controls */}
-        <div className="lg:col-span-7 space-y-6">
-          {/* Card: Topic & Prompt */}
+        <div className={`lg:col-span-7 space-y-6 ${mobileTab === "canvas" ? "hidden lg:block" : "block"}`}>
+          {/* Section: Topic & Curated Verticals */}
           <div className="studio-card rounded-2xl p-6 space-y-5">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2.5">
                 <div className="h-7 w-7 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
-                  <Sparkles className="h-4 w-4" />
+                  <Compass className="h-4 w-4" />
                 </div>
                 <div>
-                  <h2 className="text-sm font-bold text-white">Video Topic & Concept</h2>
-                  <p className="text-[11px] text-zinc-400">What is this video about?</p>
+                  <h2 className="text-sm font-bold text-white tracking-tight">Concept & Direction</h2>
+                  <p className="text-[11px] text-zinc-400">Specify your thesis or choose an editorial vertical</p>
                 </div>
               </div>
               <span className="text-[11px] font-mono text-zinc-500">{topic.length}/300</span>
@@ -228,25 +328,45 @@ export function StudioConsoleView({
               placeholder="e.g. 3 terrifying facts about the deep sea midnight zone that science still cannot explain..."
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
-              className="min-h-[110px] text-sm bg-black/40 border-white/[0.08] focus:border-amber-500/40 focus:ring-amber-500/20 resize-none rounded-xl leading-relaxed"
+              className="min-h-[105px] text-sm bg-black/40 border-white/[0.08] focus:border-amber-500/40 focus:ring-amber-500/20 resize-none rounded-xl leading-relaxed text-zinc-100 placeholder:text-zinc-600 font-sans"
               maxLength={300}
             />
 
-            {/* Trending Niches Presets */}
+            {/* Curated Editorial Verticals */}
             <div className="space-y-2.5 pt-1">
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-zinc-300">
-                <TrendingUp className="h-3.5 w-3.5 text-amber-400" />
-                <span>Trending Niche Ideas (Click to use)</span>
+              <div className="flex items-center justify-between text-xs font-semibold text-zinc-300">
+                <span className="flex items-center gap-1.5">
+                  <TrendingUp className="h-3.5 w-3.5 text-amber-400" />
+                  Curated Editorial Verticals
+                </span>
+                <span className="text-[10px] text-zinc-500 font-mono">High Retention Formats</span>
               </div>
-              <div className="flex flex-wrap gap-2">
-                {TRENDING_NICHES.map((niche) => (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {EDITORIAL_TOPICS.map((item) => (
                   <button
-                    key={niche.label}
+                    key={item.title}
                     type="button"
-                    onClick={() => setTopic(niche.topic)}
-                    className="px-3 py-1.5 rounded-xl text-xs font-medium bg-white/[0.04] border border-white/[0.08] hover:border-amber-500/30 hover:bg-white/[0.07] text-zinc-300 hover:text-white transition-all text-left flex items-center gap-1.5"
+                    onClick={() => {
+                      setTopic(item.topic);
+                      if (item.runtimeHint === "45s") setTargetDuration(45);
+                      else setTargetDuration(25);
+                    }}
+                    className="p-3 rounded-xl text-left bg-black/30 border border-white/[0.06] hover:border-amber-500/35 hover:bg-white/[0.03] transition-all group relative overflow-hidden"
                   >
-                    <span>{niche.label}</span>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[10px] font-mono uppercase tracking-wider text-amber-400/90 font-semibold">
+                        {item.category}
+                      </span>
+                      <span className="text-[10px] font-mono text-zinc-500">
+                        {item.runtimeHint}
+                      </span>
+                    </div>
+                    <p className="text-xs font-semibold text-zinc-200 group-hover:text-white transition-colors">
+                      {item.title}
+                    </p>
+                    <p className="text-[10px] text-zinc-500 line-clamp-1 mt-0.5 group-hover:text-zinc-400">
+                      {item.topic}
+                    </p>
                   </button>
                 ))}
               </div>
@@ -257,7 +377,7 @@ export function StudioConsoleView({
               <div className="flex items-center justify-between">
                 <label className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
                   <Clock className="h-3.5 w-3.5 text-amber-400" />
-                  Target Duration
+                  Target Runtime
                 </label>
                 <span className="text-xs font-mono text-amber-400 font-semibold">
                   ~{targetDuration}s runtime
@@ -275,46 +395,97 @@ export function StudioConsoleView({
                         : "bg-black/30 border-white/[0.06] text-zinc-400 hover:text-white hover:border-white/[0.12]"
                     }`}
                   >
-                    <p className="text-sm font-bold">{d.label}</p>
+                    <p className="text-sm font-bold tracking-tight">{d.label}</p>
                     <p className="text-[10px] text-zinc-400 mt-0.5">{d.role}</p>
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Voice Actor Selector */}
+            {/* Narrator Voice Casting Deck with Audition Audio Player */}
             <div className="space-y-3 pt-3 border-t border-white/[0.06]">
-              <label className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
-                <Mic className="h-3.5 w-3.5 text-amber-400" />
-                Narrator Voice Talent
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
+                  <Mic className="h-3.5 w-3.5 text-amber-400" />
+                  Narrator Casting Deck
+                </label>
+                <span className="text-[10px] font-mono text-zinc-500">
+                  Click icon to audition sample
+                </span>
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {VOICES.map((v) => (
-                  <button
-                    key={v.id}
-                    type="button"
-                    onClick={() => setSelectedVoice(v.id)}
-                    className={`p-3.5 rounded-xl border text-left transition-all ${
-                      selectedVoice === v.id
-                        ? "bg-amber-500/10 border-amber-500 shadow-sm"
-                        : "bg-black/30 border-white/[0.06] hover:border-white/[0.14] text-zinc-300"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-1.5">
-                      <div className="flex items-center gap-2">
-                        <div className="h-6 w-6 rounded-full bg-gradient-to-tr from-amber-500 to-amber-700 flex items-center justify-center text-[10px] font-bold text-black">
-                          {v.initials}
+                {VOICES.map((v) => {
+                  const isSelected = selectedVoice === v.id;
+                  const isAuditioning = auditionVoiceId === v.id;
+
+                  return (
+                    <div
+                      key={v.id}
+                      onClick={() => setSelectedVoice(v.id)}
+                      className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer relative group ${
+                        isSelected
+                          ? "bg-amber-500/10 border-amber-500 shadow-sm"
+                          : "bg-black/30 border-white/[0.06] hover:border-white/[0.14] text-zinc-300"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1.5">
+                        <div className="flex items-center gap-2">
+                          <div
+                            className={`h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                              isSelected
+                                ? "bg-amber-500 text-black"
+                                : "bg-white/[0.08] text-zinc-300 group-hover:bg-white/[0.12]"
+                            }`}
+                          >
+                            {v.initials}
+                          </div>
+                          <span className="text-xs font-bold text-white tracking-tight">
+                            {v.name}
+                          </span>
                         </div>
-                        <span className="text-xs font-bold text-white">{v.name}</span>
+
+                        {/* Audition Player Button */}
+                        <button
+                          type="button"
+                          onClick={(e) => togglePlayVoiceSample(v.id, e)}
+                          title={`Audition voice sample for ${v.name}`}
+                          className={`h-6 px-2 rounded-md flex items-center gap-1.5 text-[10px] font-mono font-semibold transition-all border ${
+                            isAuditioning
+                              ? "bg-amber-500 text-black border-amber-400"
+                              : "bg-white/[0.06] text-zinc-300 hover:text-white border-white/[0.08] hover:bg-white/[0.12]"
+                          }`}
+                        >
+                          {isAuditioning ? (
+                            <>
+                              <div className="flex items-end gap-[2px] h-3">
+                                <span className="w-[2px] bg-black rounded-full eq-bar-1" />
+                                <span className="w-[2px] bg-black rounded-full eq-bar-2" />
+                                <span className="w-[2px] bg-black rounded-full eq-bar-3" />
+                                <span className="w-[2px] bg-black rounded-full eq-bar-4" />
+                              </div>
+                              <span>Playing</span>
+                            </>
+                          ) : (
+                            <>
+                              <Play className="h-2.5 w-2.5 fill-current" />
+                              <span>Audition</span>
+                            </>
+                          )}
+                        </button>
                       </div>
-                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/[0.06] text-zinc-400">
-                        {v.badge}
-                      </span>
+
+                      <div className="flex items-center justify-between mt-2">
+                        <div>
+                          <p className="text-[11px] font-semibold text-amber-400/90">{v.role}</p>
+                          <p className="text-[10px] text-zinc-500 mt-0.5">{v.genre}</p>
+                        </div>
+                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-white/[0.04] text-zinc-400 border border-white/[0.06]">
+                          {v.badge}
+                        </span>
+                      </div>
                     </div>
-                    <p className="text-[11px] font-semibold text-amber-400">{v.role}</p>
-                    <p className="text-[10px] text-zinc-400 mt-0.5">{v.genre}</p>
-                  </button>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
@@ -330,11 +501,11 @@ export function StudioConsoleView({
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-semibold text-white">Auto-Publish to YouTube Shorts</span>
                         <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-red-500/10 text-red-400 font-semibold border border-red-500/20">
-                          1-Click
+                          Zero-Click
                         </span>
                       </div>
                       <p className="text-[10px] text-zinc-400 mt-0.5">
-                        Directly upload to your connected YouTube channel once rendering completes
+                        Directly deliver to your connected YouTube channel once video assembly completes
                       </p>
                     </div>
                   </div>
@@ -362,80 +533,123 @@ export function StudioConsoleView({
             </div>
           </div>
 
-          {/* Creation Pipeline Stage Tracker */}
+          {/* Creation Pipeline Stage Tracker (Linear / Vercel Aesthetic) */}
           <div className="studio-card rounded-2xl p-5 space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
-                <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-                  Creation Progress
+                <div className={`h-2 w-2 rounded-full ${isRendering ? "bg-amber-400 animate-pulse" : "bg-emerald-400"}`} />
+                <h3 className="text-xs font-bold text-white uppercase tracking-wider font-mono">
+                  Engine Pipeline Execution
                 </h3>
               </div>
               {activeJob && (
                 <span className="text-xs font-mono font-semibold text-amber-400">
-                  {activeJob.progress_pct}%
+                  {activeJob.progress_pct}% Completed
                 </span>
               )}
             </div>
 
             {/* Progress Bar */}
-            <div className="w-full h-2 rounded-full bg-white/[0.06] overflow-hidden">
+            <div className="w-full h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-amber-500 to-orange-500 transition-all duration-500 rounded-full"
+                className="h-full bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 transition-all duration-500 rounded-full"
                 style={{ width: `${activeJob ? activeJob.progress_pct : 0}%` }}
               />
             </div>
 
-            {/* Stage Steps */}
+            {/* Discrete Pipeline Stages */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 text-xs">
               <div className="p-2.5 rounded-xl bg-black/30 border border-white/[0.04] space-y-1">
-                <span className="text-[10px] text-zinc-500 font-mono">01. Script</span>
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] text-zinc-500 font-mono">01. SCRIPT</span>
+                  {getStageStatus("scripting") === "done" && <Check className="h-3 w-3 text-emerald-400" />}
+                </div>
                 <p className="text-[11px] font-semibold text-zinc-300">Viral Hook</p>
                 <span className={`text-[10px] font-mono ${getStageStatus("scripting") === "done" ? "text-emerald-400" : getStageStatus("scripting") === "active" ? "text-amber-400 animate-pulse" : "text-zinc-600"}`}>
-                  {getStageStatus("scripting") === "done" ? "✓ Done" : getStageStatus("scripting") === "active" ? "Writing..." : "Standby"}
+                  {getStageStatus("scripting") === "done" ? "Generated" : getStageStatus("scripting") === "active" ? "Authoring..." : "Standby"}
                 </span>
               </div>
 
               <div className="p-2.5 rounded-xl bg-black/30 border border-white/[0.04] space-y-1">
-                <span className="text-[10px] text-zinc-500 font-mono">02. Voice</span>
-                <p className="text-[11px] font-semibold text-zinc-300">Narration</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] text-zinc-500 font-mono">02. AUDIO</span>
+                  {getStageStatus("tts") === "done" && <Check className="h-3 w-3 text-emerald-400" />}
+                </div>
+                <p className="text-[11px] font-semibold text-zinc-300">Neural TTS</p>
                 <span className={`text-[10px] font-mono ${getStageStatus("tts") === "done" ? "text-emerald-400" : getStageStatus("tts") === "active" ? "text-amber-400 animate-pulse" : "text-zinc-600"}`}>
-                  {getStageStatus("tts") === "done" ? "✓ Done" : getStageStatus("tts") === "active" ? "Recording..." : "Standby"}
+                  {getStageStatus("tts") === "done" ? "Synthesized" : getStageStatus("tts") === "active" ? "Recording..." : "Standby"}
                 </span>
               </div>
 
               <div className="p-2.5 rounded-xl bg-black/30 border border-white/[0.04] space-y-1">
-                <span className="text-[10px] text-zinc-500 font-mono">03. Footage</span>
-                <p className="text-[11px] font-semibold text-zinc-300">4K B-Roll</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] text-zinc-500 font-mono">03. MEDIA</span>
+                  {getStageStatus("sourcing") === "done" && <Check className="h-3 w-3 text-emerald-400" />}
+                </div>
+                <p className="text-[11px] font-semibold text-zinc-300">4K Curations</p>
                 <span className={`text-[10px] font-mono ${getStageStatus("sourcing") === "done" ? "text-emerald-400" : getStageStatus("sourcing") === "active" ? "text-amber-400 animate-pulse" : "text-zinc-600"}`}>
-                  {getStageStatus("sourcing") === "done" ? "✓ Done" : getStageStatus("sourcing") === "active" ? "Curating..." : "Standby"}
+                  {getStageStatus("sourcing") === "done" ? "Downloaded" : getStageStatus("sourcing") === "active" ? "Acquiring..." : "Standby"}
                 </span>
               </div>
 
               <div className="p-2.5 rounded-xl bg-black/30 border border-white/[0.04] space-y-1">
-                <span className="text-[10px] text-zinc-500 font-mono">04. Assembly</span>
-                <p className="text-[11px] font-semibold text-zinc-300">Captions & Edit</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] text-zinc-500 font-mono">04. RENDER</span>
+                  {getStageStatus("assembly") === "done" && <Check className="h-3 w-3 text-emerald-400" />}
+                </div>
+                <p className="text-[11px] font-semibold text-zinc-300">FFmpeg Assembly</p>
                 <span className={`text-[10px] font-mono ${getStageStatus("assembly") === "done" ? "text-emerald-400" : getStageStatus("assembly") === "active" ? "text-amber-400 animate-pulse" : "text-zinc-600"}`}>
-                  {getStageStatus("assembly") === "done" ? "✓ Done" : getStageStatus("assembly") === "active" ? "Editing..." : "Standby"}
+                  {getStageStatus("assembly") === "done" ? "Encoded" : getStageStatus("assembly") === "active" ? "Muxing..." : "Standby"}
                 </span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Right Column: Realistic Shorts Smartphone Canvas */}
-        <div className="lg:col-span-5 flex flex-col items-center">
-          <div className="w-full max-w-[340px] space-y-4">
-            {/* Phone Bezel */}
-            <div className="relative w-full aspect-[9/18] rounded-[48px] p-3.5 bg-gradient-to-b from-[#252b3b] via-[#141824] to-[#0a0d14] shadow-[0_24px_64px_-12px_rgba(0,0,0,0.8)] border border-white/[0.14]">
-              {/* Inner Screen */}
-              <div className="relative w-full h-full rounded-[38px] overflow-hidden bg-black flex flex-col justify-between p-4 select-none">
-                {/* Dynamic Island */}
+        {/* Right Column: Hardware Smartphone Canvas */}
+        <div className={`lg:col-span-5 flex flex-col items-center ${mobileTab === "controls" ? "hidden lg:flex" : "flex"}`}>
+          <div className="w-full max-w-[340px] space-y-3">
+            {/* Top Canvas Controls: Safe Zone Toggle & Status */}
+            <div className="flex items-center justify-between px-1">
+              <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+                <Smartphone className="h-3.5 w-3.5 text-zinc-500" />
+                9:16 Canvas
+              </span>
+
+              <button
+                type="button"
+                onClick={() => setShowSafeZoneOverlay(!showSafeZoneOverlay)}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-mono font-semibold border transition-all ${
+                  showSafeZoneOverlay
+                    ? "bg-amber-500/15 text-amber-400 border-amber-500/40"
+                    : "bg-white/[0.04] text-zinc-400 hover:text-white border-white/[0.08]"
+                }`}
+                title="Toggle TikTok / YouTube Shorts UI Safe Zone overlay"
+              >
+                {showSafeZoneOverlay ? (
+                  <>
+                    <EyeOff className="h-3 w-3 text-amber-400" />
+                    <span>Safe Zone: ON</span>
+                  </>
+                ) : (
+                  <>
+                    <Eye className="h-3 w-3" />
+                    <span>Safe Zone Guide</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Precision Hardware Bezel Container */}
+            <div className="relative w-full aspect-[9/18] rounded-[48px] p-3.5 hardware-bezel select-none">
+              {/* Inner High-Density Screen */}
+              <div className="relative w-full h-full rounded-[38px] overflow-hidden bg-black flex flex-col justify-between p-4">
+                {/* Dynamic Island Sensor */}
                 <div className="relative z-30 mx-auto w-24 h-5 rounded-full bg-black flex items-center justify-end px-2 border border-white/[0.08]">
-                  <div className="h-2 w-2 rounded-full bg-emerald-500/80" />
+                  <div className="h-2 w-2 rounded-full bg-emerald-500/80 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
                 </div>
 
-                {/* Video Playback or Standby State */}
+                {/* Video Playback or Cloud Rendering or Standby State */}
                 {videoSrc && activeJob?.status === "completed" ? (
                   <>
                     <video
@@ -447,20 +661,20 @@ export function StudioConsoleView({
                       onClick={togglePlay}
                     />
 
-                    {/* Play/Pause Overlay */}
+                    {/* Play/Pause Center Indicator */}
                     {!isPlaying && (
                       <button
                         onClick={togglePlay}
-                        className="absolute inset-0 m-auto z-20 h-16 w-16 rounded-full bg-black/60 backdrop-blur-md flex items-center justify-center text-white border border-white/20 hover:scale-110 transition-transform"
+                        className="absolute inset-0 m-auto z-20 h-16 w-16 rounded-full bg-black/65 backdrop-blur-md flex items-center justify-center text-white border border-white/20 hover:scale-110 transition-transform shadow-2xl"
                       >
                         <Play className="h-7 w-7 fill-white ml-1" />
                       </button>
                     )}
 
-                    {/* Sound Toggle */}
+                    {/* Sound Mute Toggle */}
                     <button
                       onClick={toggleMute}
-                      className="absolute top-12 right-4 z-20 h-8 w-8 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center text-white border border-white/10"
+                      className="absolute top-12 right-4 z-20 h-8 w-8 rounded-full bg-black/60 backdrop-blur-md flex items-center justify-center text-white border border-white/10"
                     >
                       {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
                     </button>
@@ -474,9 +688,9 @@ export function StudioConsoleView({
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <p className="text-sm font-bold text-white">Rendering Your Video</p>
+                      <p className="text-sm font-bold text-white tracking-tight">Rendering Studio Master</p>
                       <p className="text-[11px] text-zinc-400">
-                        Offloaded to 7 GB cloud runner
+                        Executing multi-scene stitch & ASS caption burn
                       </p>
                     </div>
                     <span className="text-xs font-mono text-amber-400 font-semibold px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20">
@@ -484,25 +698,62 @@ export function StudioConsoleView({
                     </span>
                   </div>
                 ) : (
-                  /* Idle Standby Screen (Simulated Aesthetic Preview) */
+                  /* Standby Canvas Screen */
                   <>
-                    <div className="absolute inset-0 bg-gradient-to-b from-blue-950/70 via-slate-900 to-black z-0">
-                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(245,158,11,0.12),transparent_60%)] animate-pulse" />
+                    <div className="absolute inset-0 bg-gradient-to-b from-[#101420] via-[#0c0f17] to-black z-0">
+                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(245,158,11,0.08),transparent_60%)]" />
                     </div>
 
                     <div className="relative z-10 my-auto text-center px-4 space-y-3">
-                      <span className="inline-block px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-400 text-[10px] font-bold tracking-wider uppercase border border-amber-500/30">
-                        Live Preview Canvas
+                      <span className="inline-block px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-400 text-[10px] font-bold tracking-wider uppercase font-mono border border-amber-500/30">
+                        Master Canvas
                       </span>
-                      <div className="text-lg font-black text-white leading-tight uppercase tracking-tight">
-                        &ldquo;Your rendered video will play here automatically with animated subtitles.&rdquo;
+                      <div className="text-base font-bold text-zinc-200 leading-snug tracking-tight">
+                        Rendered vertical video will preview here with synced typography captions.
                       </div>
                     </div>
                   </>
                 )}
 
-                {/* Realistic Shorts UI Overlay */}
-                <div className="relative z-20 flex items-end justify-between gap-3 mt-auto">
+                {/* Professional Safe Zone Overlay Guides */}
+                {showSafeZoneOverlay && (
+                  <div className="absolute inset-0 z-25 pointer-events-none flex flex-col justify-between">
+                    {/* Top Platform UI Danger Zone */}
+                    <div className="h-[15%] w-full safezone-guide-header flex items-center justify-center">
+                      <span className="text-[9px] font-mono font-semibold uppercase tracking-wider text-amber-400/90 bg-black/70 px-2 py-0.5 rounded border border-amber-500/30">
+                        Platform Search & Header Space
+                      </span>
+                    </div>
+
+                    {/* Middle Safe Bounds */}
+                    <div className="flex-1 flex justify-between items-center px-2">
+                      <div className="flex-1 h-full flex items-center justify-center p-2">
+                        <div className="w-full h-4/5 border border-dashed border-amber-500/40 rounded-xl flex items-center justify-center">
+                          <span className="text-[9px] font-mono font-semibold uppercase tracking-wider text-amber-400/80 bg-black/60 px-2 py-0.5 rounded">
+                            Caption Safe Zone
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Right Action Rail Danger Zone */}
+                      <div className="w-[20%] h-full safezone-guide-actionbar flex items-center justify-center">
+                        <span className="text-[8px] font-mono font-semibold uppercase tracking-widest text-amber-400/80 rotate-90 whitespace-nowrap bg-black/70 px-1 py-0.5 rounded">
+                          Action Rail
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Bottom Platform UI Danger Zone */}
+                    <div className="h-[28%] w-full safezone-guide-footer flex items-center justify-center">
+                      <span className="text-[9px] font-mono font-semibold uppercase tracking-wider text-amber-400/90 bg-black/70 px-2 py-0.5 rounded border border-amber-500/30">
+                        Meta & Sound Disc Space
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Realistic Shorts / TikTok Native UI Overlay */}
+                <div className="relative z-20 flex items-end justify-between gap-3 mt-auto pointer-events-none">
                   <div className="space-y-1 text-left">
                     <div className="flex items-center gap-2">
                       <div className="h-7 w-7 rounded-full bg-gradient-to-tr from-amber-400 to-orange-500 flex items-center justify-center text-black font-bold text-[10px]">
@@ -543,18 +794,17 @@ export function StudioConsoleView({
               </div>
             </div>
 
-            {/* Bottom Actions under Phone */}
+            {/* Quick Export & Cloud Actions */}
             {activeJob && activeJob.status === "completed" && videoSrc && (
-              <div className="flex items-center gap-2 w-full pt-1">
+              <div className="flex items-center gap-2 w-full pt-2">
                 <a
                   href={videoSrc}
                   download={`video_${(activeJob.job_id || activeJob.id || "export").slice(0, 8)}.mp4`}
-
                   target="_blank"
                   rel="noreferrer"
                   className="flex-1"
                 >
-                  <Button variant="secondary" size="sm" className="w-full text-xs h-10 rounded-xl">
+                  <Button variant="secondary" size="sm" className="w-full text-xs h-10 rounded-xl bg-white/[0.04] border-white/[0.1] hover:bg-white/[0.08]">
                     <Download className="h-3.5 w-3.5 mr-1.5" />
                     Download MP4
                   </Button>
@@ -575,7 +825,7 @@ export function StudioConsoleView({
                     className="flex-1 text-xs h-10 rounded-xl"
                   >
                     <Share2 className="h-3.5 w-3.5 mr-1.5" />
-                    Publish to YouTube
+                    Distribute
                   </Button>
                 )}
               </div>

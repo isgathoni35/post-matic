@@ -81,8 +81,41 @@ def test_synthesize_script_end_to_end(tmp_path: Path):
         assert scene_res.duration > 0.0
         assert len(scene_res.words) > 0
 
+def test_generate_ass_subtitles_scene_isolation(tmp_path: Path):
+    """Verify that subtitle phrases do not cross scene boundaries."""
+    scene1_words = [
+        WordTiming(text="Scene", start=0.1, end=0.4),
+        WordTiming(text="one", start=0.45, end=0.7),
+    ]
+    scene2_words = [
+        WordTiming(text="Scene", start=1.0, end=1.3),
+        WordTiming(text="two", start=1.35, end=1.6),
+    ]
 
-if __name__ == "__main__":
+    ass_path = tmp_path / "scene_isolated.ass"
+    generate_ass_subtitles([scene1_words, scene2_words], ass_path, words_per_line=3)
+
+    content = ass_path.read_text(encoding="utf-8")
+    lines = [line for line in content.splitlines() if line.startswith("Dialogue:")]
+    # Scene 1 has 2 words, Scene 2 has 2 words.
+    # If they were merged, with words_per_line=3, a line would contain "SCENE ONE SCENE".
+    # Because they are scene-isolated, Scene 1 only has "SCENE ONE", Scene 2 only has "SCENE TWO".
+    for line in lines:
+        assert not ("ONE" in line and "TWO" in line), "Dialogue line straddles across scene boundary!"
+
+
+def test_concatenate_audio_files(tmp_path: Path):
+    """Verify FFmpeg audio concatenation creates valid playable audio."""
+    from engine.tts_engine import concatenate_audio_files, synthesize_scene
+    s1 = synthesize_scene(1, "First scene.", output_dir=tmp_path)
+    s2 = synthesize_scene(2, "Second scene.", output_dir=tmp_path)
+
+    out = tmp_path / "concat_master.mp3"
+    concatenate_audio_files([s1.audio_path, s2.audio_path], out)
+
+    assert out.exists()
+    assert out.stat().st_size > 0
+
     import tempfile
     with tempfile.TemporaryDirectory() as td:
         p = Path(td)

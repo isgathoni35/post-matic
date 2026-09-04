@@ -198,8 +198,16 @@ def render_video(
 
     # Step 1: Process and normalize each scene clip
     normalized_clips: List[Path] = []
-    for vid in downloaded_videos:
+    total_audio_dur = tts_result.total_duration
+    total_scenes = len(downloaded_videos)
+
+    for idx, vid in enumerate(downloaded_videos):
         dur = scene_durations.get(vid.scene_id, 5.0)
+        # For the final scene, add a slight safety buffer so -shortest never clips trailing narration
+        if idx == total_scenes - 1:
+            preceding_sum = sum(scene_durations.get(v.scene_id, 5.0) for v in downloaded_videos[:-1])
+            dur = max(dur, total_audio_dur - preceding_sum + 0.3)
+
         norm_path = work_dir / f"scene_{vid.scene_id}_norm.mp4"
         logger.info(
             "Rendering Scene %d: trimming to %.2fs and resizing to 1080x1920...",
