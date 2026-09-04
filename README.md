@@ -39,34 +39,70 @@ PostMatic is a full-stack, zero-OpEx autonomous faceless video generator and soc
 - **Node.js 20+**
 - **FFmpeg** (automatically managed via `imageio-ffmpeg` or system PATH)
 
-### 2. Backend Setup
+### 2. Backend Setup (Terminal 1)
+
+In the root directory of the repository:
+
 ```bash
-# Create and activate virtual environment
+# 1. Create virtual environment (if not already created)
 python -m venv .venv
-# On Windows:
-.\.venv\Scripts\activate
+
+# 2. Activate virtual environment
+# On Windows (PowerShell):
+.\.venv\Scripts\Activate.ps1
+# If PowerShell script execution is restricted, run:
+# Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+
 # On Linux/macOS:
 source .venv/bin/activate
 
-# Install dependencies
+# 3. Install dependencies
 pip install -r requirements.txt
 
-# Configure environment variables
+# 4. Configure environment variables
+# Copy .env.example to .env and fill in your keys (GEMINI_API_KEY, PEXELS_API_KEY, SUPABASE keys)
 cp .env.example .env
-# Edit .env and supply your GEMINI_API_KEY, PEXELS_API_KEY, SUPABASE keys, and GOOGLE OAuth credentials
 
-# Start FastAPI server
-python -m uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+# 5. Start the FastAPI backend server
+python -m uvicorn api.main:app --reload --port 8000
 ```
 
-### 3. Frontend Setup
+> **FastAPI Backend URL:** [http://localhost:8000](http://localhost:8000)  
+> **Interactive Swagger Docs:** [http://localhost:8000/docs](http://localhost:8000/docs)  
+> **Health Check:** [http://localhost:8000/health](http://localhost:8000/health)
+
+---
+
+### 3. Frontend Setup (Terminal 2)
+
+In a separate terminal tab, navigate to the `web` directory:
+
 ```bash
 cd web
+
+# 1. Install dependencies
 npm install
-cp .env.example .env.local
+
+# 2. Configure environment variables
+# Ensure web/.env.local contains:
+# NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+# NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+# NEXT_PUBLIC_API_URL=http://localhost:8000
+
+# 3. Start the Next.js development server
 npm run dev
 ```
-Open **`http://localhost:3001`** in your browser.
+
+> **Frontend Dashboard:** [http://localhost:3001](http://localhost:3001) (or `http://localhost:3000` if default port is used)
+
+---
+
+### 4. Local Development Verification
+
+Once both servers are running:
+1. Open **[http://localhost:3001](http://localhost:3001)** in your browser.
+2. Sign in or explore the landing page and Studio Console.
+3. Your frontend will communicate directly with your local backend at `http://localhost:8000`. You can monitor backend logs live in Terminal 1.
 
 ---
 
