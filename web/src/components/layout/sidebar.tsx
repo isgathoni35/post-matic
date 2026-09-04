@@ -12,6 +12,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { BrandIcon } from "@/components/ui/brand-logo";
 
 export type ActiveWorkspaceView =
   | "studio"
@@ -122,7 +123,7 @@ export function Sidebar({
       <div className="creator-surface rounded-2xl p-4 space-y-3 shadow-lg">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-amber-400" />
+            <BrandIcon size="xs" glow={false} />
             <span className="text-xs font-semibold text-white">Creator Studio</span>
           </div>
           <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-semibold border border-emerald-500/20">

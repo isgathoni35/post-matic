@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Film, Mail, Lock, User, Eye, EyeOff, Sparkles, ArrowRight, ArrowLeft, Loader2, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { BrandLogo } from "@/components/ui/brand-logo";
+import { BrandLogo, BrandIcon } from "@/components/ui/brand-logo";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 
@@ -38,9 +38,7 @@ export default function LoginPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#090b10] p-4 text-center">
         <div className="flex flex-col items-center gap-3 animate-in fade-in duration-300">
-          <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-xl shadow-amber-500/20 text-black">
-            <Film className="h-6 w-6" />
-          </div>
+          <BrandIcon size="lg" glow={true} className="shadow-2xl shadow-amber-500/25 animate-pulse" />
           <div className="flex items-center gap-2 text-sm font-medium text-zinc-400">
             <Loader2 className="h-4 w-4 animate-spin text-amber-500" />
             <span>Taking you to your studio...</span>

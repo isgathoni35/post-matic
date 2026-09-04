@@ -15,8 +15,9 @@ import { SocialChannelsView } from "@/components/views/social-channels-view";
 import { EngineLogsView } from "@/components/views/engine-logs-view";
 import { SettingsView } from "@/components/views/settings-view";
 import { WorkspaceErrorBoundary } from "@/components/ui/error-boundary";
+import { BrandIcon } from "@/components/ui/brand-logo";
 import { toast } from "sonner";
-import { Film, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 export default function StudioPage() {
   const router = useRouter();
@@ -222,9 +223,7 @@ export default function StudioPage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#090b10] text-zinc-300">
         <div className="flex flex-col items-center gap-4 animate-in fade-in duration-300">
-          <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-xl shadow-amber-500/20 border border-amber-300/30">
-            <Film className="h-6 w-6 text-black" />
-          </div>
+          <BrandIcon size="lg" glow={true} className="shadow-2xl shadow-amber-500/25 animate-pulse" />
           <div className="flex items-center gap-2 text-sm font-medium text-zinc-400">
             <Loader2 className="h-4 w-4 animate-spin text-amber-500" />
             <span>Loading PostMatic Studio...</span>

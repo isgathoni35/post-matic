@@ -1,0 +1,26 @@
+{
+  "name": "PostMatic — Turn Any Idea into Viral Short-Form Videos",
+  "short_name": "PostMatic",
+  "description": "The autonomous studio for YouTube Shorts, Reels, and TikTok.",
+  "start_url": "/studio",
+  "display": "standalone",
+  "background_color": "#08090d",
+  "theme_color": "#08090d",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

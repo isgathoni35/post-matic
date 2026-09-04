@@ -18,6 +18,16 @@ export const metadata: Metadata = {
   title: "PostMatic — Turn Any Idea into Viral Short-Form Videos",
   description:
     "The autonomous studio for YouTube Shorts, Reels, and TikTok. Create high-retention 9:16 videos with neural narration, 4K B-roll, and kinetic subtitles in 30 seconds.",
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "32x32" },
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180" },
+    ],
+  },
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({
