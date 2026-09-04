@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/layout/header";
 import { Sidebar, ActiveWorkspaceView } from "@/components/layout/sidebar";
+import { MobileNav } from "@/components/layout/mobile-nav";
 import { useAuth } from "@/hooks/use-auth";
 import { createClient } from "@/lib/supabase/client";
 import { generateVideoJob, getVideoJobStatus, VideoJobResponse, normalizeJob } from "@/lib/api";
@@ -255,7 +256,7 @@ export default function StudioPage() {
         />
 
         {/* Dynamic Workspace View Container */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 min-w-0 overflow-y-auto">
+        <main className="flex-1 p-3.5 sm:p-6 lg:p-8 pb-24 md:pb-8 min-w-0 overflow-y-auto">
           <WorkspaceErrorBoundary key={activeView} onReset={() => handleViewChange("studio")}>
             {activeView === "studio" && (
               <StudioConsoleView
@@ -318,6 +319,13 @@ export default function StudioPage() {
         </main>
       </div>
 
+      {/* Persistent Mobile Bottom Navigation Dock (< md viewports) */}
+      <MobileNav
+        activeView={activeView}
+        onViewChange={handleViewChange}
+        activeJobsCount={activeJobsCount}
+        completedJobsCount={completedJobsCount}
+      />
 
       {/* Global OAuth / Social Connect Modal */}
       <SocialAccountsModal

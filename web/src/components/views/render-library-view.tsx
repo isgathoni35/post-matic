@@ -19,6 +19,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { BrandIcon } from "@/components/ui/brand-logo";
 import { VideoJobResponse, publishVideoToYouTube } from "@/lib/api";
 import { toast } from "sonner";
 
@@ -102,22 +103,22 @@ export function RenderLibraryView({
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="relative w-64">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full sm:w-auto">
+          <div className="relative w-full sm:w-64">
             <Input
               type="text"
               placeholder="Search library..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               icon={<Search className="h-3.5 w-3.5" />}
-              className="h-9 text-xs bg-white/[0.03] border-white/[0.08]"
+              className="h-9 text-xs bg-white/[0.03] border-white/[0.08] w-full"
             />
           </div>
           <Button
             variant="primary"
             size="sm"
             onClick={onNavigateToStudio}
-            className="text-xs h-9 font-semibold shadow-lg shadow-amber-500/20"
+            className="text-xs h-9 font-semibold shadow-lg shadow-amber-500/20 w-full sm:w-auto shrink-0"
           >
             <Sparkles className="h-3.5 w-3.5 mr-1.5" />
             New Video
@@ -127,10 +128,8 @@ export function RenderLibraryView({
 
       {/* Grid or Empty State */}
       {completedJobs.length === 0 ? (
-        <div className="rounded-3xl border border-white/[0.08] bg-[#0f131a] p-12 text-center space-y-5 max-w-md mx-auto my-12 shadow-2xl">
-          <div className="h-16 w-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mx-auto shadow-lg shadow-amber-500/10">
-            <Film className="h-8 w-8" />
-          </div>
+        <div className="rounded-3xl border border-white/[0.08] bg-[#0f131a] p-8 sm:p-12 text-center space-y-5 max-w-md mx-auto my-8 sm:my-12 shadow-2xl">
+          <BrandIcon size="xl" glow={true} className="mx-auto shadow-2xl shadow-amber-500/20" />
           <div className="space-y-1.5">
             <h2 className="text-lg font-bold text-white">No Videos Rendered Yet</h2>
             <p className="text-xs text-zinc-400 leading-relaxed">
@@ -251,21 +250,21 @@ export function RenderLibraryView({
 
       {/* Video Playback Modal */}
       {selectedModalVideo && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="relative w-full max-w-2xl rounded-3xl bg-[#0b0e14] border border-white/[0.1] shadow-2xl p-6 sm:p-8 space-y-6">
-            <div className="flex items-start justify-between pb-4 border-b border-white/[0.08]">
-              <div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="relative w-full max-w-2xl max-h-[92vh] overflow-y-auto rounded-3xl bg-[#0b0e14] border border-white/[0.1] shadow-2xl p-4 sm:p-8 space-y-4 sm:space-y-6">
+            <div className="flex items-start justify-between pb-3 sm:pb-4 border-b border-white/[0.08]">
+              <div className="pr-2">
                 <span className="text-[10px] font-mono text-amber-400 uppercase tracking-wider font-semibold">
                   Video Inspector
                 </span>
-                <h2 className="text-base sm:text-lg font-bold text-white mt-0.5">
+                <h2 className="text-sm sm:text-lg font-bold text-white mt-0.5 line-clamp-2">
                   {selectedModalVideo.topic}
                 </h2>
               </div>
               <button
                 type="button"
                 onClick={() => setSelectedModalVideo(null)}
-                className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.08] transition-colors"
+                className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.08] transition-colors shrink-0"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -273,7 +272,7 @@ export function RenderLibraryView({
 
             {/* Video Player */}
             <div className="flex justify-center">
-              <div className="relative w-full max-w-[260px] aspect-[9/16] rounded-2xl overflow-hidden border-2 border-white/[0.12] bg-black shadow-2xl">
+              <div className="relative w-full max-w-[220px] sm:max-w-[260px] aspect-[9/16] rounded-2xl overflow-hidden border-2 border-white/[0.12] bg-black shadow-2xl">
                 <video
                   src={
                     selectedModalVideo.video_url?.startsWith("http")

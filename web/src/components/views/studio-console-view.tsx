@@ -239,14 +239,14 @@ export function StudioConsoleView({
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
       {/* Studio View Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-white/[0.08]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-white/[0.08]">
         <div>
-          <div className="flex items-center gap-2.5 mb-1.5">
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+          <div className="flex items-center gap-2 mb-1">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-white">
               Studio Director
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
-              9:16 Shorts Engine
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+              9:16 Shorts
             </span>
           </div>
           <p className="text-xs text-zinc-400 max-w-xl">
@@ -254,22 +254,22 @@ export function StudioConsoleView({
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <Button
             variant="secondary"
             size="sm"
             onClick={onOpenSocialModal}
-            className="text-xs h-9 bg-white/[0.03] hover:bg-white/[0.07] border-white/[0.08] text-zinc-300"
+            className="flex-1 sm:flex-initial text-xs h-9 bg-white/[0.03] hover:bg-white/[0.07] border-white/[0.08] text-zinc-300"
           >
             <Share2 className="h-3.5 w-3.5 mr-1.5 text-amber-400" />
-            Social Distribution
+            Channels
           </Button>
           <Button
             variant="primary"
             size="sm"
             onClick={onGenerate}
             isLoading={isSubmitting || !!isRendering}
-            className="text-xs h-9 font-semibold shadow-lg shadow-amber-500/20"
+            className="flex-1 sm:flex-initial text-xs h-9 font-semibold shadow-lg shadow-amber-500/20"
           >
             <Sparkles className="h-3.5 w-3.5 mr-1.5" />
             {isRendering ? "Rendering..." : "Generate Video"}
@@ -277,8 +277,8 @@ export function StudioConsoleView({
         </div>
       </div>
 
-      {/* Adaptive Mobile Stepper Tab (Visible on < lg viewports) */}
-      <div className="lg:hidden flex items-center p-1 rounded-xl bg-[#121622] border border-white/[0.08]">
+      {/* Adaptive Mobile Stepper Tab (Sticky on < lg viewports) */}
+      <div className="lg:hidden sticky top-0 z-30 flex items-center p-1 rounded-xl bg-[#090b10]/95 backdrop-blur-md border border-white/[0.08] shadow-lg">
         <button
           type="button"
           onClick={() => setMobileTab("controls")}
@@ -294,7 +294,7 @@ export function StudioConsoleView({
         <button
           type="button"
           onClick={() => setMobileTab("canvas")}
-          className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-semibold rounded-lg transition-all ${
+          className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-semibold rounded-lg transition-all relative ${
             mobileTab === "canvas"
               ? "bg-amber-500/15 text-amber-400 border border-amber-500/30 shadow-sm"
               : "text-zinc-400 hover:text-white"
@@ -302,15 +302,18 @@ export function StudioConsoleView({
         >
           <Smartphone className="h-3.5 w-3.5" />
           <span>Preview Canvas</span>
+          {isRendering && (
+            <span className="h-2 w-2 rounded-full bg-amber-400 animate-ping absolute top-2 right-4" />
+          )}
         </button>
       </div>
 
       {/* Main Studio Grid: Controls Deck (Left) + Hardware Canvas (Right) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
         {/* Left Column: Input Form Controls */}
-        <div className={`lg:col-span-7 space-y-6 ${mobileTab === "canvas" ? "hidden lg:block" : "block"}`}>
+        <div className={`lg:col-span-7 space-y-5 sm:space-y-6 ${mobileTab === "canvas" ? "hidden lg:block" : "block"}`}>
           {/* Section: Topic & Curated Verticals */}
-          <div className="studio-card rounded-2xl p-6 space-y-5">
+          <div className="studio-card rounded-2xl p-4 sm:p-6 space-y-4 sm:space-y-5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <div className="h-7 w-7 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
@@ -328,20 +331,21 @@ export function StudioConsoleView({
               placeholder="e.g. 3 terrifying facts about the deep sea midnight zone that science still cannot explain..."
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
-              className="min-h-[105px] text-sm bg-black/40 border-white/[0.08] focus:border-amber-500/40 focus:ring-amber-500/20 resize-none rounded-xl leading-relaxed text-zinc-100 placeholder:text-zinc-600 font-sans"
+              className="min-h-[95px] sm:min-h-[105px] text-sm bg-black/40 border-white/[0.08] focus:border-amber-500/40 focus:ring-amber-500/20 resize-none rounded-xl leading-relaxed text-zinc-100 placeholder:text-zinc-600 font-sans"
               maxLength={300}
             />
 
-            {/* Curated Editorial Verticals */}
-            <div className="space-y-2.5 pt-1">
+            {/* Curated Editorial Verticals (Swipeable strip on mobile) */}
+            <div className="space-y-2 pt-1">
               <div className="flex items-center justify-between text-xs font-semibold text-zinc-300">
                 <span className="flex items-center gap-1.5">
                   <TrendingUp className="h-3.5 w-3.5 text-amber-400" />
                   Curated Editorial Verticals
                 </span>
-                <span className="text-[10px] text-zinc-500 font-mono">High Retention Formats</span>
+                <span className="text-[10px] text-zinc-500 font-mono hidden sm:inline">High Retention Formats</span>
+                <span className="text-[10px] text-amber-400/80 font-mono sm:hidden">Swipe →</span>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className="flex sm:grid sm:grid-cols-2 gap-2 overflow-x-auto snap-x no-scrollbar pb-1 -mx-1 px-1 sm:mx-0 sm:px-0">
                 {EDITORIAL_TOPICS.map((item) => (
                   <button
                     key={item.title}
@@ -351,7 +355,7 @@ export function StudioConsoleView({
                       if (item.runtimeHint === "45s") setTargetDuration(45);
                       else setTargetDuration(25);
                     }}
-                    className="p-3 rounded-xl text-left bg-black/30 border border-white/[0.06] hover:border-amber-500/35 hover:bg-white/[0.03] transition-all group relative overflow-hidden"
+                    className="min-w-[210px] max-w-[230px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink p-3 rounded-xl text-left bg-black/30 border border-white/[0.06] hover:border-amber-500/35 hover:bg-white/[0.03] transition-all group relative overflow-hidden active:scale-[0.98]"
                   >
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-[10px] font-mono uppercase tracking-wider text-amber-400/90 font-semibold">
@@ -361,7 +365,7 @@ export function StudioConsoleView({
                         {item.runtimeHint}
                       </span>
                     </div>
-                    <p className="text-xs font-semibold text-zinc-200 group-hover:text-white transition-colors">
+                    <p className="text-xs font-semibold text-zinc-200 group-hover:text-white transition-colors truncate">
                       {item.title}
                     </p>
                     <p className="text-[10px] text-zinc-500 line-clamp-1 mt-0.5 group-hover:text-zinc-400">
@@ -372,31 +376,31 @@ export function StudioConsoleView({
               </div>
             </div>
 
-            {/* Target Duration Selector */}
-            <div className="space-y-3 pt-3 border-t border-white/[0.06]">
+            {/* Target Duration Selector (4 clean pills in single row) */}
+            <div className="space-y-2.5 pt-3 border-t border-white/[0.06]">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
                   <Clock className="h-3.5 w-3.5 text-amber-400" />
                   Target Runtime
                 </label>
                 <span className="text-xs font-mono text-amber-400 font-semibold">
-                  ~{targetDuration}s runtime
+                  ~{targetDuration}s
                 </span>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              <div className="grid grid-cols-4 gap-1.5 sm:gap-2.5">
                 {DURATIONS.map((d) => (
                   <button
                     key={d.value}
                     type="button"
                     onClick={() => setTargetDuration(d.value)}
-                    className={`py-3 px-3 rounded-xl border text-center transition-all ${
+                    className={`py-2 sm:py-3 px-1 sm:px-3 rounded-xl border text-center transition-all ${
                       targetDuration === d.value
-                        ? "bg-amber-500/10 border-amber-500 text-white shadow-sm"
+                        ? "bg-amber-500/10 border-amber-500 text-white shadow-sm font-bold"
                         : "bg-black/30 border-white/[0.06] text-zinc-400 hover:text-white hover:border-white/[0.12]"
                     }`}
                   >
-                    <p className="text-sm font-bold tracking-tight">{d.label}</p>
-                    <p className="text-[10px] text-zinc-400 mt-0.5">{d.role}</p>
+                    <p className="text-xs sm:text-sm font-bold tracking-tight">{d.label}</p>
+                    <p className="text-[9px] sm:text-[10px] text-zinc-400 mt-0.5 truncate">{d.role}</p>
                   </button>
                 ))}
               </div>
@@ -608,7 +612,7 @@ export function StudioConsoleView({
 
         {/* Right Column: Hardware Smartphone Canvas */}
         <div className={`lg:col-span-5 flex flex-col items-center ${mobileTab === "controls" ? "hidden lg:flex" : "flex"}`}>
-          <div className="w-full max-w-[340px] space-y-3">
+          <div className="w-full max-w-[310px] sm:max-w-[340px] space-y-3">
             {/* Top Canvas Controls: Safe Zone Toggle & Status */}
             <div className="flex items-center justify-between px-1">
               <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
@@ -641,11 +645,11 @@ export function StudioConsoleView({
             </div>
 
             {/* Precision Hardware Bezel Container */}
-            <div className="relative w-full aspect-[9/18] rounded-[48px] p-3.5 hardware-bezel select-none">
+            <div className="relative w-full aspect-[9/16] sm:aspect-[9/18] rounded-[28px] sm:rounded-[48px] p-2.5 sm:p-3.5 hardware-bezel select-none max-h-[65vh] sm:max-h-none">
               {/* Inner High-Density Screen */}
-              <div className="relative w-full h-full rounded-[38px] overflow-hidden bg-black flex flex-col justify-between p-4">
+              <div className="relative w-full h-full rounded-[20px] sm:rounded-[38px] overflow-hidden bg-black flex flex-col justify-between p-3 sm:p-4">
                 {/* Dynamic Island Sensor */}
-                <div className="relative z-30 mx-auto w-24 h-5 rounded-full bg-black flex items-center justify-end px-2 border border-white/[0.08]">
+                <div className="relative z-30 mx-auto w-20 sm:w-24 h-4 sm:h-5 rounded-full bg-black flex items-center justify-end px-2 border border-white/[0.08]">
                   <div className="h-2 w-2 rounded-full bg-emerald-500/80 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
                 </div>
 

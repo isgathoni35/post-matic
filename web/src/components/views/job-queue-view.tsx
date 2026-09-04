@@ -74,9 +74,9 @@ export function JobQueueView({
         </div>
 
         {/* Filter Pills */}
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-black/40 border border-white/[0.08]">
+        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-black/40 border border-white/[0.08] overflow-x-auto no-scrollbar w-full sm:w-auto shrink-0">
           {[
-            { id: "all", label: "All Jobs", count: jobs.length },
+            { id: "all", label: "All", count: jobs.length },
             {
               id: "active",
               label: "Active",
@@ -97,7 +97,7 @@ export function JobQueueView({
               key={f.id}
               type="button"
               onClick={() => setStatusFilter(f.id)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap shrink-0 ${
                 statusFilter === f.id
                   ? "bg-white/[0.1] text-white font-semibold shadow-sm"
                   : "text-zinc-400 hover:text-white"

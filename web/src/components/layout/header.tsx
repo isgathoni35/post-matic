@@ -19,8 +19,8 @@ export function Header({ onOpenSocialModal }: HeaderProps = {}) {
   const userInitial = user?.email ? user.email.charAt(0).toUpperCase() : "U";
 
   return (
-    <header className="sticky top-0 z-40 w-full h-16 studio-glass border-b border-white/[0.08] px-4 sm:px-8 flex items-center justify-between">
-      <div className="flex items-center gap-6">
+    <header className="sticky top-0 z-40 w-full h-14 sm:h-16 studio-glass border-b border-white/[0.08] px-3.5 sm:px-8 flex items-center justify-between">
+      <div className="flex items-center gap-3 sm:gap-6">
         <BrandLogo size="sm" badgeText="Studio" />
       </div>
 

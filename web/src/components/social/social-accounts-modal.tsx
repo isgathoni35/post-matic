@@ -97,8 +97,8 @@ export function SocialAccountsModal({ isOpen, onClose, userId }: SocialAccountsM
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-xl studio-card rounded-2xl p-6 sm:p-8 bg-[#0b0e14] border border-white/[0.1] shadow-2xl space-y-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="relative w-full max-w-xl max-h-[90vh] overflow-y-auto studio-card rounded-2xl p-4 sm:p-8 bg-[#0b0e14] border border-white/[0.1] shadow-2xl space-y-5 sm:space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-white/[0.08]">
           <div className="flex items-center gap-3">
