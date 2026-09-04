@@ -11,6 +11,7 @@ import {
   RefreshCw,
   ShieldCheck,
   Zap,
+  Info,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -40,7 +41,7 @@ export function SocialAccountsModal({ isOpen, onClose, userId }: SocialAccountsM
   const fetchAccounts = useCallback(async () => {
     setIsLoading(true);
     try {
-      const data = await getConnectedSocialAccounts(user?.id);
+      const data = await getConnectedSocialAccounts(effectiveUserId);
       setAccounts(data);
     } catch (err: any) {
       console.warn("Failed to load social accounts:", err.message);
@@ -66,7 +67,7 @@ export function SocialAccountsModal({ isOpen, onClose, userId }: SocialAccountsM
     });
 
     try {
-      const res = await getYouTubeAuthUrl(user?.id);
+      const res = await getYouTubeAuthUrl(effectiveUserId);
       if (res.auth_url) {
         window.location.href = res.auth_url;
       }
@@ -81,7 +82,7 @@ export function SocialAccountsModal({ isOpen, onClose, userId }: SocialAccountsM
   const handleDisconnect = async (accountId: string) => {
     setIsDeletingId(accountId);
     try {
-      await disconnectSocialAccount(accountId, user?.id);
+      await disconnectSocialAccount(accountId, effectiveUserId);
       toast.success("Account Disconnected", {
         description: "YouTube OAuth tokens have been revoked and removed.",
       });
@@ -109,39 +110,37 @@ export function SocialAccountsModal({ isOpen, onClose, userId }: SocialAccountsM
                 Social Publishing Hub
               </h2>
               <p className="text-xs text-muted-foreground">
-                Manage OAuth 2.0 authorizations for autonomous 1-click video publishing.
+                Manage autonomous multi-channel distribution integrations.
               </p>
             </div>
           </div>
           <button
-            type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-muted-foreground hover:text-white hover:bg-white/[0.08] transition-colors"
+            className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.05] transition-colors"
           >
-            <X className="h-5 w-5" />
+            <X className="h-4 w-4" />
           </button>
         </div>
 
-        {/* Channels List */}
-        <div className="space-y-4">
+        {/* Accounts List */}
+        <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
           {/* YouTube Integration Card */}
-          <div className="rounded-xl p-4 bg-white/[0.02] border border-white/[0.08] space-y-4 hover:border-white/[0.14] transition-colors">
-            <div className="flex items-start justify-between">
+          <div className="rounded-xl p-4 bg-white/[0.02] border border-white/[0.06] space-y-3">
+            <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-red-600/10 border border-red-500/20 flex items-center justify-center text-red-500">
-                  <svg className="h-5 w-5 fill-current" viewBox="0 0 24 24">
-                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                  </svg>
+                <div className="h-10 w-10 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 font-bold text-xs">
+                  YT
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="font-semibold text-sm text-white">YouTube Shorts</span>
                     {youtubeAccount ? (
-                      <Badge variant="success" className="text-[10px] font-mono">
+                      <Badge variant="default" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-[10px]">
+                        <CheckCircle2 className="h-2.5 w-2.5 mr-1" />
                         Connected
                       </Badge>
                     ) : (
-                      <Badge variant="outline" className="text-[10px] font-mono">
+                      <Badge variant="outline" className="text-[10px]">
                         Disconnected
                       </Badge>
                     )}
@@ -181,15 +180,37 @@ export function SocialAccountsModal({ isOpen, onClose, userId }: SocialAccountsM
 
             {/* Action CTA */}
             {!youtubeAccount && (
-              <Button
-                variant="primary"
-                className="w-full h-10 text-xs font-semibold"
-                onClick={handleConnectYouTube}
-                isLoading={isConnecting}
-              >
-                <Zap className="h-4 w-4 mr-1.5" />
-                Authorize YouTube Channel
-              </Button>
+              <div className="space-y-2">
+                <Button
+                  variant="primary"
+                  className="w-full h-10 text-xs font-semibold"
+                  onClick={handleConnectYouTube}
+                  isLoading={isConnecting}
+                >
+                  <Zap className="h-4 w-4 mr-1.5" />
+                  Authorize YouTube Channel
+                </Button>
+                <div className="p-3 rounded-lg bg-amber-500/5 border border-amber-500/10 text-[11px] text-zinc-400 space-y-1.5">
+                  <div className="flex items-center gap-1.5 text-amber-400 font-medium">
+                    <Info className="h-3.5 w-3.5" />
+                    <span>Google Cloud Console Setup Checklist</span>
+                  </div>
+                  <p className="text-zinc-400 leading-relaxed">
+                    If Google displays <em>&ldquo;This request is invalid (Error 400)&rdquo;</em>:
+                  </p>
+                  <ul className="list-disc list-inside space-y-0.5 text-zinc-400 pl-1">
+                    <li>
+                      Authorized redirect URI must include: <br />
+                      <code className="text-amber-300 font-mono text-[10px] bg-black/50 px-1 py-0.5 rounded select-all">
+                        http://localhost:8000/api/social/youtube/callback
+                      </code>
+                    </li>
+                    <li>
+                      Your Google/YouTube email must be added under <strong>OAuth consent screen &gt; Test users</strong>.
+                    </li>
+                  </ul>
+                </div>
+              </div>
             )}
           </div>
 

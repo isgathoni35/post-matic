@@ -73,15 +73,39 @@ export default function StudioPage() {
       const connected = urlParams.get("connected");
       const channel = urlParams.get("channel");
       const error = urlParams.get("error");
+      const errorDesc = urlParams.get("error_description");
+      const warning = urlParams.get("warning");
 
       if (connected === "youtube") {
-        toast.success("YouTube Channel Connected!", {
-          description: channel ? `Connected to ${decodeURIComponent(channel)}` : "Channel is ready for autonomous uploads.",
-        });
+        if (warning) {
+          toast.warning("YouTube Connected with Warning", {
+            description: decodeURIComponent(warning),
+            duration: 8000,
+          });
+        } else {
+          toast.success("YouTube Channel Connected!", {
+            description: channel
+              ? `Connected to ${decodeURIComponent(channel)}`
+              : "Channel is ready for autonomous uploads.",
+            duration: 6000,
+          });
+        }
         window.history.replaceState({}, "", "/studio");
       } else if (error) {
-        toast.error("Social Connection Failed", {
-          description: decodeURIComponent(error),
+        let title = "Social Connection Failed";
+        let message = errorDesc ? decodeURIComponent(errorDesc) : decodeURIComponent(error);
+
+        if (error === "access_denied") {
+          title = "Authorization Cancelled";
+          message = "You cancelled or denied the Google consent request.";
+        } else if (error === "redirect_uri_mismatch") {
+          title = "Google Configuration Error";
+          message = "Redirect URI mismatch in Google Cloud Console. Verify authorized redirect URIs.";
+        }
+
+        toast.error(title, {
+          description: message,
+          duration: 9000,
         });
         window.history.replaceState({}, "", "/studio");
       }

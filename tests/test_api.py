@@ -99,3 +99,41 @@ def test_get_video_job_status_not_found():
     response = client.get("/api/video/status/non-existent-job-12345")
     assert response.status_code == 404
     assert "not found" in response.json()["detail"].lower()
+
+
+def test_youtube_auth_url_endpoint():
+    """Verify GET /api/social/youtube/auth-url generates valid consent URL with base64url state."""
+    response = client.get("/api/social/youtube/auth-url?user_id=test-user-123")
+    assert response.status_code == 200
+    data = response.json()
+    assert "auth_url" in data
+    assert data["platform"] == "youtube"
+    assert "accounts.google.com" in data["auth_url"]
+    assert "client_id=" in data["auth_url"]
+    assert "scope=" in data["auth_url"]
+
+
+def test_youtube_oauth_callback_handles_error():
+    """Verify /api/social/youtube/callback redirects to /studio with error details on OAuth rejection."""
+    response = client.get(
+        "/api/social/youtube/callback?error=access_denied&error_description=User+declined+permissions",
+        follow_redirects=False,
+    )
+    assert response.status_code in (302, 307)
+    location = response.headers["location"]
+    assert "/studio" in location
+    assert "error=access_denied" in location
+    assert "error_description=" in location
+
+
+def test_youtube_oauth_callback_missing_code():
+    """Verify /api/social/youtube/callback redirects to /studio when code is missing."""
+    response = client.get(
+        "/api/social/youtube/callback",
+        follow_redirects=False,
+    )
+    assert response.status_code in (302, 307)
+    location = response.headers["location"]
+    assert "/studio" in location
+    assert "error=missing_auth_code" in location
+

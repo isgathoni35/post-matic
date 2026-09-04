@@ -1,4 +1,4 @@
-"""FastAPI router for social media OAuth 2.0 and channel integrations."""
+import base64
 from datetime import datetime, timedelta, timezone
 import json
 import logging
@@ -32,6 +32,26 @@ GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token"
 YOUTUBE_CHANNELS_API = "https://www.googleapis.com/youtube/v3/channels"
 
 
+def _encode_oauth_state(payload: dict) -> str:
+    """Encode OAuth state payload into URL-safe base64 string."""
+    raw_bytes = json.dumps(payload).encode("utf-8")
+    return base64.urlsafe_b64encode(raw_bytes).decode("utf-8")
+
+
+def _decode_oauth_state(state_str: str) -> dict:
+    """Decode OAuth state payload from base64url or fallback to plain JSON."""
+    if not state_str:
+        return {}
+    try:
+        raw_bytes = base64.urlsafe_b64decode(state_str.encode("utf-8"))
+        return json.loads(raw_bytes.decode("utf-8"))
+    except Exception:
+        try:
+            return json.loads(state_str)
+        except Exception:
+            return {}
+
+
 @router.get(
     "/youtube/auth-url",
     response_model=SocialAuthUrlResponse,
@@ -44,10 +64,10 @@ async def get_youtube_auth_url(user_id: Optional[str] = None) -> SocialAuthUrlRe
         logger.error("GOOGLE_CLIENT_ID is not configured in backend environment.")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="GOOGLE_CLIENT_ID is not configured on the backend server. Please add your GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET to your Render environment variables.",
+            detail="GOOGLE_CLIENT_ID is not configured on the backend server. Please add your GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET to your environment variables.",
         )
 
-    state_data = json.dumps({"user_id": user_id or "", "platform": "youtube"})
+    state_token = _encode_oauth_state({"user_id": user_id or "", "platform": "youtube"})
     params = {
         "client_id": GOOGLE_CLIENT_ID,
         "redirect_uri": GOOGLE_REDIRECT_URI,
@@ -56,7 +76,7 @@ async def get_youtube_auth_url(user_id: Optional[str] = None) -> SocialAuthUrlRe
         "access_type": "offline",
         "prompt": "consent",
         "include_granted_scopes": "true",
-        "state": state_data,
+        "state": state_token,
     }
 
     auth_url = f"{GOOGLE_AUTH_BASE_URL}?{urllib.parse.urlencode(params)}"
@@ -72,23 +92,26 @@ async def youtube_oauth_callback(
     code: Optional[str] = None,
     state: Optional[str] = None,
     error: Optional[str] = None,
+    error_description: Optional[str] = None,
 ):
     """Callback handler for Google OAuth 2.0."""
+    studio_base = f"{FRONTEND_URL.rstrip('/')}/studio"
+
     if error:
-        logger.error("OAuth error received from Google: %s", error)
-        return RedirectResponse(url=f"{FRONTEND_URL}/?error={urllib.parse.quote(error)}")
+        logger.error("OAuth error received from Google: %s (description: %s)", error, error_description)
+        desc = error_description or error
+        return RedirectResponse(
+            url=f"{studio_base}?error={urllib.parse.quote(error)}&error_description={urllib.parse.quote(desc)}"
+        )
 
     if not code:
         logger.error("No authorization code provided in Google OAuth callback.")
-        return RedirectResponse(url=f"{FRONTEND_URL}/?error=missing_auth_code")
+        return RedirectResponse(
+            url=f"{studio_base}?error=missing_auth_code&error_description={urllib.parse.quote('Google did not return an authorization code.')}"
+        )
 
-    user_id: Optional[str] = None
-    if state:
-        try:
-            parsed_state = json.loads(state)
-            user_id = parsed_state.get("user_id") or None
-        except Exception:
-            pass
+    parsed_state = _decode_oauth_state(state or "")
+    user_id = parsed_state.get("user_id") or None
 
     # Exchange authorization code for tokens
     token_payload = {
@@ -104,8 +127,10 @@ async def youtube_oauth_callback(
             token_res = await client.post(GOOGLE_TOKEN_URL, data=token_payload)
 
             if token_res.status_code != 200:
-                logger.error("Token exchange failed: %s", token_res.text)
-                return RedirectResponse(url=f"{FRONTEND_URL}/?error=token_exchange_failed")
+                logger.error("Token exchange failed (HTTP %d): %s", token_res.status_code, token_res.text)
+                return RedirectResponse(
+                    url=f"{studio_base}?error=token_exchange_failed&error_description={urllib.parse.quote('Google rejected token exchange. Verify your Client Secret.')}"
+                )
 
             tokens = token_res.json()
             if hasattr(tokens, "__await__"):
@@ -120,6 +145,7 @@ async def youtube_oauth_callback(
 
             # Retrieve YouTube Channel profile name
             channel_name = "YouTube Channel"
+            has_channel = False
             try:
                 headers = {"Authorization": f"Bearer {access_token}"}
                 params = {"part": "snippet", "mine": "true"}
@@ -131,6 +157,9 @@ async def youtube_oauth_callback(
                     items = ch_data.get("items", [])
                     if items and "snippet" in items[0]:
                         channel_name = items[0]["snippet"].get("title", channel_name)
+                        has_channel = True
+                    else:
+                        logger.warning("No public YouTube channel associated with this Google account.")
             except Exception as ch_err:
                 logger.warning("Failed to fetch channel name from YouTube API: %s", ch_err)
 
@@ -146,11 +175,18 @@ async def youtube_oauth_callback(
 
             logger.info("Successfully connected YouTube channel '%s' (User: %s)", channel_name, user_id)
             encoded_name = urllib.parse.quote(channel_name)
-            return RedirectResponse(url=f"{FRONTEND_URL}/?connected=youtube&channel={encoded_name}")
+            redirect_url = f"{studio_base}?connected=youtube&channel={encoded_name}"
+            if not has_channel:
+                notice = "No public YouTube channel was found on this Google account. Create a channel on YouTube to enable video uploads."
+                redirect_url += f"&warning={urllib.parse.quote(notice)}"
+
+            return RedirectResponse(url=redirect_url)
 
     except Exception as exc:
         logger.exception("Unexpected exception in OAuth callback: %s", exc)
-        return RedirectResponse(url=f"{FRONTEND_URL}/?error=internal_oauth_error")
+        return RedirectResponse(
+            url=f"{studio_base}?error=internal_oauth_error&error_description={urllib.parse.quote(str(exc))}"
+        )
 
 
 @router.get(
