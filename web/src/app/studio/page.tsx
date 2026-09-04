@@ -241,12 +241,12 @@ export default function StudioPage() {
   const completedJobsCount = jobs.filter((j) => j.status === "completed").length;
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#090b10] text-zinc-100">
+    <div className="min-h-screen flex flex-col bg-[#090b10] text-zinc-100 overflow-x-hidden w-full max-w-full">
       {/* Top Navigation Bar */}
       <Header onOpenSocialModal={() => setIsSocialModalOpen(true)} />
 
       {/* Main Studio Body: Sidebar + Dynamic Workspace Views */}
-      <div className="flex-1 flex flex-col md:flex-row min-w-0">
+      <div className="flex-1 flex flex-col md:flex-row min-w-0 w-full max-w-full overflow-x-hidden">
         {/* Workspace Sidebar */}
         <Sidebar
           activeView={activeView}
@@ -256,7 +256,7 @@ export default function StudioPage() {
         />
 
         {/* Dynamic Workspace View Container */}
-        <main className="flex-1 p-3.5 sm:p-6 lg:p-8 pb-24 md:pb-8 min-w-0 overflow-y-auto">
+        <main className="flex-1 p-3.5 sm:p-6 lg:p-8 pb-24 md:pb-8 min-w-0 w-full max-w-full overflow-x-hidden overflow-y-auto">
           <WorkspaceErrorBoundary key={activeView} onReset={() => handleViewChange("studio")}>
             {activeView === "studio" && (
               <StudioConsoleView

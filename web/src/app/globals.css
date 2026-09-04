@@ -63,11 +63,20 @@
   --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
+html {
+  overflow-x: hidden;
+  max-width: 100vw;
+  width: 100%;
+}
+
 body {
   background-color: #08090d;
   color: var(--card-foreground);
   font-family: var(--font-sans);
   overflow-x: hidden;
+  max-width: 100vw;
+  width: 100%;
+  position: relative;
   letter-spacing: -0.015em;
   background-image: 
     radial-gradient(ellipse 60% 22% at 50% 0%, rgba(245, 158, 11, 0.05), transparent 70%);

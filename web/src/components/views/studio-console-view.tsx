@@ -237,7 +237,7 @@ export function StudioConsoleView({
   const isRendering = activeJob && !["completed", "failed"].includes(activeJob.status);
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-300">
+    <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-300 w-full max-w-full min-w-0">
       {/* Studio View Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-white/[0.08]">
         <div>
@@ -278,7 +278,7 @@ export function StudioConsoleView({
       </div>
 
       {/* Adaptive Mobile Stepper Tab (Sticky on < lg viewports) */}
-      <div className="lg:hidden sticky top-0 z-30 flex items-center p-1 rounded-xl bg-[#090b10]/95 backdrop-blur-md border border-white/[0.08] shadow-lg">
+      <div className="lg:hidden sticky top-0 z-30 flex items-center p-1 rounded-xl bg-[#090b10]/95 backdrop-blur-md border border-white/[0.08] shadow-lg w-full max-w-full">
         <button
           type="button"
           onClick={() => setMobileTab("controls")}
@@ -309,11 +309,11 @@ export function StudioConsoleView({
       </div>
 
       {/* Main Studio Grid: Controls Deck (Left) + Hardware Canvas (Right) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start w-full max-w-full min-w-0">
         {/* Left Column: Input Form Controls */}
-        <div className={`lg:col-span-7 space-y-5 sm:space-y-6 ${mobileTab === "canvas" ? "hidden lg:block" : "block"}`}>
+        <div className={`lg:col-span-7 space-y-5 sm:space-y-6 min-w-0 w-full max-w-full ${mobileTab === "canvas" ? "hidden lg:block" : "block"}`}>
           {/* Section: Topic & Curated Verticals */}
-          <div className="studio-card rounded-2xl p-4 sm:p-6 space-y-4 sm:space-y-5">
+          <div className="studio-card rounded-2xl p-4 sm:p-6 space-y-4 sm:space-y-5 min-w-0 w-full max-w-full overflow-hidden">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <div className="h-7 w-7 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
@@ -336,7 +336,7 @@ export function StudioConsoleView({
             />
 
             {/* Curated Editorial Verticals (Swipeable strip on mobile) */}
-            <div className="space-y-2 pt-1">
+            <div className="space-y-2 pt-1 min-w-0 w-full max-w-full">
               <div className="flex items-center justify-between text-xs font-semibold text-zinc-300">
                 <span className="flex items-center gap-1.5">
                   <TrendingUp className="h-3.5 w-3.5 text-amber-400" />
@@ -345,7 +345,7 @@ export function StudioConsoleView({
                 <span className="text-[10px] text-zinc-500 font-mono hidden sm:inline">High Retention Formats</span>
                 <span className="text-[10px] text-amber-400/80 font-mono sm:hidden">Swipe →</span>
               </div>
-              <div className="flex sm:grid sm:grid-cols-2 gap-2 overflow-x-auto snap-x no-scrollbar pb-1 -mx-1 px-1 sm:mx-0 sm:px-0">
+              <div className="flex sm:grid sm:grid-cols-2 gap-2 overflow-x-auto snap-x no-scrollbar pb-1 w-full max-w-full min-w-0">
                 {EDITORIAL_TOPICS.map((item) => (
                   <button
                     key={item.title}
@@ -538,7 +538,7 @@ export function StudioConsoleView({
           </div>
 
           {/* Creation Pipeline Stage Tracker (Linear / Vercel Aesthetic) */}
-          <div className="studio-card rounded-2xl p-5 space-y-4">
+          <div className="studio-card rounded-2xl p-4 sm:p-5 space-y-4 min-w-0 w-full max-w-full overflow-hidden">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className={`h-2 w-2 rounded-full ${isRendering ? "bg-amber-400 animate-pulse" : "bg-emerald-400"}`} />
@@ -611,7 +611,7 @@ export function StudioConsoleView({
         </div>
 
         {/* Right Column: Hardware Smartphone Canvas */}
-        <div className={`lg:col-span-5 flex flex-col items-center ${mobileTab === "controls" ? "hidden lg:flex" : "flex"}`}>
+        <div className={`lg:col-span-5 flex flex-col items-center min-w-0 w-full max-w-full ${mobileTab === "controls" ? "hidden lg:flex" : "flex"}`}>
           <div className="w-full max-w-[310px] sm:max-w-[340px] space-y-3">
             {/* Top Canvas Controls: Safe Zone Toggle & Status */}
             <div className="flex items-center justify-between px-1">

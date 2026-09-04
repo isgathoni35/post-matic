@@ -111,10 +111,12 @@ export default function LandingPage() {
   const activeTopic = PREVIEW_TOPICS[activeTopicIndex];
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#090b10] text-zinc-100 selection:bg-amber-500/30 selection:text-amber-200 overflow-x-hidden">
-      {/* Warm Ambient Environmental Lighting (Replaces flat cold black) */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[650px] bg-gradient-to-b from-amber-500/[0.08] via-orange-500/[0.04] to-transparent blur-3xl pointer-events-none" />
-      <div className="absolute top-[450px] right-0 w-[600px] h-[500px] bg-gradient-to-l from-indigo-500/[0.04] to-transparent blur-3xl pointer-events-none" />
+    <div className="min-h-screen flex flex-col bg-[#090b10] text-zinc-100 selection:bg-amber-500/30 selection:text-amber-200 overflow-x-hidden relative w-full max-w-full">
+      {/* Warm Ambient Environmental Lighting (Contained within overflow-hidden boundary) */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] max-w-[100vw] h-[650px] bg-gradient-to-b from-amber-500/[0.08] via-orange-500/[0.04] to-transparent blur-3xl" />
+        <div className="absolute top-[450px] right-0 w-[600px] max-w-[100vw] h-[500px] bg-gradient-to-l from-indigo-500/[0.04] to-transparent blur-3xl" />
+      </div>
 
       {/* Navigation Header */}
       <header className="sticky top-0 z-50 w-full h-18 studio-glass border-b border-white/[0.08] px-6 sm:px-12 flex items-center justify-between">
