@@ -98,11 +98,12 @@ def generate_faceless_video(
     }
 
     # 3. Media Sourcing
-    print(f"\n[3/4] Sourcing HD vertical video clips from Pexels...", flush=True)
+    print(f"\n[3/4] Sourcing vertical video clips (Pexels Stock + Google Imagen 3 AI Fallback)...", flush=True)
     downloaded_videos = fetch_script_media(
         script=script,
         scene_durations=scene_durations,
         api_key=pexels_api_key,
+        gemini_api_key=gemini_api_key,
     )
 
     # 4. Assembly & Subtitle Burning

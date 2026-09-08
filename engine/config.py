@@ -40,6 +40,13 @@ GEMINI_MODELS = [
     "gemini-flash-latest",
 ]
 
+# AI Image Generation Fallback (Google Imagen 3 / Nano Banana)
+ENABLE_AI_IMAGE_FALLBACK = os.getenv("ENABLE_AI_IMAGE_FALLBACK", "true").lower() in ("true", "1", "yes")
+IMAGEN_MODELS = [
+    "imagen-3.0-generate-002",
+    "imagen-3.0-fast-generate-001",
+]
+
 # Ensure working directories exist
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 TEMP_DIR.mkdir(parents=True, exist_ok=True)

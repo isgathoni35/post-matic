@@ -2,6 +2,7 @@
 from dataclasses import dataclass
 import logging
 from pathlib import Path
+import re
 import sys
 from typing import Dict, List, Optional, Set
 
@@ -11,7 +12,8 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 import requests
-from engine.config import PEXELS_API_KEY, TEMP_DIR
+from engine.config import ENABLE_AI_IMAGE_FALLBACK, PEXELS_API_KEY, TEMP_DIR
+from engine.image_generator import generate_ai_scene_image
 from engine.schema import VideoScript
 
 logger = logging.getLogger(__name__)
@@ -22,7 +24,7 @@ PEXELS_POPULAR_URL = "https://api.pexels.com/videos/popular"
 
 @dataclass
 class DownloadedVideo:
-    """Metadata and local file path for a downloaded stock video asset."""
+    """Metadata and local file path for a downloaded stock video or AI-generated asset."""
     scene_id: int
     video_id: int
     file_path: Path
@@ -31,6 +33,8 @@ class DownloadedVideo:
     height: int
     download_url: str
     keyword_used: str
+    is_ai_generated: bool = False
+    source: str = "pexels"
 
 
 def get_pexels_headers(api_key: Optional[str] = None) -> Dict[str, str]:
@@ -70,6 +74,25 @@ def select_best_video_file(video_files: List[dict]) -> Optional[dict]:
     return mp4_files[0]
 
 
+def expand_search_queries(keywords: List[str]) -> List[str]:
+    """Expands list of keyword queries with simplified 1-3 word noun phrases."""
+    expanded: List[str] = []
+    for kw in keywords:
+        cleaned = kw.strip()
+        if not cleaned or cleaned in expanded:
+            continue
+        expanded.append(cleaned)
+        words = cleaned.split()
+        if len(words) > 3:
+            sub1 = " ".join(words[:2])
+            sub2 = " ".join(words[-2:])
+            if sub1 not in expanded:
+                expanded.append(sub1)
+            if sub2 not in expanded:
+                expanded.append(sub2)
+    return expanded
+
+
 def search_pexels_video(
     keywords: List[str],
     min_duration: float = 3.0,
@@ -82,19 +105,20 @@ def search_pexels_video(
     """
     headers = get_pexels_headers(api_key)
     used = used_ids or set()
+    all_queries = expand_search_queries(keywords)
 
-    for keyword in keywords:
-        cleaned_query = keyword.strip()
+    # Primary pass: portrait vertical footage
+    for query in all_queries:
+        cleaned_query = query.strip()
         if not cleaned_query:
             continue
 
         try:
-            logger.info("Searching Pexels for keyword: '%s'", cleaned_query)
+            logger.info("Searching Pexels for keyword (portrait): '%s'", cleaned_query)
             params = {
                 "query": cleaned_query,
                 "orientation": "portrait",
-                "per_page": 10,
-                "size": "medium",
+                "per_page": 12,
             }
             response = requests.get(PEXELS_SEARCH_URL, headers=headers, params=params, timeout=15)
             if response.status_code != 200:
@@ -121,13 +145,14 @@ def search_pexels_video(
             logger.warning("Error querying Pexels for '%s': %s", cleaned_query, e)
             continue
 
-    # Fallback: if portrait yielded no unused videos, try searching without portrait constraint
-    for keyword in keywords:
-        cleaned_query = keyword.strip()
+    # Secondary pass: high-res landscape clips (FFmpeg center-crops into 9:16)
+    for query in all_queries:
+        cleaned_query = query.strip()
         try:
+            logger.info("Searching Pexels for keyword (landscape fallback): '%s'", cleaned_query)
             params = {
                 "query": cleaned_query,
-                "per_page": 5,
+                "per_page": 10,
             }
             response = requests.get(PEXELS_SEARCH_URL, headers=headers, params=params, timeout=15)
             if response.status_code == 200:
@@ -135,6 +160,8 @@ def search_pexels_video(
                 for video in data.get("videos", []):
                     vid_id = video.get("id")
                     if vid_id in used:
+                        continue
+                    if video.get("duration", 0) < min_duration:
                         continue
                     best_file = select_best_video_file(video.get("video_files", []))
                     if best_file:
@@ -167,15 +194,26 @@ def download_file(url: str, destination: Path, timeout: int = 60) -> Path:
 def fetch_scene_media(
     scene_id: int,
     keywords: List[str],
+    visual_description: Optional[str] = None,
+    topic: Optional[str] = None,
     target_duration: float = 5.0,
     used_ids: Optional[Set[int]] = None,
     output_dir: Optional[Path] = None,
     api_key: Optional[str] = None,
+    gemini_api_key: Optional[str] = None,
+    enable_ai_fallback: Optional[bool] = None,
 ) -> DownloadedVideo:
-    """Find, download, and return metadata for a single scene's background video."""
+    """Find, download, or generate background media for a single scene.
+
+    Hierarchy:
+    1. Stock Video Search via Pexels API (portrait + landscape center-crop).
+    2. AI Visual Generation via Google Imagen 3 (Nano Banana) using existing Gemini API key.
+    3. Topic-Anchored Stock Video Fallback (avoids generic random nature footage).
+    """
     target_dir = output_dir or (TEMP_DIR / "media")
     used = used_ids if used_ids is not None else set()
 
+    # Step 1: Search Pexels for stock video
     search_result = search_pexels_video(
         keywords=keywords,
         min_duration=min(3.0, target_duration),
@@ -183,16 +221,57 @@ def fetch_scene_media(
         api_key=api_key,
     )
 
+    # Step 2: If stock video returned no match, try Google Imagen 3 AI visual generation
+    use_ai = enable_ai_fallback if enable_ai_fallback is not None else ENABLE_AI_IMAGE_FALLBACK
+    if not search_result and use_ai:
+        prompt_desc = visual_description or (", ".join(keywords) if keywords else "cinematic visual")
+        logger.info("Pexels returned 0 clips for Scene %d. Triggering Imagen 3 AI visual generation...", scene_id)
+        print(f"      [AI Visual Fallback] Generating 9:16 custom visual with Imagen 3 for Scene {scene_id}...", flush=True)
+
+        ai_image_path = generate_ai_scene_image(
+            scene_id=scene_id,
+            visual_description=prompt_desc,
+            topic=topic,
+            output_dir=target_dir,
+            api_key=gemini_api_key,
+        )
+
+        if ai_image_path and ai_image_path.exists() and ai_image_path.stat().st_size > 0:
+            return DownloadedVideo(
+                scene_id=scene_id,
+                video_id=900000 + scene_id,
+                file_path=ai_image_path,
+                duration=target_duration,
+                width=1080,
+                height=1920,
+                download_url="ai://imagen-3",
+                keyword_used=prompt_desc[:50],
+                is_ai_generated=True,
+                source="imagen",
+            )
+        logger.warning("AI image generation was unavailable for Scene %d. Proceeding to topic stock fallback.", scene_id)
+
+    # Step 3: Topic-anchored stock fallback (replaces generic nature/stars)
     if not search_result:
-        # Ultimate fallback: search generic nature/abstract vertical background
+        topic_fallbacks: List[str] = []
+        if topic and topic.strip():
+            clean_top = re.sub(r"[^\w\s]", "", topic).strip()
+            words = clean_top.split()
+            if len(words) <= 3:
+                topic_fallbacks.append(clean_top)
+            else:
+                topic_fallbacks.append(" ".join(words[:2]))
+                topic_fallbacks.append(" ".join(words[-2:]))
+        topic_fallbacks.extend(["cinematic 4k vertical", "abstract dark background vertical"])
+
         fallback_result = search_pexels_video(
-            keywords=["nature vertical 4k", "dark abstract background vertical", "stars night sky vertical"],
+            keywords=topic_fallbacks,
             min_duration=2.0,
             used_ids=used,
             api_key=api_key,
         )
         if not fallback_result:
-            raise RuntimeError(f"Could not find any suitable stock video for Scene {scene_id} with keywords: {keywords}")
+            raise RuntimeError(f"Could not find or generate any suitable media asset for Scene {scene_id}.")
         search_result = fallback_result
 
     video_meta, file_meta, matched_keyword = search_result
@@ -215,6 +294,8 @@ def fetch_scene_media(
         height=int(file_meta.get("height") or video_meta.get("height", 1920)),
         download_url=download_url,
         keyword_used=matched_keyword,
+        is_ai_generated=False,
+        source="pexels",
     )
 
 
@@ -223,8 +304,10 @@ def fetch_script_media(
     scene_durations: Optional[Dict[int, float]] = None,
     output_dir: Optional[Path] = None,
     api_key: Optional[str] = None,
+    gemini_api_key: Optional[str] = None,
+    enable_ai_fallback: Optional[bool] = None,
 ) -> List[DownloadedVideo]:
-    """Download background video assets for all scenes in a VideoScript."""
+    """Download background video assets or generate AI visuals for all scenes in a VideoScript."""
     target_dir = output_dir or (TEMP_DIR / "media")
     target_dir.mkdir(parents=True, exist_ok=True)
 
@@ -245,13 +328,20 @@ def fetch_script_media(
         video = fetch_scene_media(
             scene_id=scene.scene_id,
             keywords=scene.search_keywords,
+            visual_description=scene.visual_description,
+            topic=script.title or script.description,
             target_duration=target_dur,
             used_ids=used_ids,
             output_dir=target_dir,
             api_key=api_key,
+            gemini_api_key=gemini_api_key,
+            enable_ai_fallback=enable_ai_fallback,
         )
         downloaded_videos.append(video)
-        print(f"      Scene {video.scene_id}: matched '{video.keyword_used}' (Video ID: {video.video_id})", flush=True)
+        if video.is_ai_generated:
+            print(f"      Scene {video.scene_id}: [AI Generated via Imagen 3] '{video.keyword_used}'", flush=True)
+        else:
+            print(f"      Scene {video.scene_id}: matched '{video.keyword_used}' (Pexels Video ID: {video.video_id})", flush=True)
 
     return downloaded_videos
 

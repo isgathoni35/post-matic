@@ -56,6 +56,50 @@ def run_ffmpeg_command(cmd: List[str], error_context: str = "FFmpeg processing")
 
 
 
+IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp", ".bmp"}
+
+
+def image_to_ken_burns_clip(
+    image_path: Path,
+    target_duration: float,
+    output_path: Path,
+    target_width: int = 1080,
+    target_height: int = 1920,
+    target_fps: int = 30,
+    zoom_in: bool = True,
+    ffmpeg_bin: Optional[str] = None,
+) -> Path:
+    """Convert a static image into a 1080x1920 vertical video with cinematic Ken Burns camera motion."""
+    ffmpeg = ffmpeg_bin or get_ffmpeg_binary()
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Smooth, subtle slow zoom expression
+    zoom_expr = "min(zoom+0.0012,1.15)" if zoom_in else "if(lte(zoom,1.0),1.15,max(1.001,zoom-0.0012))"
+    filtergraph = (
+        f"scale={target_width}:{target_height}:force_original_aspect_ratio=increase,"
+        f"crop={target_width}:{target_height},"
+        f"zoompan=z='{zoom_expr}':d=1:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s={target_width}x{target_height}:fps={target_fps},"
+        f"setsar=1,fps={target_fps},format=yuv420p"
+    )
+
+    cmd = [
+        ffmpeg,
+        "-y",
+        "-loop", "1",
+        "-i", str(image_path),
+        "-t", f"{target_duration:.3f}",
+        "-vf", filtergraph,
+        "-c:v", "libx264",
+        "-preset", "ultrafast",
+        "-crf", "20",
+        "-an",
+        str(output_path),
+    ]
+
+    run_ffmpeg_command(cmd, error_context=f"Rendering Ken Burns clip for {image_path.name}")
+    return output_path
+
+
 def process_scene_clip(
     video_path: Path,
     target_duration: float,
@@ -65,15 +109,27 @@ def process_scene_clip(
     target_fps: int = 30,
     ffmpeg_bin: Optional[str] = None,
 ) -> Path:
-    """Trim and normalize a single video clip to target duration and 1080x1920 9:16 aspect ratio.
+    """Trim and normalize a single video clip or still AI image to target duration and 1080x1920 9:16 aspect ratio.
 
     Applies aspect ratio scaling with center crop (`force_original_aspect_ratio=increase,crop=1080:1920`),
-    sets frame rate to 30fps and pixel format to yuv420p.
+    sets frame rate to 30fps and pixel format to yuv420p. If the input is an image, applies Ken Burns motion.
     """
     ffmpeg = ffmpeg_bin or get_ffmpeg_binary()
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # Filter complex to scale and crop to 9:16 vertical canvas
+    # If the scene asset is a still image (e.g. from Google Imagen 3), animate it with Ken Burns
+    if video_path.suffix.lower() in IMAGE_EXTENSIONS:
+        return image_to_ken_burns_clip(
+            image_path=video_path,
+            target_duration=target_duration,
+            output_path=output_path,
+            target_width=target_width,
+            target_height=target_height,
+            target_fps=target_fps,
+            ffmpeg_bin=ffmpeg,
+        )
+
+    # Filter complex to scale and crop video to 9:16 vertical canvas
     filtergraph = (
         f"scale={target_width}:{target_height}:force_original_aspect_ratio=increase,"
         f"crop={target_width}:{target_height},"

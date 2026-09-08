@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Settings,
   User,
@@ -12,6 +12,7 @@ import {
   Volume2,
   Clock,
   ExternalLink,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -36,7 +37,21 @@ export function SettingsView({
   defaultVoice,
   setDefaultVoice,
 }: SettingsViewProps) {
+  const [aiVisualsEnabled, setAiVisualsEnabled] = useState(true);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("postmatic_ai_visuals_enabled");
+      if (saved !== null) {
+        setAiVisualsEnabled(saved === "true");
+      }
+    }
+  }, []);
+
   const handleSave = () => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("postmatic_ai_visuals_enabled", String(aiVisualsEnabled));
+    }
     toast.success("Studio preferences saved successfully!");
   };
 
@@ -144,6 +159,34 @@ export function SettingsView({
               ))}
             </select>
           </div>
+
+          {/* AI Visual Fallback Toggle */}
+          <div className="pt-3 border-t border-white/[0.04]">
+            <label className="flex items-center justify-between p-3.5 rounded-xl bg-black/30 border border-white/[0.06] hover:border-white/[0.12] transition-colors cursor-pointer group">
+              <div className="flex items-center gap-3">
+                <div className="h-8 w-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shrink-0">
+                  <Sparkles className="h-4 w-4" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-white">AI Visual Generation (Google Imagen 3)</span>
+                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 font-semibold border border-amber-500/20">
+                      Zero-Drift
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-zinc-400 mt-0.5">
+                    Synthesizes custom 9:16 cinematic visuals via Imagen 3 whenever Pexels has no matching video, animated with Ken Burns motion.
+                  </p>
+                </div>
+              </div>
+              <input
+                type="checkbox"
+                checked={aiVisualsEnabled}
+                onChange={(e) => setAiVisualsEnabled(e.target.checked)}
+                className="h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-amber-500 focus:ring-amber-500/30 accent-amber-500 cursor-pointer"
+              />
+            </label>
+          </div>
         </div>
       </div>
 
@@ -162,6 +205,7 @@ export function SettingsView({
             { service: "FastAPI Backend Engine", status: "Online", desc: "Uvicorn worker daemon" },
             { service: "Supabase PostgreSQL & Auth", status: "Online", desc: "RLS & Service Role active" },
             { service: "Google Gemini 3.7 Flash", status: "Connected", desc: "Structured JSON schema validation" },
+            { service: "Google Imagen 3 (Nano Banana)", status: "Connected", desc: "9:16 AI visual generator & Ken Burns" },
             { service: "Pexels Video CDN", status: "Connected", desc: "Vertical 4K/HD clips" },
             { service: "Microsoft edge-tts", status: "Online", desc: "High fidelity word-boundaries" },
             { service: "FFmpeg 9:16 Encoder", status: "Online", desc: "H.264 / AAC stitcher" },

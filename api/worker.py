@@ -122,7 +122,7 @@ def execute_video_pipeline_job(
             status=VideoJobStatus.SOURCING_MEDIA,
             progress_pct=60,
         )
-        logger.info("[%s] Stage 3/4: Fetching Pexels vertical videos...", job_id)
+        logger.info("[%s] Stage 3/4: Sourcing media (Pexels Stock + Google Imagen 3 AI Fallback)...", job_id)
         media_dir = TEMP_DIR / "media" / job_id
         downloaded_videos = fetch_script_media(
             script=script,
