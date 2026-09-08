@@ -30,9 +30,53 @@ AVAILABLE_VOICES = {
     "guy": "en-US-GuyNeural",                  # Energetic, dynamic male
     "eric": "en-US-EricNeural",                # Friendly, articulate male
     "jenny": "en-US-JennyNeural",              # Natural, clear female
+    "sonia": "en-GB-SoniaNeural",              # British narrative female
     "aria": "en-US-AriaNeural",                # Confident, narrative female
     "michelle": "en-US-MichelleNeural",        # Professional female
 }
+
+# Voice-specific prosody presets to prevent robotic monotone
+VOICE_PROSODY_PRESETS = {
+    "en-US-ChristopherNeural": {"rate": "-4%", "pitch": "-2Hz", "volume": "+0%"},  # Cinematic, deliberate, deep
+    "en-US-GuyNeural":         {"rate": "+2%", "pitch": "+0Hz", "volume": "+5%"},  # Energetic, modern hook
+    "en-US-EricNeural":        {"rate": "-2%", "pitch": "-1Hz", "volume": "+0%"},  # Authoritative, articulate
+    "en-US-JennyNeural":       {"rate": "+0%", "pitch": "+2Hz", "volume": "+0%"},  # Warm, conversational
+    "en-GB-SoniaNeural":       {"rate": "-3%", "pitch": "-1Hz", "volume": "+0%"},  # Narrative storyteller
+    "en-US-AriaNeural":        {"rate": "-2%", "pitch": "+1Hz", "volume": "+0%"},  # Confident, narrative
+    "en-US-MichelleNeural":    {"rate": "-1%", "pitch": "+0Hz", "volume": "+0%"},  # Professional
+}
+
+
+def condition_narration_for_natural_speech(text: str) -> str:
+    """Preprocess narration text so edge-tts synthesizes with natural human pauses and inflection.
+
+    Transforms abrupt punctuation, introduces slight pauses at rhetorical breaks,
+    and formats connectors to sound conversational rather than robotic.
+    """
+    if not text:
+        return ""
+
+    cleaned = text.strip()
+
+    # Replace multiple hyphens or dashes with spaced em-dash for dramatic pause
+    cleaned = re.sub(r"\s*--+\s*", " — ", cleaned)
+
+    # If sentence ends with '?' and has more text immediately, ensure pause spacing
+    cleaned = re.sub(r"\?(\s*)([A-Z])", r"? ... \2", cleaned)
+
+    # Insert slight pause after introductory conversational phrases if comma missing
+    intro_patterns = [
+        r"^(Here's the thing|Here's the wild part|Think about this|Imagine this|Believe it or not|Guess what|The truth is|In fact)(?!\s*[,—\.\?])",
+        r"\b(Here's the thing|Here's the wild part|Think about this|Imagine this|Believe it or not|Guess what|The truth is|In fact)(?!\s*[,—\.\?])",
+    ]
+    for pattern in intro_patterns:
+        cleaned = re.sub(pattern, r"\1,", cleaned, flags=re.IGNORECASE)
+
+    # Clean up duplicate spaces
+    cleaned = re.sub(r"\s{2,}", " ", cleaned)
+
+    return cleaned
+
 
 
 @dataclass
@@ -150,27 +194,39 @@ def format_ass_time(seconds: float) -> str:
 
 def create_ass_header(
     font_name: str = "Arial Black",
-    font_size: int = 76,
+    font_size: Optional[int] = None,
     primary_color: str = "&H00FFFFFF",    # Crisp White (ABGR)
     highlight_color: str = "&H0000FFFF",  # Bright Yellow (ABGR)
     outline_color: str = "&H00000000",    # Black (ABGR)
     back_color: str = "&H80000000",       # Semi-transparent black
-    margin_v: int = 580,                  # Safe zone: centered above Shorts/TikTok overlays
+    margin_v: Optional[int] = None,       # Safe zone clearance
+    aspect_ratio: str = "9:16",
 ) -> str:
-    """Generate ASS subtitle header and style definitions for 1080x1920 canvas."""
+    """Generate ASS subtitle header and style definitions for 1080x1920 (short) or 1920x1080 (long) canvas."""
+    if aspect_ratio == "16:9":
+        play_res_x = 1920
+        play_res_y = 1080
+        effective_margin_v = margin_v if margin_v is not None else 120
+        effective_font_size = font_size if font_size is not None else 62
+    else:
+        play_res_x = 1080
+        play_res_y = 1920
+        effective_margin_v = margin_v if margin_v is not None else 580
+        effective_font_size = font_size if font_size is not None else 76
+
     return f"""[Script Info]
 Title: PostMatic Subtitles
 ScriptType: v4.00+
 WrapStyle: 0
 ScaledBorderAndShadow: yes
 YCbCr Matrix: TV.601
-PlayResX: 1080
-PlayResY: 1920
+PlayResX: {play_res_x}
+PlayResY: {play_res_y}
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,{font_name},{font_size},{primary_color},&H000000FF,{outline_color},{back_color},-1,0,0,0,100,100,0,0,1,5,3,2,60,60,{margin_v},1
-Style: Highlight,{font_name},{font_size},{highlight_color},&H000000FF,{outline_color},{back_color},-1,0,0,0,100,100,0,0,1,5,3,2,60,60,{margin_v},1
+Style: Default,{font_name},{effective_font_size},{primary_color},&H000000FF,{outline_color},{back_color},-1,0,0,0,100,100,0,0,1,5,3,2,60,60,{effective_margin_v},1
+Style: Highlight,{font_name},{effective_font_size},{highlight_color},&H000000FF,{outline_color},{back_color},-1,0,0,0,100,100,0,0,1,5,3,2,60,60,{effective_margin_v},1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -182,10 +238,11 @@ def generate_ass_subtitles(
     output_file: Path,
     words_per_line: int = 3,
     font_name: str = "Arial Black",
-    font_size: int = 76,
+    font_size: Optional[int] = None,
     highlight_color: str = "&H0000FFFF",  # Bright Yellow (ABGR)
     primary_color: str = "&H00FFFFFF",    # Crisp White (ABGR)
-    margin_v: int = 580,                  # Safe zone clearance
+    margin_v: Optional[int] = None,
+    aspect_ratio: str = "9:16",
 ) -> Path:
     """Generate animated, word-highlighted ASS subtitles with strict scene boundary isolation.
 
@@ -193,7 +250,7 @@ def generate_ass_subtitles(
     preventing captions from straddling two distinct scenes across cuts.
     """
     if not words:
-        output_file.write_text(create_ass_header(margin_v=margin_v), encoding="utf-8")
+        output_file.write_text(create_ass_header(margin_v=margin_v, aspect_ratio=aspect_ratio), encoding="utf-8")
         return output_file
 
     lines = [create_ass_header(
@@ -202,6 +259,7 @@ def generate_ass_subtitles(
         primary_color=primary_color,
         highlight_color=highlight_color,
         margin_v=margin_v,
+        aspect_ratio=aspect_ratio,
     )]
 
     # Normalize input: support either flat list of WordTiming or list of scene word lists
@@ -296,10 +354,16 @@ def synthesize_scene(
     target_dir = output_dir or (TEMP_DIR / "tts")
     audio_path = target_dir / f"scene_{scene_id}.mp3"
 
+    prosody = VOICE_PROSODY_PRESETS.get(voice, {"rate": "+0%", "pitch": "+0Hz", "volume": "+0%"})
+    conditioned_text = condition_narration_for_natural_speech(narration)
+
     audio_bytes, words = asyncio.run(
         synthesize_speech_async(
-            text=narration,
+            text=conditioned_text,
             voice=voice,
+            rate=prosody["rate"],
+            volume=prosody["volume"],
+            pitch=prosody["pitch"],
             output_audio_path=audio_path,
         )
     )
@@ -320,6 +384,7 @@ def synthesize_script(
     voice: str = DEFAULT_VOICE,
     output_dir: Optional[Path] = None,
     words_per_line: int = 3,
+    aspect_ratio: str = "9:16",
 ) -> TTSResult:
     """Synthesize complete narration for all scenes in a VideoScript.
 
@@ -334,12 +399,18 @@ def synthesize_script(
     scene_results: List[SceneAudioResult] = []
     time_offset = 0.0
 
+    prosody = VOICE_PROSODY_PRESETS.get(voice, {"rate": "+0%", "pitch": "+0Hz", "volume": "+0%"})
+
     for scene in script.scenes:
         scene_audio_path = target_dir / f"scene_{scene.scene_id}.mp3"
+        conditioned_narration = condition_narration_for_natural_speech(scene.narration)
         audio_bytes, scene_words = asyncio.run(
             synthesize_speech_async(
-                text=scene.narration,
+                text=conditioned_narration,
                 voice=voice,
+                rate=prosody["rate"],
+                volume=prosody["volume"],
+                pitch=prosody["pitch"],
                 output_audio_path=scene_audio_path,
             )
         )
@@ -381,7 +452,7 @@ def synthesize_script(
         words=scenes_words_nested,
         output_file=master_sub_path,
         words_per_line=words_per_line,
-        margin_v=580,
+        aspect_ratio=aspect_ratio,
     )
 
     total_duration = get_audio_duration(master_audio_path, fallback_duration=time_offset)

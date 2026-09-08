@@ -407,8 +407,8 @@ export default function LandingPage() {
                     <p className="text-[11px] text-zinc-400">Retention-engineered narrative curves</p>
                   </div>
                 </div>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold">
-                  Auto-Paced
+                <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  Natural Pacing
                 </span>
               </div>
 
@@ -452,8 +452,8 @@ export default function LandingPage() {
                     <p className="text-[11px] text-zinc-400">Zero robotic monotone speech</p>
                   </div>
                 </div>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-semibold">
-                  48kHz Studio
+                <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                  HD Audio
                 </span>
               </div>
 
@@ -509,50 +509,52 @@ export default function LandingPage() {
               </div>
 
               {/* Visual Multi-Track Timeline */}
-              <div className="rounded-2xl bg-black/50 border border-white/[0.08] p-4 space-y-2.5 timeline-track overflow-x-auto font-mono text-[11px]">
-                {/* Track 1: 4K Video Clips */}
-                <div className="flex items-center gap-3">
-                  <span className="w-24 shrink-0 text-zinc-400 text-[10px] uppercase font-bold flex items-center gap-1.5">
-                    <Video className="h-3 w-3 text-cyan-400" />
-                    Video 4K
-                  </span>
-                  <div className="flex-1 grid grid-cols-4 gap-1.5">
-                    <div className="p-2 rounded-lg bg-cyan-950/40 border border-cyan-500/30 text-cyan-300 truncate">
-                      Clip 1: Deep Trench
-                    </div>
-                    <div className="p-2 rounded-lg bg-cyan-950/40 border border-cyan-500/30 text-cyan-300 truncate">
-                      Clip 2: Submarine Hull
-                    </div>
-                    <div className="p-2 rounded-lg bg-cyan-950/40 border border-cyan-500/30 text-cyan-300 truncate">
-                      Clip 3: Sonar Radar
-                    </div>
-                    <div className="p-2 rounded-lg bg-cyan-950/40 border border-cyan-500/30 text-cyan-300 truncate">
-                      Clip 4: Bioluminescence
+              <div className="rounded-2xl bg-black/50 border border-white/[0.08] p-4 space-y-2.5 timeline-track overflow-x-auto text-[11px]">
+                <div className="min-w-[500px] space-y-2.5">
+                  {/* Track 1: 4K Video Clips */}
+                  <div className="flex items-center gap-3">
+                    <span className="w-24 shrink-0 text-zinc-400 text-[10px] uppercase font-semibold flex items-center gap-1.5">
+                      <Video className="h-3 w-3 text-cyan-400" />
+                      Visuals
+                    </span>
+                    <div className="flex-1 grid grid-cols-4 gap-1.5 font-mono text-[10px]">
+                      <div className="p-2 rounded-lg bg-cyan-950/40 border border-cyan-500/30 text-cyan-300 truncate">
+                        Clip 1: Deep Trench
+                      </div>
+                      <div className="p-2 rounded-lg bg-cyan-950/40 border border-cyan-500/30 text-cyan-300 truncate">
+                        Clip 2: Submarine Hull
+                      </div>
+                      <div className="p-2 rounded-lg bg-cyan-950/40 border border-cyan-500/30 text-cyan-300 truncate">
+                        Clip 3: Sonar Radar
+                      </div>
+                      <div className="p-2 rounded-lg bg-cyan-950/40 border border-cyan-500/30 text-cyan-300 truncate">
+                        Clip 4: Bioluminescence
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Track 2: Voiceover Audio */}
-                <div className="flex items-center gap-3">
-                  <span className="w-24 shrink-0 text-zinc-400 text-[10px] uppercase font-bold flex items-center gap-1.5">
-                    <Mic className="h-3 w-3 text-amber-400" />
-                    Speech
-                  </span>
-                  <div className="flex-1 p-2 rounded-lg bg-amber-950/40 border border-amber-500/30 text-amber-300 truncate flex items-center justify-between">
-                    <span>Neural Voice Waveform (Normalized -14 LUFS)</span>
-                    <span className="text-[10px] text-amber-400">24.6s</span>
+                  {/* Track 2: Voiceover Audio */}
+                  <div className="flex items-center gap-3">
+                    <span className="w-24 shrink-0 text-zinc-400 text-[10px] uppercase font-semibold flex items-center gap-1.5">
+                      <Mic className="h-3 w-3 text-amber-400" />
+                      Voiceover
+                    </span>
+                    <div className="flex-1 p-2 rounded-lg bg-amber-950/40 border border-amber-500/30 text-amber-300 truncate flex items-center justify-between">
+                      <span className="text-xs">Voice Track (Studio Balanced Audio)</span>
+                      <span className="text-[10px] text-amber-400 font-mono">24.6s</span>
+                    </div>
                   </div>
-                </div>
 
-                {/* Track 3: Kinetic Word Subtitles */}
-                <div className="flex items-center gap-3">
-                  <span className="w-24 shrink-0 text-zinc-400 text-[10px] uppercase font-bold flex items-center gap-1.5">
-                    <Film className="h-3 w-3 text-pink-400" />
-                    Captions
-                  </span>
-                  <div className="flex-1 p-2 rounded-lg bg-pink-950/40 border border-pink-500/30 text-pink-300 truncate flex items-center justify-between">
-                    <span>ASS Dynamic Word Highlighting (Bottom 25% Safezone)</span>
-                    <span className="text-[10px] text-pink-400">60 FPS</span>
+                  {/* Track 3: Kinetic Word Subtitles */}
+                  <div className="flex items-center gap-3">
+                    <span className="w-24 shrink-0 text-zinc-400 text-[10px] uppercase font-semibold flex items-center gap-1.5">
+                      <Film className="h-3 w-3 text-pink-400" />
+                      Subtitles
+                    </span>
+                    <div className="flex-1 p-2 rounded-lg bg-pink-950/40 border border-pink-500/30 text-pink-300 truncate flex items-center justify-between">
+                      <span className="text-xs">Animated Subtitles (Safe Zone Positioned)</span>
+                      <span className="text-[10px] text-pink-400 font-mono">Synced</span>
+                    </div>
                   </div>
                 </div>
               </div>

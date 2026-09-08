@@ -45,29 +45,34 @@ def get_pexels_headers(api_key: Optional[str] = None) -> Dict[str, str]:
     return {"Authorization": key}
 
 
-def select_best_video_file(video_files: List[dict]) -> Optional[dict]:
-    """Select the best matching vertical/high-res MP4 video file from Pexels video_files list.
+def select_best_video_file(video_files: List[dict], video_format: str = "short") -> Optional[dict]:
+    """Select the best matching MP4 video file from Pexels video_files list.
 
-    Prefers 1080x1920 (Full HD Vertical), then other vertical HD resolutions,
-    then highest quality MP4.
+    For 'long' format (16:9), prefers 1920x1080 landscape footage.
+    For 'short' format (9:16), prefers 1080x1920 vertical footage.
     """
-    mp4_files = [f for f in video_files if f.get("file_type") == "video/mp4" and f.get("link")]
+    mp4_files = [f for f in video_files if f.get("file_type", "video/mp4") == "video/mp4" and f.get("link")]
     if not mp4_files:
         return None
 
-    # Priority 1: Exact 1080x1920 vertical MP4
+    target_w, target_h = (1920, 1080) if video_format == "long" else (1080, 1920)
+
+    # Priority 1: Exact target dimension MP4
     for f in mp4_files:
-        if f.get("width") == 1080 and f.get("height") == 1920:
+        if f.get("width") == target_w and f.get("height") == target_h:
             return f
 
-    # Priority 2: Any vertical MP4 (height > width) with height >= 720
-    vertical_files = [f for f in mp4_files if (f.get("height") or 0) > (f.get("width") or 0)]
-    if vertical_files:
-        # Sort by resolution closest to 1080x1920
-        vertical_files.sort(
-            key=lambda x: abs((x.get("width") or 0) - 1080) + abs((x.get("height") or 0) - 1920)
+    # Priority 2: Matching orientation (width > height for long, height > width for short)
+    if video_format == "long":
+        oriented_files = [f for f in mp4_files if (f.get("width") or 0) > (f.get("height") or 0)]
+    else:
+        oriented_files = [f for f in mp4_files if (f.get("height") or 0) > (f.get("width") or 0)]
+
+    if oriented_files:
+        oriented_files.sort(
+            key=lambda x: abs((x.get("width") or 0) - target_w) + abs((x.get("height") or 0) - target_h)
         )
-        return vertical_files[0]
+        return oriented_files[0]
 
     # Priority 3: Highest resolution available
     mp4_files.sort(key=lambda x: (x.get("width") or 0) * (x.get("height") or 0), reverse=True)
@@ -98,6 +103,7 @@ def search_pexels_video(
     min_duration: float = 3.0,
     used_ids: Optional[Set[int]] = None,
     api_key: Optional[str] = None,
+    video_format: str = "short",
 ) -> Optional[tuple[dict, dict, str]]:
     """Search Pexels API across a list of keyword queries.
 
@@ -107,17 +113,20 @@ def search_pexels_video(
     used = used_ids or set()
     all_queries = expand_search_queries(keywords)
 
-    # Primary pass: portrait vertical footage
+    primary_orientation = "landscape" if video_format == "long" else "portrait"
+    secondary_orientation = "portrait" if video_format == "long" else "landscape"
+
+    # Primary pass: footage matching the preferred orientation
     for query in all_queries:
         cleaned_query = query.strip()
         if not cleaned_query:
             continue
 
         try:
-            logger.info("Searching Pexels for keyword (portrait): '%s'", cleaned_query)
+            logger.info("Searching Pexels for keyword (%s): '%s'", primary_orientation, cleaned_query)
             params = {
                 "query": cleaned_query,
-                "orientation": "portrait",
+                "orientation": primary_orientation,
                 "per_page": 12,
             }
             response = requests.get(PEXELS_SEARCH_URL, headers=headers, params=params, timeout=15)
@@ -137,7 +146,7 @@ def search_pexels_video(
                 if duration < min_duration:
                     continue
 
-                best_file = select_best_video_file(video.get("video_files", []))
+                best_file = select_best_video_file(video.get("video_files", []), video_format=video_format)
                 if best_file:
                     return video, best_file, cleaned_query
 
@@ -145,13 +154,14 @@ def search_pexels_video(
             logger.warning("Error querying Pexels for '%s': %s", cleaned_query, e)
             continue
 
-    # Secondary pass: high-res landscape clips (FFmpeg center-crops into 9:16)
+    # Secondary pass: opposite orientation clips (FFmpeg center-crops / scales to canvas)
     for query in all_queries:
         cleaned_query = query.strip()
         try:
-            logger.info("Searching Pexels for keyword (landscape fallback): '%s'", cleaned_query)
+            logger.info("Searching Pexels for keyword (%s fallback): '%s'", secondary_orientation, cleaned_query)
             params = {
                 "query": cleaned_query,
+                "orientation": secondary_orientation,
                 "per_page": 10,
             }
             response = requests.get(PEXELS_SEARCH_URL, headers=headers, params=params, timeout=15)
@@ -163,7 +173,7 @@ def search_pexels_video(
                         continue
                     if video.get("duration", 0) < min_duration:
                         continue
-                    best_file = select_best_video_file(video.get("video_files", []))
+                    best_file = select_best_video_file(video.get("video_files", []), video_format=video_format)
                     if best_file:
                         return video, best_file, cleaned_query
         except Exception:
@@ -202,11 +212,12 @@ def fetch_scene_media(
     api_key: Optional[str] = None,
     gemini_api_key: Optional[str] = None,
     enable_ai_fallback: Optional[bool] = None,
+    video_format: str = "short",
 ) -> DownloadedVideo:
     """Find, download, or generate background media for a single scene.
 
     Hierarchy:
-    1. Stock Video Search via Pexels API (portrait + landscape center-crop).
+    1. Stock Video Search via Pexels API (portrait or landscape based on video_format).
     2. AI Visual Generation via Google Imagen 3 (Nano Banana) using existing Gemini API key.
     3. Topic-Anchored Stock Video Fallback (avoids generic random nature footage).
     """
@@ -219,14 +230,16 @@ def fetch_scene_media(
         min_duration=min(3.0, target_duration),
         used_ids=used,
         api_key=api_key,
+        video_format=video_format,
     )
 
     # Step 2: If stock video returned no match, try Google Imagen 3 AI visual generation
     use_ai = enable_ai_fallback if enable_ai_fallback is not None else ENABLE_AI_IMAGE_FALLBACK
     if not search_result and use_ai:
         prompt_desc = visual_description or (", ".join(keywords) if keywords else "cinematic visual")
-        logger.info("Pexels returned 0 clips for Scene %d. Triggering Imagen 3 AI visual generation...", scene_id)
-        print(f"      [AI Visual Fallback] Generating 9:16 custom visual with Imagen 3 for Scene {scene_id}...", flush=True)
+        aspect_ratio = "16:9" if video_format == "long" else "9:16"
+        logger.info("Pexels returned 0 clips for Scene %d. Triggering Imagen 3 AI visual generation (%s)...", scene_id, aspect_ratio)
+        print(f"      [AI Visual Fallback] Generating {aspect_ratio} custom visual with Imagen 3 for Scene {scene_id}...", flush=True)
 
         ai_image_path = generate_ai_scene_image(
             scene_id=scene_id,
@@ -234,16 +247,18 @@ def fetch_scene_media(
             topic=topic,
             output_dir=target_dir,
             api_key=gemini_api_key,
+            aspect_ratio=aspect_ratio,
         )
 
         if ai_image_path and ai_image_path.exists() and ai_image_path.stat().st_size > 0:
+            target_w, target_h = (1920, 1080) if video_format == "long" else (1080, 1920)
             return DownloadedVideo(
                 scene_id=scene_id,
                 video_id=900000 + scene_id,
                 file_path=ai_image_path,
                 duration=target_duration,
-                width=1080,
-                height=1920,
+                width=target_w,
+                height=target_h,
                 download_url="ai://imagen-3",
                 keyword_used=prompt_desc[:50],
                 is_ai_generated=True,
@@ -262,13 +277,16 @@ def fetch_scene_media(
             else:
                 topic_fallbacks.append(" ".join(words[:2]))
                 topic_fallbacks.append(" ".join(words[-2:]))
-        topic_fallbacks.extend(["cinematic 4k vertical", "abstract dark background vertical"])
+        
+        fallback_style = "landscape" if video_format == "long" else "vertical"
+        topic_fallbacks.extend([f"cinematic 4k {fallback_style}", f"abstract dark background {fallback_style}"])
 
         fallback_result = search_pexels_video(
             keywords=topic_fallbacks,
             min_duration=2.0,
             used_ids=used,
             api_key=api_key,
+            video_format=video_format,
         )
         if not fallback_result:
             raise RuntimeError(f"Could not find or generate any suitable media asset for Scene {scene_id}.")
@@ -285,13 +303,14 @@ def fetch_scene_media(
     if not file_path.exists() or file_path.stat().st_size == 0:
         download_file(download_url, file_path)
 
+    default_w, default_h = (1920, 1080) if video_format == "long" else (1080, 1920)
     return DownloadedVideo(
         scene_id=scene_id,
         video_id=vid_id,
         file_path=file_path,
         duration=float(video_meta.get("duration", 0)),
-        width=int(file_meta.get("width") or video_meta.get("width", 1080)),
-        height=int(file_meta.get("height") or video_meta.get("height", 1920)),
+        width=int(file_meta.get("width") or video_meta.get("width", default_w)),
+        height=int(file_meta.get("height") or video_meta.get("height", default_h)),
         download_url=download_url,
         keyword_used=matched_keyword,
         is_ai_generated=False,
@@ -306,6 +325,7 @@ def fetch_script_media(
     api_key: Optional[str] = None,
     gemini_api_key: Optional[str] = None,
     enable_ai_fallback: Optional[bool] = None,
+    video_format: str = "short",
 ) -> List[DownloadedVideo]:
     """Download background video assets or generate AI visuals for all scenes in a VideoScript."""
     target_dir = output_dir or (TEMP_DIR / "media")
@@ -319,10 +339,11 @@ def fetch_script_media(
         target_dur = durations.get(scene.scene_id, 5.0)
         print(f"      Fetching media for Scene {scene.scene_id} (keywords: {scene.search_keywords})...", flush=True)
         logger.info(
-            "Fetching media for Scene %d (keywords: %s, duration: %.1fs)...",
+            "Fetching media for Scene %d (keywords: %s, duration: %.1fs, format: %s)...",
             scene.scene_id,
             scene.search_keywords,
             target_dur,
+            video_format,
         )
 
         video = fetch_scene_media(
@@ -336,6 +357,7 @@ def fetch_script_media(
             api_key=api_key,
             gemini_api_key=gemini_api_key,
             enable_ai_fallback=enable_ai_fallback,
+            video_format=video_format,
         )
         downloaded_videos.append(video)
         if video.is_ai_generated:

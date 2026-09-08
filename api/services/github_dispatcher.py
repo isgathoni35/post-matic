@@ -23,6 +23,8 @@ async def dispatch_github_render_job(
     user_id: Optional[str] = None,
     publish_youtube: bool = False,
     privacy: str = "public",
+    video_format: str = "short",
+    target_platform: str = "youtube",
 ) -> bool:
     """Trigger the GitHub Actions workflow via repository_dispatch to offload heavy rendering.
 
@@ -34,6 +36,8 @@ async def dispatch_github_render_job(
         user_id: UUID of user creating the job.
         publish_youtube: Whether to auto-upload to YouTube Shorts after rendering.
         privacy: YouTube privacy status ('public', 'unlisted', 'private').
+        video_format: 'short' (9:16) or 'long' (16:9).
+        target_platform: 'youtube', 'tiktok', or 'instagram'.
 
     Returns:
         bool: True if dispatch was successfully received by GitHub (HTTP 204).
@@ -60,6 +64,8 @@ async def dispatch_github_render_job(
             "user_id": user_id or "",
             "publish_youtube": bool(publish_youtube),
             "privacy": privacy or "public",
+            "video_format": video_format or "short",
+            "target_platform": target_platform or "youtube",
         },
     }
 

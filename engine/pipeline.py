@@ -5,7 +5,7 @@ from pathlib import Path
 import shutil
 import sys
 import time
-from typing import List, Optional
+from typing import Callable, Dict, List, Optional
 
 # Ensure project root is on sys.path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -48,31 +48,45 @@ class VideoGenerationResult:
     elapsed_time_seconds: float
 
 
+ProgressCallback = Callable[[str, int, Optional[dict]], None]
+
+
 def generate_faceless_video(
     topic: str,
     target_duration: int = 30,
     target_scenes: Optional[int] = None,
     voice: str = DEFAULT_VOICE,
+    video_format: str = "short",
     output_path: Optional[Path] = None,
     gemini_api_key: Optional[str] = None,
     pexels_api_key: Optional[str] = None,
     preferred_model: Optional[str] = None,
     words_per_subtitle_line: int = 3,
     cleanup_temp: bool = True,
+    progress_callback: Optional[ProgressCallback] = None,
 ) -> VideoGenerationResult:
     """Execute the entire 5-stage automated video generation pipeline.
 
     Stages:
     1. Script Generation (Gemini LLM)
     2. Voice Synthesis & Word Timings & ASS Subtitle Creation (edge-tts)
-    3. Vertical Video Asset Sourcing & Downloading (Pexels API)
+    3. Video Asset Sourcing & Downloading (Pexels API + Imagen 3)
     4. Programmatic FFmpeg Assembly, Normalization, & Libass Caption Burning
     5. Result Validation & Packaging
     """
     start_time = time.time()
-    logger.info("Starting automated video generation for topic: '%s'", topic)
+    aspect_ratio = "16:9" if video_format == "long" else "9:16"
+    logger.info("Starting automated video generation for topic: '%s' (format: %s, aspect: %s)", topic, video_format, aspect_ratio)
+
+    def report_progress(status: str, pct: int, script_data: Optional[dict] = None):
+        if progress_callback:
+            try:
+                progress_callback(status, pct, script_data)
+            except Exception as cb_err:
+                logger.warning("Progress callback failed: %s", cb_err)
 
     # 1. Generate Script
+    report_progress("scripting", 15)
     print(f"\n[1/4] Generating script for topic: '{topic}'...")
     script = generate_script(
         topic=topic,
@@ -82,15 +96,19 @@ def generate_faceless_video(
         preferred_model=preferred_model,
     )
     print(f"      Title: \"{script.title}\" ({len(script.scenes)} scenes)")
+    report_progress("scripting", 25, script.model_dump())
 
     # 2. Voice Synthesis & Subtitles
-    print(f"\n[2/4] Synthesizing voiceover with voice '{voice}' and generating ASS subtitles...")
+    report_progress("synthesizing", 35)
+    print(f"\n[2/4] Synthesizing voiceover with voice '{voice}' and generating ASS subtitles ({aspect_ratio})...")
     tts_result = synthesize_script(
         script=script,
         voice=voice,
         words_per_line=words_per_subtitle_line,
+        aspect_ratio=aspect_ratio,
     )
     print(f"      Audio duration: {tts_result.total_duration:.2f}s")
+    report_progress("synthesizing", 50)
 
     # Map scene durations from audio
     scene_durations = {
@@ -98,24 +116,30 @@ def generate_faceless_video(
     }
 
     # 3. Media Sourcing
-    print(f"\n[3/4] Sourcing vertical video clips (Pexels Stock + Google Imagen 3 AI Fallback)...", flush=True)
+    report_progress("sourcing_media", 60)
+    print(f"\n[3/4] Sourcing video clips (Pexels Stock + Google Imagen 3 AI Fallback, format: {video_format})...", flush=True)
     downloaded_videos = fetch_script_media(
         script=script,
         scene_durations=scene_durations,
         api_key=pexels_api_key,
         gemini_api_key=gemini_api_key,
+        video_format=video_format,
     )
+    report_progress("sourcing_media", 75)
 
     # 4. Assembly & Subtitle Burning
+    report_progress("rendering", 85)
     timestamp_slug = int(time.time())
     dest_output = output_path or (OUTPUT_DIR / f"video_{timestamp_slug}.mp4")
 
-    print(f"\n[4/4] Assembling video, normalizing aspect ratio, and burning animated captions with FFmpeg...")
+    print(f"\n[4/4] Assembling video, normalizing to {aspect_ratio}, and burning animated captions with FFmpeg...")
     final_video = render_video(
         downloaded_videos=downloaded_videos,
         tts_result=tts_result,
         output_path=dest_output,
+        video_format=video_format,
     )
+    report_progress("rendering", 95)
 
     elapsed = time.time() - start_time
     file_size = final_video.stat().st_size

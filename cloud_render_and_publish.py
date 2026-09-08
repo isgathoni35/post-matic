@@ -5,6 +5,7 @@ import asyncio
 import logging
 from pathlib import Path
 import sys
+from typing import Optional
 
 # Ensure project root is on sys.path
 PROJECT_ROOT = Path(__file__).resolve().parent
@@ -38,6 +39,8 @@ def main():
     parser.add_argument("--user-id", "-u", type=str, default=None, help="User ID owning the job")
     parser.add_argument("--publish-youtube", action="store_true", help="Publish directly to YouTube Shorts")
     parser.add_argument("--privacy", type=str, default="public", choices=["public", "unlisted", "private"], help="YouTube privacy status")
+    parser.add_argument("--format", "--video-format", dest="video_format", type=str, default="short", choices=["short", "long"], help="Video format: short (9:16) or long (16:9)")
+    parser.add_argument("--platform", type=str, default="youtube", choices=["youtube", "tiktok", "instagram"], help="Target social platform")
     parser.add_argument("--access-token", type=str, default=None, help="Direct access token override")
 
     args = parser.parse_args()
@@ -50,19 +53,36 @@ def main():
             progress_pct=10,
         )
 
+    def on_progress(status_str: str, pct: int, script_data: Optional[dict] = None):
+        if job_id:
+            try:
+                st = VideoJobStatus(status_str)
+                update_video_job_record(
+                    job_id=job_id,
+                    status=st,
+                    progress_pct=pct,
+                    script_data=script_data,
+                )
+                logger.info("[%s] Real-time milestone updated: status=%s, progress=%d%%", job_id, status_str, pct)
+            except Exception as e:
+                logger.warning("[%s] Failed updating progress milestone: %s", job_id, e)
+
     try:
-        logger.info("Starting cloud generation for topic: '%s'...", args.topic)
+        logger.info("Starting cloud generation for topic: '%s' (format: %s)...", args.topic, args.video_format)
         result = generate_faceless_video(
             topic=args.topic,
             target_duration=args.duration,
             voice=args.voice,
+            video_format=args.video_format,
+            progress_callback=on_progress,
         )
 
         logger.info("Video generation completed: %s (%d bytes)", result.video_path, result.file_size_bytes)
 
         youtube_url = None
-        if args.publish_youtube:
-            logger.info("Publishing video to YouTube Shorts...")
+        if args.publish_youtube and args.platform == "youtube":
+            is_short = (args.video_format == "short")
+            logger.info("Publishing video to YouTube (%s)...", "Shorts" if is_short else "Standard Video")
             access_token = args.access_token
 
             if not access_token:
@@ -80,18 +100,28 @@ def main():
                 if was_refreshed:
                     logger.info("Access token was successfully refreshed prior to upload.")
 
+            tags_formatted = ' #'.join(result.script.tags) if result.script.tags else ""
+            if is_short:
+                desc = f"{result.script.description}\n\n#Shorts #{tags_formatted}"
+            else:
+                desc = f"{result.script.description}\n\n#{tags_formatted}" if tags_formatted else result.script.description
+
             upload_res = upload_video_to_youtube(
                 video_file_path=result.video_path,
                 title=result.script.title,
-                description=f"{result.script.description}\n\n#Shorts #{' #'.join(result.script.tags)}",
+                description=desc,
                 tags=result.script.tags,
                 access_token=access_token,
                 privacy_status=args.privacy,
+                video_format=args.video_format,
             )
             youtube_url = upload_res.youtube_url
-            logger.info("Published YouTube Short URL: %s", youtube_url)
+            logger.info("Published YouTube URL: %s", youtube_url)
 
         # Upload to persistent Supabase Storage CDN
+        if job_id:
+            update_video_job_record(job_id=job_id, status=VideoJobStatus.RENDERING, progress_pct=95)
+
         public_storage_url = None
         try:
             public_storage_url = upload_video_to_supabase(result.video_path, job_id=job_id or "latest")

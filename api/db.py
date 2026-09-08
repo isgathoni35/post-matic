@@ -45,6 +45,8 @@ def create_video_job_record(
     target_duration: int = 25,
     voice: Optional[str] = None,
     user_id: Optional[str] = None,
+    video_format: str = "short",
+    target_platform: str = "youtube",
 ) -> VideoJobResponse:
     """Create a new video job record in Supabase (with fallback to in-memory store)."""
     now_str = get_iso_now()
@@ -70,6 +72,10 @@ def create_video_job_record(
                 "user_id": user_id,
                 "created_at": now_str,
                 "updated_at": now_str,
+                "script_data": {
+                    "video_format": video_format,
+                    "target_platform": target_platform,
+                },
             }
             res = client.table("video_jobs").insert(record).execute()
             if res.data:

@@ -20,6 +20,8 @@ import { useAuth } from "@/hooks/use-auth";
 import {
   getConnectedSocialAccounts,
   getYouTubeAuthUrl,
+  getTikTokAuthUrl,
+  getInstagramAuthUrl,
   disconnectSocialAccount,
   SocialAccount,
 } from "@/lib/api";
@@ -35,7 +37,7 @@ export function SocialAccountsModal({ isOpen, onClose, userId }: SocialAccountsM
   const effectiveUserId = userId || user?.id;
   const [accounts, setAccounts] = useState<SocialAccount[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isConnecting, setIsConnecting] = useState(false);
+  const [connectingPlatform, setConnectingPlatform] = useState<string | null>(null);
   const [isDeletingId, setIsDeletingId] = useState<string | null>(null);
 
   const fetchAccounts = useCallback(async () => {
@@ -48,7 +50,7 @@ export function SocialAccountsModal({ isOpen, onClose, userId }: SocialAccountsM
     } finally {
       setIsLoading(false);
     }
-  }, [user]);
+  }, [effectiveUserId]);
 
   useEffect(() => {
     if (isOpen) {
@@ -59,9 +61,11 @@ export function SocialAccountsModal({ isOpen, onClose, userId }: SocialAccountsM
   if (!isOpen) return null;
 
   const youtubeAccount = accounts.find((a) => a.platform === "youtube");
+  const tiktokAccount = accounts.find((a) => a.platform === "tiktok");
+  const instagramAccount = accounts.find((a) => a.platform === "instagram");
 
   const handleConnectYouTube = async () => {
-    setIsConnecting(true);
+    setConnectingPlatform("youtube");
     toast.info("Connecting to Google OAuth 2.0...", {
       description: "Redirecting to Google Consent Screen for YouTube permissions.",
     });
@@ -75,16 +79,54 @@ export function SocialAccountsModal({ isOpen, onClose, userId }: SocialAccountsM
       toast.error("OAuth Initialization Error", {
         description: err.message || "Failed to initialize YouTube connection.",
       });
-      setIsConnecting(false);
+      setConnectingPlatform(null);
     }
   };
 
-  const handleDisconnect = async (accountId: string) => {
+  const handleConnectTikTok = async () => {
+    setConnectingPlatform("tiktok");
+    toast.info("Connecting to TikTok Login Kit...", {
+      description: "Redirecting to TikTok OAuth consent screen.",
+    });
+
+    try {
+      const res = await getTikTokAuthUrl(effectiveUserId);
+      if (res.auth_url) {
+        window.location.href = res.auth_url;
+      }
+    } catch (err: any) {
+      toast.error("TikTok Initialization Error", {
+        description: err.message || "Failed to initialize TikTok connection. Check TIKTOK_CLIENT_KEY in .env.",
+      });
+      setConnectingPlatform(null);
+    }
+  };
+
+  const handleConnectInstagram = async () => {
+    setConnectingPlatform("instagram");
+    toast.info("Connecting to Meta / Instagram...", {
+      description: "Redirecting to Meta OAuth screen for Instagram Reels publishing permissions.",
+    });
+
+    try {
+      const res = await getInstagramAuthUrl(effectiveUserId);
+      if (res.auth_url) {
+        window.location.href = res.auth_url;
+      }
+    } catch (err: any) {
+      toast.error("Instagram Initialization Error", {
+        description: err.message || "Failed to initialize Instagram connection. Check META_APP_ID in .env.",
+      });
+      setConnectingPlatform(null);
+    }
+  };
+
+  const handleDisconnect = async (accountId: string, platformLabel: string) => {
     setIsDeletingId(accountId);
     try {
       await disconnectSocialAccount(accountId, effectiveUserId);
       toast.success("Account Disconnected", {
-        description: "YouTube OAuth tokens have been revoked and removed.",
+        description: `${platformLabel} OAuth tokens have been revoked and removed.`,
       });
       fetchAccounts();
     } catch (err: any) {
@@ -98,7 +140,7 @@ export function SocialAccountsModal({ isOpen, onClose, userId }: SocialAccountsM
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-xl max-h-[90vh] overflow-y-auto studio-card rounded-2xl p-4 sm:p-8 bg-[#0b0e14] border border-white/[0.1] shadow-2xl space-y-5 sm:space-y-6">
+      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto studio-card rounded-2xl p-4 sm:p-8 bg-[#0b0e14] border border-white/[0.1] shadow-2xl space-y-5 sm:space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-white/[0.08]">
           <div className="flex items-center gap-3">
@@ -110,11 +152,12 @@ export function SocialAccountsModal({ isOpen, onClose, userId }: SocialAccountsM
                 Social Publishing Hub
               </h2>
               <p className="text-xs text-muted-foreground">
-                Manage autonomous multi-channel distribution integrations.
+                Connect YouTube, TikTok, and Instagram for automated multi-channel video distribution.
               </p>
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
             className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.05] transition-colors"
           >
@@ -123,7 +166,7 @@ export function SocialAccountsModal({ isOpen, onClose, userId }: SocialAccountsM
         </div>
 
         {/* Accounts List */}
-        <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+        <div className="space-y-5 max-h-[60vh] overflow-y-auto pr-1">
           {/* YouTube Integration Card */}
           <div className="rounded-xl p-4 bg-white/[0.02] border border-white/[0.06] space-y-3">
             <div className="flex items-center justify-between">
@@ -157,7 +200,7 @@ export function SocialAccountsModal({ isOpen, onClose, userId }: SocialAccountsM
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => handleDisconnect(youtubeAccount.id)}
+                  onClick={() => handleDisconnect(youtubeAccount.id, "YouTube")}
                   isLoading={isDeletingId === youtubeAccount.id}
                   className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-8 text-xs"
                 >
@@ -167,55 +210,41 @@ export function SocialAccountsModal({ isOpen, onClose, userId }: SocialAccountsM
               )}
             </div>
 
-            {/* Offline Token Security Info */}
-            <div className="p-3 rounded-lg bg-black/40 border border-white/[0.04] flex items-center justify-between text-xs font-mono">
+            <div className="p-2.5 rounded-lg bg-black/40 border border-white/[0.04] flex items-center justify-between text-xs font-mono">
               <div className="flex items-center gap-2 text-zinc-400">
                 <ShieldCheck className="h-4 w-4 text-emerald-400" />
-                <span>Scope: youtube.upload + youtube.readonly</span>
+                <span>Scope: youtube.upload</span>
               </div>
               <span className="text-zinc-500 text-[11px]">
-                {youtubeAccount?.has_refresh_token ? "Offline Refresh Stored" : "Offline Refresh"}
+                {youtubeAccount?.has_refresh_token ? "Offline Refresh Stored" : "OAuth 2.0"}
               </span>
             </div>
 
-            {/* Action CTA */}
             {!youtubeAccount && (
               <div className="space-y-2">
                 <Button
                   variant="primary"
-                  className="w-full h-10 text-xs font-semibold"
+                  className="w-full h-9 text-xs font-semibold"
                   onClick={handleConnectYouTube}
-                  isLoading={isConnecting}
+                  isLoading={connectingPlatform === "youtube"}
                 >
                   <Zap className="h-4 w-4 mr-1.5" />
                   Authorize YouTube Channel
                 </Button>
-                <div className="p-3 rounded-lg bg-amber-500/5 border border-amber-500/10 text-[11px] text-zinc-400 space-y-1.5">
-                  <div className="flex items-center gap-1.5 text-amber-400 font-medium">
-                    <Info className="h-3.5 w-3.5" />
-                    <span>Google Cloud Console Setup Checklist</span>
-                  </div>
-                  <p className="text-zinc-400 leading-relaxed">
-                    If Google displays <em>&ldquo;This request is invalid (Error 400)&rdquo;</em>:
-                  </p>
-                  <ul className="list-disc list-inside space-y-0.5 text-zinc-400 pl-1">
-                    <li>
-                      Authorized redirect URI must include: <br />
-                      <code className="text-amber-300 font-mono text-[10px] bg-black/50 px-1 py-0.5 rounded select-all">
-                        http://localhost:8000/api/social/youtube/callback
-                      </code>
-                    </li>
-                    <li>
-                      Your Google/YouTube email must be added under <strong>OAuth consent screen &gt; Test users</strong>.
-                    </li>
-                  </ul>
+                <div className="p-2.5 rounded-lg bg-amber-500/5 border border-amber-500/10 text-[11px] text-zinc-400 space-y-1">
+                  <span className="text-amber-400 font-medium flex items-center gap-1">
+                    <Info className="h-3 w-3" /> Callback URI:
+                  </span>
+                  <code className="text-amber-300 font-mono text-[10px] bg-black/50 px-1 py-0.5 rounded select-all block">
+                    http://localhost:8000/api/social/youtube/callback
+                  </code>
                 </div>
               </div>
             )}
           </div>
 
-          {/* TikTok Integration Card (Preview / Future Step) */}
-          <div className="rounded-xl p-4 bg-white/[0.01] border border-white/[0.04] space-y-3 opacity-75">
+          {/* TikTok Integration Card */}
+          <div className="rounded-xl p-4 bg-white/[0.02] border border-white/[0.06] space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 font-bold text-xs">
@@ -224,16 +253,149 @@ export function SocialAccountsModal({ isOpen, onClose, userId }: SocialAccountsM
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="font-semibold text-sm text-white">TikTok Direct Post</span>
-                    <Badge variant="outline" className="text-[10px] font-mono">
-                      Coming Soon
-                    </Badge>
+                    {tiktokAccount ? (
+                      <Badge variant="default" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-[10px]">
+                        <CheckCircle2 className="h-2.5 w-2.5 mr-1" />
+                        Connected
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-[10px]">
+                        Disconnected
+                      </Badge>
+                    )}
                   </div>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Chunked HTTP PUT upload via TikTok Content Posting API.
+                    {tiktokAccount?.account_name
+                      ? `Linked to account: ${tiktokAccount.account_name}`
+                      : "Direct video publishing via TikTok Content Posting API."}
                   </p>
                 </div>
               </div>
+
+              {tiktokAccount && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleDisconnect(tiktokAccount.id, "TikTok")}
+                  isLoading={isDeletingId === tiktokAccount.id}
+                  className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-8 text-xs"
+                >
+                  <Trash2 className="h-3.5 w-3.5 mr-1" />
+                  Disconnect
+                </Button>
+              )}
             </div>
+
+            <div className="p-2.5 rounded-lg bg-black/40 border border-white/[0.04] flex items-center justify-between text-xs font-mono">
+              <div className="flex items-center gap-2 text-zinc-400">
+                <ShieldCheck className="h-4 w-4 text-cyan-400" />
+                <span>Scope: video.publish, video.upload</span>
+              </div>
+              <span className="text-zinc-500 text-[11px]">
+                {tiktokAccount?.has_refresh_token ? "Refresh Token Stored" : "Content Posting API"}
+              </span>
+            </div>
+
+            {!tiktokAccount && (
+              <div className="space-y-2">
+                <Button
+                  variant="primary"
+                  className="w-full h-9 text-xs font-semibold bg-cyan-600 hover:bg-cyan-500 text-white"
+                  onClick={handleConnectTikTok}
+                  isLoading={connectingPlatform === "tiktok"}
+                >
+                  <Zap className="h-4 w-4 mr-1.5" />
+                  Authorize TikTok Account
+                </Button>
+                <div className="p-2.5 rounded-lg bg-cyan-500/5 border border-cyan-500/10 text-[11px] text-zinc-400 space-y-1">
+                  <span className="text-cyan-400 font-medium flex items-center gap-1">
+                    <Info className="h-3 w-3" /> TikTok Callback URI:
+                  </span>
+                  <code className="text-cyan-300 font-mono text-[10px] bg-black/50 px-1 py-0.5 rounded select-all block">
+                    http://localhost:8000/api/social/tiktok/callback
+                  </code>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Instagram Reels Integration Card */}
+          <div className="rounded-xl p-4 bg-white/[0.02] border border-white/[0.06] space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-pink-400 font-bold text-xs">
+                  IG
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-sm text-white">Instagram Reels</span>
+                    {instagramAccount ? (
+                      <Badge variant="default" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-[10px]">
+                        <CheckCircle2 className="h-2.5 w-2.5 mr-1" />
+                        Connected
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-[10px]">
+                        Disconnected
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {instagramAccount?.account_name
+                      ? `Linked to account: ${instagramAccount.account_name}`
+                      : "Publish Reels to Instagram Professional / Creator accounts."}
+                  </p>
+                </div>
+              </div>
+
+              {instagramAccount && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleDisconnect(instagramAccount.id, "Instagram")}
+                  isLoading={isDeletingId === instagramAccount.id}
+                  className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-8 text-xs"
+                >
+                  <Trash2 className="h-3.5 w-3.5 mr-1" />
+                  Disconnect
+                </Button>
+              )}
+            </div>
+
+            <div className="p-2.5 rounded-lg bg-black/40 border border-white/[0.04] flex items-center justify-between text-xs font-mono">
+              <div className="flex items-center gap-2 text-zinc-400">
+                <ShieldCheck className="h-4 w-4 text-pink-400" />
+                <span>Scope: instagram_content_publish</span>
+              </div>
+              <span className="text-zinc-500 text-[11px]">
+                {instagramAccount?.has_refresh_token ? "60-Day Long-Lived Token" : "Meta Graph API"}
+              </span>
+            </div>
+
+            {!instagramAccount && (
+              <div className="space-y-2">
+                <Button
+                  variant="primary"
+                  className="w-full h-9 text-xs font-semibold bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white"
+                  onClick={handleConnectInstagram}
+                  isLoading={connectingPlatform === "instagram"}
+                >
+                  <Zap className="h-4 w-4 mr-1.5" />
+                  Authorize Instagram Reels
+                </Button>
+                <div className="p-2.5 rounded-lg bg-pink-500/5 border border-pink-500/10 text-[11px] text-zinc-400 space-y-1">
+                  <span className="text-pink-400 font-medium flex items-center gap-1">
+                    <Info className="h-3 w-3" /> Meta Callback URI:
+                  </span>
+                  <code className="text-pink-300 font-mono text-[10px] bg-black/50 px-1 py-0.5 rounded select-all block">
+                    http://localhost:8000/api/social/instagram/callback
+                  </code>
+                  <p className="text-[10px] text-zinc-400 pt-0.5">
+                    Requires an Instagram Professional Account linked to a Facebook Page.
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

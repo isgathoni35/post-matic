@@ -139,6 +139,8 @@ def test_api_generate_triggers_background_task():
             user_id=None,
             publish_youtube=False,
             privacy="public",
+            video_format="short",
+            target_platform="youtube",
         )
 
 
@@ -160,6 +162,8 @@ def test_execute_video_pipeline_job_dispatches_to_github(mock_enabled, mock_disp
         user_id="usr-99",
         publish_youtube=True,
         privacy="unlisted",
+        video_format="short",
+        target_platform="youtube",
     )
 
     mock_dispatch.assert_called_once_with(
@@ -170,4 +174,41 @@ def test_execute_video_pipeline_job_dispatches_to_github(mock_enabled, mock_disp
         user_id="usr-99",
         publish_youtube=True,
         privacy="unlisted",
+        video_format="short",
+        target_platform="youtube",
+    )
+
+
+@patch("api.worker.dispatch_github_render_job")
+@patch("api.worker.is_github_dispatch_enabled", return_value=True)
+def test_execute_video_pipeline_job_dispatches_long_format_to_github(mock_enabled, mock_dispatch):
+    """Verify that when long video format is specified, it forwards video_format='long'."""
+    job_id = str(uuid.uuid4())
+    topic = "The Rise and Fall of Rome"
+
+    from api.db import create_video_job_record
+    create_video_job_record(job_id=job_id, topic=topic, target_duration=60, video_format="long")
+
+    execute_video_pipeline_job(
+        job_id=job_id,
+        topic=topic,
+        target_duration=60,
+        voice="eric",
+        user_id="usr-100",
+        publish_youtube=True,
+        privacy="public",
+        video_format="long",
+        target_platform="youtube",
+    )
+
+    mock_dispatch.assert_called_once_with(
+        job_id=job_id,
+        topic=topic,
+        duration=60,
+        voice="eric",
+        user_id="usr-100",
+        publish_youtube=True,
+        privacy="public",
+        video_format="long",
+        target_platform="youtube",
     )

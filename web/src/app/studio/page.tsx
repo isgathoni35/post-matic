@@ -54,6 +54,8 @@ export default function StudioPage() {
 
   // Form Parameters
   const [topic, setTopic] = useState("");
+  const [videoFormat, setVideoFormat] = useState<"short" | "long">("short");
+  const [targetPlatform, setTargetPlatform] = useState<"youtube" | "tiktok" | "instagram">("youtube");
   const [targetDuration, setTargetDuration] = useState(25);
   const [selectedVoice, setSelectedVoice] = useState(VOICES[0].id);
   const [autoPublishYouTube, setAutoPublishYouTube] = useState(false);
@@ -74,9 +76,10 @@ export default function StudioPage() {
       const urlParams = new URLSearchParams(window.location.search);
       const connected = urlParams.get("connected");
       const channel = urlParams.get("channel");
-      const error = urlParams.get("error");
+      const error = urlParams.get("error") || urlParams.get("social_error");
       const errorDesc = urlParams.get("error_description");
       const warning = urlParams.get("warning");
+      const platform = urlParams.get("platform");
 
       if (connected === "youtube") {
         if (warning) {
@@ -93,16 +96,40 @@ export default function StudioPage() {
           });
         }
         window.history.replaceState({}, "", "/studio");
+      } else if (connected === "tiktok") {
+        toast.success("TikTok Account Connected!", {
+          description: channel
+            ? `Connected to ${decodeURIComponent(channel)}`
+            : "Account is ready for direct TikTok publishing.",
+          duration: 6000,
+        });
+        window.history.replaceState({}, "", "/studio");
+      } else if (connected === "instagram") {
+        if (warning) {
+          toast.warning("Instagram Connected with Notice", {
+            description: decodeURIComponent(warning),
+            duration: 9000,
+          });
+        } else {
+          toast.success("Instagram Reels Connected!", {
+            description: channel
+              ? `Connected to ${decodeURIComponent(channel)}`
+              : "Account is ready for Instagram Reels publishing.",
+            duration: 6000,
+          });
+        }
+        window.history.replaceState({}, "", "/studio");
       } else if (error) {
-        let title = "Social Connection Failed";
+        const platformLabel = platform ? platform.charAt(0).toUpperCase() + platform.slice(1) : "Social";
+        let title = `${platformLabel} Connection Failed`;
         let message = errorDesc ? decodeURIComponent(errorDesc) : decodeURIComponent(error);
 
         if (error === "access_denied") {
           title = "Authorization Cancelled";
-          message = "You cancelled or denied the Google consent request.";
+          message = `You cancelled or denied the ${platformLabel} consent request.`;
         } else if (error === "redirect_uri_mismatch") {
-          title = "Google Configuration Error";
-          message = "Redirect URI mismatch in Google Cloud Console. Verify authorized redirect URIs.";
+          title = "OAuth Configuration Error";
+          message = "Redirect URI mismatch. Verify authorized redirect URIs in the developer portal.";
         }
 
         toast.error(title, {
@@ -189,10 +216,13 @@ export default function StudioPage() {
     try {
       const response = await generateVideoJob({
         topic: topic.trim(),
+        duration: targetDuration,
         target_duration: targetDuration,
         voice: selectedVoice,
         user_id: user?.id,
         publish_youtube: autoPublishYouTube,
+        video_format: videoFormat,
+        target_platform: targetPlatform,
       });
 
       const normalizedResponse = normalizeJob(response);
@@ -256,12 +286,16 @@ export default function StudioPage() {
         />
 
         {/* Dynamic Workspace View Container */}
-        <main className="flex-1 p-3.5 sm:p-6 lg:p-8 pb-24 md:pb-8 min-w-0 w-full max-w-full overflow-x-hidden overflow-y-auto">
+        <main className="flex-1 p-3.5 sm:p-6 lg:p-8 pb-32 md:pb-8 min-w-0 w-full max-w-full overflow-x-hidden overflow-y-auto">
           <WorkspaceErrorBoundary key={activeView} onReset={() => handleViewChange("studio")}>
             {activeView === "studio" && (
               <StudioConsoleView
                 topic={topic}
                 setTopic={setTopic}
+                videoFormat={videoFormat}
+                setVideoFormat={setVideoFormat}
+                targetPlatform={targetPlatform}
+                setTargetPlatform={setTargetPlatform}
                 targetDuration={targetDuration}
                 setTargetDuration={setTargetDuration}
                 selectedVoice={selectedVoice}

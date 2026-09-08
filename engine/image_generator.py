@@ -50,8 +50,9 @@ def generate_ai_scene_image(
     output_dir: Optional[Path] = None,
     api_key: Optional[str] = None,
     preferred_model: Optional[str] = None,
+    aspect_ratio: str = "9:16",
 ) -> Optional[Path]:
-    """Generate a custom 9:16 photorealistic image for a scene using Google Imagen 3.
+    """Generate a custom photorealistic image for a scene using Google Imagen 3.
 
     Args:
         scene_id: The scene index (e.g. 1, 2, 3).
@@ -60,6 +61,7 @@ def generate_ai_scene_image(
         output_dir: Target directory to save the generated image file.
         api_key: Optional override for Gemini API Key.
         preferred_model: Optional override for preferred Imagen model name.
+        aspect_ratio: Aspect ratio string (e.g. "9:16" for shorts, "16:9" for horizontal).
 
     Returns:
         Path to the saved image file on success, or None on failure/quota limit.
@@ -80,7 +82,7 @@ def generate_ai_scene_image(
         return None
 
     prompt = build_cinematic_prompt(visual_description, topic)
-    logger.info("Requesting Imagen 3 visual for Scene %d (prompt length: %d chars)...", scene_id, len(prompt))
+    logger.info("Requesting Imagen 3 visual for Scene %d (%s, prompt length: %d chars)...", scene_id, aspect_ratio, len(prompt))
 
     models_to_try = [preferred_model] if preferred_model else []
     for m in IMAGEN_MODELS:
@@ -95,7 +97,7 @@ def generate_ai_scene_image(
                 prompt=prompt,
                 config=types.GenerateImagesConfig(
                     number_of_images=1,
-                    aspect_ratio="9:16",
+                    aspect_ratio=aspect_ratio,
                     person_generation="ALLOW_ADULT",
                     output_mime_type="image/jpeg",
                     output_compression_quality=92,

@@ -29,6 +29,7 @@ def upload_video_to_youtube(
     privacy_status: str = "public",
     category_id: str = "24",  # 24 = Entertainment, 27 = Education
     chunk_size_bytes: int = 1024 * 1024 * 5,  # 5MB chunks
+    video_format: str = "short",
 ) -> YouTubeUploadResult:
     """Upload a video file to YouTube via YouTube Data API v3 resumable upload.
 
@@ -41,6 +42,7 @@ def upload_video_to_youtube(
         privacy_status: 'public', 'unlisted', or 'private'.
         category_id: YouTube numeric category ID.
         chunk_size_bytes: Resumable chunk upload size.
+        video_format: 'short' for YouTube Shorts or 'long' for standard video.
 
     Returns:
         YouTubeUploadResult: Details of the published video.
@@ -122,7 +124,10 @@ def upload_video_to_youtube(
                     # Upload complete!
                     response_data = upload_res.json()
                     video_id = response_data.get("id")
-                    youtube_url = f"https://www.youtube.com/shorts/{video_id}"
+                    if video_format == "long":
+                        youtube_url = f"https://www.youtube.com/watch?v={video_id}"
+                    else:
+                        youtube_url = f"https://www.youtube.com/shorts/{video_id}"
                     logger.info("SUCCESS! Video published to YouTube: %s", youtube_url)
                     return YouTubeUploadResult(
                         video_id=video_id,

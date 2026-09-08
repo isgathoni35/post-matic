@@ -6,11 +6,14 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export interface GenerateVideoPayload {
   topic: string;
+  duration?: number;
   target_duration?: number;
   voice?: string;
   user_id?: string;
   publish_youtube?: boolean;
   privacy?: string;
+  video_format?: "short" | "long";
+  target_platform?: "youtube" | "tiktok" | "instagram";
 }
 
 export interface VideoJobResponse {
@@ -122,7 +125,66 @@ export async function getYouTubeAuthUrl(userId?: string): Promise<{ auth_url: st
   });
 
   if (!response.ok) {
-    throw new Error("Failed to generate YouTube authorization URL");
+    let errMsg = "Failed to generate YouTube authorization URL";
+    try {
+      const errData = await response.json();
+      if (errData.detail) errMsg = typeof errData.detail === "string" ? errData.detail : JSON.stringify(errData.detail);
+    } catch {
+      // ignore
+    }
+    throw new Error(errMsg);
+  }
+
+  return response.json();
+}
+
+/**
+ * Fetches the TikTok OAuth consent URL.
+ */
+export async function getTikTokAuthUrl(userId?: string): Promise<{ auth_url: string; platform: string }> {
+  const params = userId ? `?user_id=${encodeURIComponent(userId)}` : "";
+  const response = await fetch(`${API_BASE_URL}/api/social/tiktok/auth-url${params}`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    let errMsg = "Failed to generate TikTok authorization URL";
+    try {
+      const errData = await response.json();
+      if (errData.detail) errMsg = typeof errData.detail === "string" ? errData.detail : JSON.stringify(errData.detail);
+    } catch {
+      // ignore
+    }
+    throw new Error(errMsg);
+  }
+
+  return response.json();
+}
+
+/**
+ * Fetches the Instagram/Meta OAuth consent URL.
+ */
+export async function getInstagramAuthUrl(userId?: string): Promise<{ auth_url: string; platform: string }> {
+  const params = userId ? `?user_id=${encodeURIComponent(userId)}` : "";
+  const response = await fetch(`${API_BASE_URL}/api/social/instagram/auth-url${params}`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    let errMsg = "Failed to generate Instagram authorization URL";
+    try {
+      const errData = await response.json();
+      if (errData.detail) errMsg = typeof errData.detail === "string" ? errData.detail : JSON.stringify(errData.detail);
+    } catch {
+      // ignore
+    }
+    throw new Error(errMsg);
   }
 
   return response.json();
@@ -165,16 +227,23 @@ export interface PublishVideoResult {
   status: string;
   message: string;
   video_id?: string;
+  publish_id?: string;
+  media_id?: string;
   youtube_url?: string;
+  tiktok_url?: string;
+  instagram_url?: string;
   title?: string;
+  caption?: string;
   privacy_status?: string;
+  platform?: string;
 }
 
 /**
- * Publishes an existing completed video to YouTube Shorts.
+ * Publishes an existing completed video to a connected social platform ('youtube', 'tiktok', 'instagram').
  */
-export async function publishVideoToYouTube(
+export async function publishVideoToPlatform(
   jobId: string,
+  platform: "youtube" | "tiktok" | "instagram",
   userId?: string,
   privacy: string = "public"
 ): Promise<PublishVideoResult> {
@@ -185,13 +254,13 @@ export async function publishVideoToYouTube(
     },
     body: JSON.stringify({
       user_id: userId,
-      platform: "youtube",
+      platform,
       privacy,
     }),
   });
 
   if (!response.ok) {
-    let errMsg = "Failed to publish video to YouTube";
+    let errMsg = `Failed to publish video to ${platform}`;
     try {
       const errData = await response.json();
       if (errData.detail) {
@@ -204,4 +273,15 @@ export async function publishVideoToYouTube(
   }
 
   return response.json();
+}
+
+/**
+ * Publishes an existing completed video to YouTube Shorts (legacy alias).
+ */
+export async function publishVideoToYouTube(
+  jobId: string,
+  userId?: string,
+  privacy: string = "public"
+): Promise<PublishVideoResult> {
+  return publishVideoToPlatform(jobId, "youtube", userId, privacy);
 }

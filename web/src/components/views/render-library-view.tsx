@@ -20,7 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { BrandIcon } from "@/components/ui/brand-logo";
-import { VideoJobResponse, publishVideoToYouTube } from "@/lib/api";
+import { VideoJobResponse, publishVideoToPlatform } from "@/lib/api";
 import { toast } from "sonner";
 
 interface RenderLibraryViewProps {
@@ -42,7 +42,7 @@ export function RenderLibraryView({
 }: RenderLibraryViewProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedModalVideo, setSelectedModalVideo] = useState<VideoJobResponse | null>(null);
-  const [isPublishing, setIsPublishing] = useState(false);
+  const [publishingPlatform, setPublishingPlatform] = useState<string | null>(null);
 
   const completedJobs = jobs.filter(
     (j) => j.status === "completed" && j.video_url
@@ -60,28 +60,38 @@ export function RenderLibraryView({
     toast.success("Video URL copied to clipboard!");
   };
 
-  const handlePublishToYouTube = async (jobId: string) => {
-    setIsPublishing(true);
-    toast.loading("Publishing to YouTube Shorts...", { id: `publish-${jobId}` });
+  const handlePublish = async (jobId: string, platform: "youtube" | "tiktok" | "instagram") => {
+    setPublishingPlatform(platform);
+    const platformNames: Record<string, string> = {
+      youtube: "YouTube Shorts",
+      tiktok: "TikTok",
+      instagram: "Instagram Reels",
+    };
+    const platformLabel = platformNames[platform] || platform;
+    toast.loading(`Publishing to ${platformLabel}...`, { id: `publish-${jobId}-${platform}` });
     try {
-      const res = await publishVideoToYouTube(jobId, userId);
-      toast.success("Published to YouTube Shorts!", {
-        id: `publish-${jobId}`,
-        description: res.title || "Your video is live on YouTube.",
-        action: res.youtube_url ? {
-          label: "View Short",
-          onClick: () => window.open(res.youtube_url, "_blank"),
+      const res = await publishVideoToPlatform(jobId, platform, userId);
+      const viewUrl = res.youtube_url || res.tiktok_url || res.instagram_url;
+      toast.success(`Published to ${platformLabel}!`, {
+        id: `publish-${jobId}-${platform}`,
+        description: res.title || res.caption || `Your video is live on ${platformLabel}.`,
+        action: viewUrl ? {
+          label: `View on ${platformLabel}`,
+          onClick: () => window.open(viewUrl, "_blank"),
         } : undefined,
       });
       if (onRefreshJobs) onRefreshJobs();
-      setSelectedModalVideo(null);
     } catch (err: any) {
-      toast.error("Publishing Failed", {
-        id: `publish-${jobId}`,
-        description: err.message || "Failed to publish to YouTube. Make sure your channel is linked in Settings.",
+      toast.error(`Publishing Failed`, {
+        id: `publish-${jobId}-${platform}`,
+        description: err.message || `Failed to publish to ${platformLabel}. Check your connected accounts.`,
+        action: {
+          label: "Distribution Channels",
+          onClick: onOpenSocialModal,
+        },
       });
     } finally {
-      setIsPublishing(false);
+      setPublishingPlatform(null);
     }
   };
 
@@ -317,6 +327,7 @@ export function RenderLibraryView({
                           Download MP4
                         </Button>
                       </a>
+                      {/* YouTube */}
                       {modalRawUrl.includes("youtube.com") ? (
                         <a
                           href={modalRawUrl}
@@ -327,22 +338,82 @@ export function RenderLibraryView({
                           <Button
                             variant="primary"
                             size="sm"
-                            className="w-full text-xs h-9 font-semibold bg-red-600 hover:bg-red-700"
+                            className="w-full text-xs h-9 font-semibold bg-red-600 hover:bg-red-700 text-white"
                           >
                             <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
-                            View on YouTube
+                            YouTube
                           </Button>
                         </a>
                       ) : (
                         <Button
                           variant="primary"
                           size="sm"
-                          onClick={() => handlePublishToYouTube(modalJobId)}
-                          isLoading={isPublishing}
-                          className="flex-1 sm:flex-none text-xs h-9 font-semibold shadow-lg shadow-amber-500/20"
+                          onClick={() => handlePublish(modalJobId, "youtube")}
+                          isLoading={publishingPlatform === "youtube"}
+                          className="flex-1 sm:flex-none text-xs h-9 font-semibold bg-red-600 hover:bg-red-700 text-white"
                         >
                           <Share2 className="h-3.5 w-3.5 mr-1.5" />
-                          Publish to YouTube
+                          YouTube
+                        </Button>
+                      )}
+
+                      {/* TikTok */}
+                      {modalRawUrl.includes("tiktok.com") ? (
+                        <a
+                          href={modalRawUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex-1 sm:flex-none"
+                        >
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            className="w-full text-xs h-9 font-semibold bg-cyan-600 hover:bg-cyan-700 text-white"
+                          >
+                            <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
+                            TikTok
+                          </Button>
+                        </a>
+                      ) : (
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          onClick={() => handlePublish(modalJobId, "tiktok")}
+                          isLoading={publishingPlatform === "tiktok"}
+                          className="flex-1 sm:flex-none text-xs h-9 font-semibold bg-cyan-600 hover:bg-cyan-700 text-white"
+                        >
+                          <Share2 className="h-3.5 w-3.5 mr-1.5" />
+                          TikTok
+                        </Button>
+                      )}
+
+                      {/* Instagram Reels */}
+                      {modalRawUrl.includes("instagram.com") ? (
+                        <a
+                          href={modalRawUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex-1 sm:flex-none"
+                        >
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            className="w-full text-xs h-9 font-semibold bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white"
+                          >
+                            <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
+                            Instagram
+                          </Button>
+                        </a>
+                      ) : (
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          onClick={() => handlePublish(modalJobId, "instagram")}
+                          isLoading={publishingPlatform === "instagram"}
+                          className="flex-1 sm:flex-none text-xs h-9 font-semibold bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white"
+                        >
+                          <Share2 className="h-3.5 w-3.5 mr-1.5" />
+                          Instagram
                         </Button>
                       )}
                     </>

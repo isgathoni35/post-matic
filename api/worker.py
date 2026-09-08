@@ -29,6 +29,8 @@ def execute_video_pipeline_job(
     user_id: Optional[str] = None,
     publish_youtube: bool = False,
     privacy: str = "public",
+    video_format: str = "short",
+    target_platform: str = "youtube",
 ) -> None:
     """Execute the end-to-end 5-stage video pipeline in a background task.
 
@@ -37,7 +39,13 @@ def execute_video_pipeline_job(
     Otherwise, executes the rendering locally with graceful fallback.
     """
     selected_voice = voice or DEFAULT_VOICE
-    logger.info("Starting background video generation job '%s' for topic '%s'", job_id, topic)
+    logger.info(
+        "Starting background video generation job '%s' for topic '%s' (format: %s, platform: %s)",
+        job_id,
+        topic,
+        video_format,
+        target_platform,
+    )
 
     # 1. Check if GitHub Actions Cloud Compute offloading is enabled
     if is_github_dispatch_enabled():
@@ -57,6 +65,8 @@ def execute_video_pipeline_job(
                     user_id=user_id,
                     publish_youtube=publish_youtube,
                     privacy=privacy,
+                    video_format=video_format,
+                    target_platform=target_platform,
                 )
             )
             logger.info(
@@ -100,10 +110,12 @@ def execute_video_pipeline_job(
         )
         logger.info("[%s] Stage 2/4: Synthesizing voiceover with '%s'...", job_id, selected_voice)
         tts_dir = TEMP_DIR / "tts" / job_id
+        aspect_ratio = "16:9" if video_format == "long" else "9:16"
         tts_result = synthesize_script(
             script=script,
             voice=selected_voice,
             output_dir=tts_dir,
+            aspect_ratio=aspect_ratio,
         )
         update_video_job_record(
             job_id=job_id,
@@ -122,12 +134,13 @@ def execute_video_pipeline_job(
             status=VideoJobStatus.SOURCING_MEDIA,
             progress_pct=60,
         )
-        logger.info("[%s] Stage 3/4: Sourcing media (Pexels Stock + Google Imagen 3 AI Fallback)...", job_id)
+        logger.info("[%s] Stage 3/4: Sourcing media (format: %s)...", job_id, video_format)
         media_dir = TEMP_DIR / "media" / job_id
         downloaded_videos = fetch_script_media(
             script=script,
             scene_durations=scene_durations,
             output_dir=media_dir,
+            video_format=video_format,
         )
         update_video_job_record(
             job_id=job_id,
@@ -145,20 +158,22 @@ def execute_video_pipeline_job(
         dest_output_path = OUTPUT_DIR / output_filename
         render_work_dir = TEMP_DIR / "render" / job_id
 
-        logger.info("[%s] Stage 4/4: Assembling final video and burning subtitles...", job_id)
+        logger.info("[%s] Stage 4/4: Assembling final %s video and burning subtitles...", job_id, video_format)
         final_video_path = render_video(
             downloaded_videos=downloaded_videos,
             tts_result=tts_result,
             output_path=dest_output_path,
             render_dir=render_work_dir,
+            video_format=video_format,
         )
 
         file_size = final_video_path.stat().st_size
         video_url = f"/output/{output_filename}"
 
         # OPTIONAL: Direct Social Publishing (YouTube)
-        if publish_youtube:
-            logger.info("[%s] Auto-publishing rendered video to YouTube Shorts...", job_id)
+        if publish_youtube and target_platform == "youtube":
+            is_short = (video_format == "short")
+            logger.info("[%s] Auto-publishing rendered video to YouTube (%s)...", job_id, "Shorts" if is_short else "Video")
             try:
                 from api.services.token_manager import ensure_valid_access_token
                 from engine.social.youtube_uploader import upload_video_to_youtube
@@ -167,16 +182,23 @@ def execute_video_pipeline_job(
                 yt_acc = next((a for a in accounts if a.get("platform") == "youtube"), None)
                 if yt_acc:
                     access_token, was_refreshed = asyncio.run(ensure_valid_access_token(yt_acc))
+                    tags_str = ' #'.join(script.tags) if script.tags else ""
+                    if is_short:
+                        desc = f"{script.description}\n\n#Shorts #{tags_str}"
+                    else:
+                        desc = f"{script.description}\n\n#{tags_str}" if tags_str else script.description
+
                     upload_res = upload_video_to_youtube(
                         video_file_path=final_video_path,
                         title=script.title,
-                        description=f"{script.description}\n\n#Shorts #{' #'.join(script.tags)}",
+                        description=desc,
                         tags=script.tags,
                         access_token=access_token,
                         privacy_status=privacy,
+                        video_format=video_format,
                     )
                     video_url = upload_res.youtube_url
-                    logger.info("[%s] Published to YouTube Shorts: %s", job_id, video_url)
+                    logger.info("[%s] Published to YouTube: %s", job_id, video_url)
                 else:
                     logger.warning("[%s] No connected YouTube account found for user '%s'", job_id, user_id)
             except Exception as pub_exc:

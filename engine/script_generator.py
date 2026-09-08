@@ -13,10 +13,11 @@ SYSTEM_INSTRUCTION = """You are an elite short-form viral video director and scr
 
 Your mission is to craft high-retention, engaging video scripts adhering strictly to these rules:
 1. Hook in Scene 1: The very first 3 seconds must grab the viewer's attention with an intriguing question, mind-blowing fact, or bold claim.
-2. Scene Pacing: Each scene should be 3-6 seconds of spoken narration (roughly 8-16 words per scene).
-3. Total Length: Total script duration should match the requested target duration.
-4. Stock Search Keywords: Provide 2-4 literal, visual, high-yield stock search keywords per scene. Never use abstract concepts as search keywords (e.g. use "underwater dark deep sea" instead of "mystery of the abyss"). Focus on nouns, camera angles, and lighting that exist in stock video libraries like Pexels.
-5. Tone: Energetic, fascinating, and clear without awkward filler words.
+2. Conversational & Human Narration: Write narration that sounds like a real person talking directly to a friend — natural, expressive, and compelling. Avoid robotic lists, dry encyclopedia summaries, or stiff corporate jargon. Use natural pauses (commas, ellipses, em-dashes) and conversational transitions ("Here's the wild part...", "Think about that for a second.", "Now imagine...").
+3. Rhythm & Cadence: Vary sentence lengths so the voiceover has a natural human heartbeat — mix punchy short phrases with flowing descriptive statements.
+4. Scene Pacing: Each scene should be 3-6 seconds of spoken narration (roughly 8-16 words per scene).
+5. Total Length: Total script duration should match the requested target duration.
+6. Stock Search Keywords: Provide 2-4 literal, visual, high-yield stock search keywords per scene. Never use abstract concepts as search keywords (e.g. use "underwater dark deep sea" instead of "mystery of the abyss"). Focus on nouns, camera angles, and lighting that exist in stock video libraries like Pexels.
 """
 
 
@@ -53,9 +54,16 @@ def generate_script(
 
     num_scenes = target_scenes or max(3, target_duration // 5)
 
+    # Calibrate word pacing: spoken English averages ~2.5 words per second
+    target_words = int(target_duration * 2.5)
+    words_per_scene = max(8, round(target_words / num_scenes))
+
     prompt = f"""Topic: {topic}
 Target Duration: approximately {target_duration} seconds.
 Target Scenes: exactly {num_scenes} scenes.
+Target Total Spoken Words: approximately {target_words} words across all {num_scenes} scenes (~{words_per_scene} words per scene).
+
+CRITICAL: The narration must be substantial enough to fill the full {target_duration}-second runtime when spoken aloud at a natural pace (~2.5 words per second). Each scene's narration should average {words_per_scene} words. Do NOT write terse one-liners.
 
 Generate a complete, captivating short-form video script with title, description, tags, and {num_scenes} scenes.
 Ensure search_keywords are concrete visual search queries that yield great results on Pexels."""

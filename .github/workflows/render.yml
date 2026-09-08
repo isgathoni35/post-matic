@@ -40,6 +40,23 @@ on:
           - unlisted
           - private
         default: 'public'
+      format:
+        description: 'Video format/aspect ratio (short for 9:16, long for 16:9)'
+        required: false
+        type: choice
+        options:
+          - short
+          - long
+        default: 'short'
+      platform:
+        description: 'Target publishing platform (youtube, tiktok, instagram)'
+        required: false
+        type: choice
+        options:
+          - youtube
+          - tiktok
+          - instagram
+        default: 'youtube'
 
   repository_dispatch:
     types: [render_video]
@@ -90,7 +107,9 @@ jobs:
               --job-id "${{ github.event.client_payload.job_id }}" \
               --user-id "${{ github.event.client_payload.user_id }}" \
               ${{ github.event.client_payload.publish_youtube && '--publish-youtube' || '' }} \
-              --privacy "${{ github.event.client_payload.privacy || 'public' }}"
+              --privacy "${{ github.event.client_payload.privacy || 'public' }}" \
+              --format "${{ github.event.client_payload.video_format || 'short' }}" \
+              --platform "${{ github.event.client_payload.target_platform || 'youtube' }}"
           else
             python cloud_render_and_publish.py \
               --topic "${{ inputs.topic }}" \
@@ -99,7 +118,9 @@ jobs:
               ${{ inputs.job_id && format('--job-id "{0}"', inputs.job_id) || '' }} \
               ${{ inputs.user_id && format('--user-id "{0}"', inputs.user_id) || '' }} \
               ${{ inputs.publish_youtube && '--publish-youtube' || '' }} \
-              --privacy "${{ inputs.privacy }}"
+              --privacy "${{ inputs.privacy }}" \
+              --format "${{ inputs.format }}" \
+              --platform "${{ inputs.platform }}"
           fi
 
       - name: Upload Output Video Artifact

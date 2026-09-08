@@ -1,7 +1,7 @@
 """Pydantic schemas for FastAPI request and response payloads."""
 from enum import Enum
 from typing import Optional
-from pydantic import BaseModel, Field
+from pydantic import AliasChoices, BaseModel, Field
 
 
 class VideoJobStatus(str, Enum):
@@ -29,6 +29,7 @@ class VideoGenerateRequest(BaseModel):
         ge=10,
         le=120,
         description="Target duration of video in seconds",
+        validation_alias=AliasChoices("duration", "target_duration"),
     )
     voice: Optional[str] = Field(
         default=None,
@@ -52,6 +53,14 @@ class VideoGenerateRequest(BaseModel):
         default=None,
         description="Owner user UUID for social account credentials lookup",
     )
+    video_format: str = Field(
+        default="short",
+        description="Video aspect ratio format ('short' for 9:16 vertical or 'long' for 16:9 widescreen)",
+    )
+    target_platform: str = Field(
+        default="youtube",
+        description="Destination platform ('youtube', 'tiktok', 'instagram')",
+    )
 
 
 class PublishVideoRequest(BaseModel):
@@ -62,7 +71,7 @@ class PublishVideoRequest(BaseModel):
     )
     platform: str = Field(
         default="youtube",
-        description="Target social platform ('youtube')",
+        description="Target social platform ('youtube', 'tiktok', 'instagram')",
     )
     privacy: str = Field(
         default="public",
@@ -86,15 +95,15 @@ class VideoJobResponse(BaseModel):
 
 class SocialAuthUrlResponse(BaseModel):
     """OAuth consent authorization URL payload."""
-    auth_url: str = Field(..., description="Google OAuth 2.0 authorization URL")
-    platform: str = Field(default="youtube", description="Social platform name")
+    auth_url: str = Field(..., description="OAuth 2.0 authorization URL")
+    platform: str = Field(default="youtube", description="Social platform name ('youtube', 'tiktok', 'instagram')")
 
 
 class SocialAccountResponse(BaseModel):
     """Connected social media account record."""
     id: str = Field(..., description="Unique UUID of the connected account record")
     user_id: Optional[str] = Field(None, description="Owner user UUID")
-    platform: str = Field(..., description="Platform name ('youtube' or 'tiktok')")
+    platform: str = Field(..., description="Platform name ('youtube', 'tiktok', 'instagram')")
     account_name: Optional[str] = Field(None, description="Display name / Channel title")
     has_refresh_token: bool = Field(default=True, description="Whether a persistent refresh token is stored")
     token_expires_at: Optional[str] = Field(None, description="ISO timestamp of token expiration")

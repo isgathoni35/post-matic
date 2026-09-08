@@ -233,19 +233,25 @@ def render_video(
     tts_result: TTSResult,
     output_path: Optional[Path] = None,
     render_dir: Optional[Path] = None,
+    video_format: str = "short",
 ) -> Path:
     """Orchestrates the entire FFmpeg rendering pipeline.
 
     1. Trims and normalizes each downloaded scene video to match scene audio duration.
     2. Concatenates all scene clips into a single video track.
     3. Overlays narration audio and burns animated ASS subtitles.
-    4. Produces a production-ready 1080x1920 vertical video MP4.
+    4. Produces a production-ready MP4 (1080x1920 for short, 1920x1080 for long).
     """
     work_dir = render_dir or (TEMP_DIR / "render")
     work_dir.mkdir(parents=True, exist_ok=True)
 
     final_output = output_path or (OUTPUT_DIR / "final_video.mp4")
     final_output.parent.mkdir(parents=True, exist_ok=True)
+
+    if video_format == "long":
+        target_width, target_height = 1920, 1080
+    else:
+        target_width, target_height = 1080, 1920
 
     # Map scene audio durations
     scene_durations = {
@@ -266,14 +272,19 @@ def render_video(
 
         norm_path = work_dir / f"scene_{vid.scene_id}_norm.mp4"
         logger.info(
-            "Rendering Scene %d: trimming to %.2fs and resizing to 1080x1920...",
+            "Rendering Scene %d: trimming to %.2fs and resizing to %dx%d (%s)...",
             vid.scene_id,
             dur,
+            target_width,
+            target_height,
+            video_format,
         )
         process_scene_clip(
             video_path=vid.file_path,
             target_duration=dur,
             output_path=norm_path,
+            target_width=target_width,
+            target_height=target_height,
         )
         normalized_clips.append(norm_path)
 

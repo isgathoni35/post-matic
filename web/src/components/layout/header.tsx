@@ -24,14 +24,6 @@ export function Header({ onOpenSocialModal }: HeaderProps = {}) {
         <BrandLogo size="sm" badgeText="Studio" />
       </div>
 
-      {/* Center / Status */}
-      <div className="hidden md:flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-xs text-zinc-300">
-        <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-        <span className="font-medium text-white">Engine Active</span>
-        <span className="text-zinc-600">•</span>
-        <span className="text-zinc-400">9:16 HD 60FPS</span>
-      </div>
-
       {/* Right side actions */}
       <div className="flex items-center gap-3">
         <Link
