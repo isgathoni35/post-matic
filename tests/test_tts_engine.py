@@ -8,6 +8,7 @@ from engine.tts_engine import (
     generate_ass_subtitles,
     synthesize_scene,
     synthesize_script,
+    apply_studio_mastering,
 )
 
 
@@ -116,10 +117,33 @@ def test_concatenate_audio_files(tmp_path: Path):
     assert out.exists()
     assert out.stat().st_size > 0
 
-    import tempfile
-    with tempfile.TemporaryDirectory() as td:
-        p = Path(td)
-        test_format_ass_time()
-        test_generate_ass_subtitles(p)
-        test_synthesize_script_end_to_end(p)
-    print("All TTS tests passed successfully!")
+
+def test_apply_studio_mastering(tmp_path: Path):
+    """Verify broadcast vocal mastering produces rich polished audio without duration drift."""
+    from engine.tts_engine import get_audio_duration, synthesize_scene
+    scene = synthesize_scene(1, "Broadcast audio mastering test.", output_dir=tmp_path)
+    initial_dur = get_audio_duration(scene.audio_path)
+
+    mastered = tmp_path / "scene_1_mastered.mp3"
+    apply_studio_mastering(scene.audio_path, mastered)
+
+    assert mastered.exists()
+    assert mastered.stat().st_size > 0
+    mastered_dur = get_audio_duration(mastered)
+    # Mastering must preserve speech timing within 0.15s (no drift)
+    assert abs(mastered_dur - initial_dur) < 0.15
+
+
+def test_brian_v2_voice_synthesis(tmp_path: Path):
+    """Verify en-US-BrianMultilingualNeural synthesizes with word boundaries and natural timing."""
+    from engine.tts_engine import synthesize_scene
+    scene = synthesize_scene(
+        scene_id=1,
+        narration="Here's the wild part — honey in Egyptian tombs is still edible!",
+        voice="en-US-BrianMultilingualNeural",
+        output_dir=tmp_path,
+    )
+    assert scene.audio_path.exists()
+    assert scene.audio_path.stat().st_size > 0
+    assert scene.duration > 0.0
+    assert len(scene.words) >= 8

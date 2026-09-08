@@ -80,9 +80,45 @@ def test_render_video_end_to_end(tmp_path: Path):
     assert "Audio: aac" in probe.stderr
 
 
-if __name__ == "__main__":
-    import tempfile
-    with tempfile.TemporaryDirectory() as td:
-        test_get_ffmpeg_binary()
-        test_render_video_end_to_end(Path(td))
-    print("All video renderer tests passed successfully!")
+def test_burn_audio_and_subtitles_with_bgm(tmp_path: Path):
+    """Verify that burn_audio_and_subtitles correctly mixes ambient BGM with narration."""
+    ffmpeg_bin = get_ffmpeg_binary()
+
+    # Generate small 3-second dummy video track
+    dummy_video = tmp_path / "dummy_video.mp4"
+    subprocess.run(
+        [ffmpeg_bin, "-y", "-f", "lavfi", "-i", "color=c=black:s=1080x1920:d=3", "-c:v", "libx264", "-t", "3", str(dummy_video)],
+        check=True,
+        capture_output=True,
+    )
+
+    # Generate small dummy narration audio
+    dummy_audio = tmp_path / "dummy_audio.mp3"
+    subprocess.run(
+        [ffmpeg_bin, "-y", "-f", "lavfi", "-i", "sine=frequency=440:duration=3", "-c:a", "libmp3lame", "-b:a", "128k", str(dummy_audio)],
+        check=True,
+        capture_output=True,
+    )
+
+    # Dummy BGM
+    dummy_bgm = tmp_path / "dummy_bgm.mp3"
+    subprocess.run(
+        [ffmpeg_bin, "-y", "-f", "lavfi", "-i", "sine=frequency=220:duration=5", "-c:a", "libmp3lame", "-b:a", "128k", str(dummy_bgm)],
+        check=True,
+        capture_output=True,
+    )
+
+    output_mux = tmp_path / "final_with_bgm.mp4"
+    res = burn_audio_and_subtitles(
+        video_track_path=dummy_video,
+        audio_path=dummy_audio,
+        subtitle_path=None,
+        output_path=output_mux,
+        bgm_path=dummy_bgm,
+        bgm_volume=0.08,
+    )
+
+    assert res.exists()
+    assert res.stat().st_size > 10_000
+    probe = subprocess.run([ffmpeg_bin, "-i", str(res)], capture_output=True, text=True)
+    assert "Audio: aac" in probe.stderr

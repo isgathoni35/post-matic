@@ -24,26 +24,37 @@ from engine.schema import VideoScript
 logger = logging.getLogger(__name__)
 
 # Popular, expressive voices for viral short-form content
-DEFAULT_VOICE = "en-US-ChristopherNeural"
+# Brian is the top-tier conversational male voice; Ava is the top-tier warm female voice
+DEFAULT_VOICE = "en-US-BrianMultilingualNeural"
 AVAILABLE_VOICES = {
-    "christopher": "en-US-ChristopherNeural",  # Authoritative, deep, engaging male
-    "guy": "en-US-GuyNeural",                  # Energetic, dynamic male
-    "eric": "en-US-EricNeural",                # Friendly, articulate male
-    "jenny": "en-US-JennyNeural",              # Natural, clear female
-    "sonia": "en-GB-SoniaNeural",              # British narrative female
-    "aria": "en-US-AriaNeural",                # Confident, narrative female
-    "michelle": "en-US-MichelleNeural",        # Professional female
+    # Next-Gen V2 Expressive Multilingual Neural Voices (Most Human-Like)
+    "brian": "en-US-BrianMultilingualNeural",      # Deep, conversational viral narrator (Male) - #1 Recommended
+    "ava": "en-US-AvaMultilingualNeural",          # Warm, natural, expressive storyteller (Female)
+    "andrew": "en-US-AndrewMultilingualNeural",    # Dynamic, punchy podcast host (Male)
+    "emma": "en-US-EmmaMultilingualNeural",        # Friendly, clear, articulate (Female)
+    # Classic Neural Voices
+    "christopher": "en-US-ChristopherNeural",      # Authoritative, cinematic male
+    "guy": "en-US-GuyNeural",                      # Energetic, dynamic male
+    "eric": "en-US-EricNeural",                    # Friendly, articulate male
+    "jenny": "en-US-JennyNeural",                  # Natural, clear female
+    "sonia": "en-GB-SoniaNeural",                  # British narrative female
+    "aria": "en-US-AriaNeural",                    # Confident, narrative female
+    "michelle": "en-US-MichelleNeural",            # Professional female
 }
 
-# Voice-specific prosody presets to prevent robotic monotone
+# Voice-specific prosody presets to ensure natural human inflection and cadence
 VOICE_PROSODY_PRESETS = {
-    "en-US-ChristopherNeural": {"rate": "-4%", "pitch": "-2Hz", "volume": "+0%"},  # Cinematic, deliberate, deep
-    "en-US-GuyNeural":         {"rate": "+2%", "pitch": "+0Hz", "volume": "+5%"},  # Energetic, modern hook
-    "en-US-EricNeural":        {"rate": "-2%", "pitch": "-1Hz", "volume": "+0%"},  # Authoritative, articulate
-    "en-US-JennyNeural":       {"rate": "+0%", "pitch": "+2Hz", "volume": "+0%"},  # Warm, conversational
-    "en-GB-SoniaNeural":       {"rate": "-3%", "pitch": "-1Hz", "volume": "+0%"},  # Narrative storyteller
-    "en-US-AriaNeural":        {"rate": "-2%", "pitch": "+1Hz", "volume": "+0%"},  # Confident, narrative
-    "en-US-MichelleNeural":    {"rate": "-1%", "pitch": "+0Hz", "volume": "+0%"},  # Professional
+    "en-US-BrianMultilingualNeural": {"rate": "-1%", "pitch": "-1Hz", "volume": "+0%"},  # Natural, conversational, deep
+    "en-US-AvaMultilingualNeural":   {"rate": "+0%", "pitch": "+0Hz", "volume": "+0%"},  # Warm, authentic narrative
+    "en-US-AndrewMultilingualNeural":{"rate": "+1%", "pitch": "+0Hz", "volume": "+0%"},  # Punchy, dynamic podcast style
+    "en-US-EmmaMultilingualNeural":  {"rate": "-1%", "pitch": "+0Hz", "volume": "+0%"},  # Friendly, engaging storyteller
+    "en-US-ChristopherNeural":       {"rate": "-4%", "pitch": "-2Hz", "volume": "+0%"},  # Cinematic, deliberate, deep
+    "en-US-GuyNeural":               {"rate": "+2%", "pitch": "+0Hz", "volume": "+5%"},  # Energetic, modern hook
+    "en-US-EricNeural":              {"rate": "-2%", "pitch": "-1Hz", "volume": "+0%"},  # Authoritative, articulate
+    "en-US-JennyNeural":             {"rate": "+0%", "pitch": "+2Hz", "volume": "+0%"},  # Warm, conversational
+    "en-GB-SoniaNeural":             {"rate": "-3%", "pitch": "-1Hz", "volume": "+0%"},  # Narrative storyteller
+    "en-US-AriaNeural":              {"rate": "-2%", "pitch": "+1Hz", "volume": "+0%"},  # Confident, narrative
+    "en-US-MichelleNeural":          {"rate": "-1%", "pitch": "+0Hz", "volume": "+0%"},  # Professional
 }
 
 
@@ -176,6 +187,62 @@ def concatenate_audio_files(audio_files: List[Path], output_file: Path) -> Path:
         list_file.unlink(missing_ok=True)
 
     return output_file
+
+
+def apply_studio_mastering(
+    input_audio: Path,
+    output_audio: Optional[Path] = None,
+) -> Path:
+    """Apply broadcast vocal mastering chain via FFmpeg to give voice natural warmth, body, and polish.
+
+    Processing chain:
+    1. highpass=f=80: Removes subsonic rumble & synthetic low-end buzz.
+    2. equalizer=f=120: Adds warm chest resonance for a rich broadcast microphone feel.
+    3. equalizer=f=3200: Elevates presence and speech articulation.
+    4. equalizer=f=7500: De-ess harsh digital sibilance and metallic frequencies.
+    5. compand: Studio dynamic range compression for smooth, controlled volume.
+    6. loudnorm: EBU R128 broadcast loudness normalization (-16 LUFS).
+    """
+    dest_path = output_audio or input_audio.with_name(f"{input_audio.stem}_mastered{input_audio.suffix}")
+    dest_path.parent.mkdir(parents=True, exist_ok=True)
+
+    if not input_audio.exists():
+        raise FileNotFoundError(f"Cannot master non-existent audio: {input_audio}")
+
+    # Use a temporary intermediate if overwriting in place
+    temp_dest = dest_path if dest_path.resolve() != input_audio.resolve() else dest_path.with_suffix(".temp.mp3")
+
+    ffmpeg_bin = shutil.which("ffmpeg") or imageio_ffmpeg.get_ffmpeg_exe()
+    filter_chain = (
+        "highpass=f=80,"
+        "equalizer=f=120:width_type=o:width=2:g=3.5,"
+        "equalizer=f=3200:width_type=o:width=1.5:g=2.0,"
+        "equalizer=f=7500:width_type=o:width=1.5:g=-2.5,"
+        "compand=attacks=0.02:decays=0.1:points=-60/-60|-24/-18|-12/-8|0/-3:soft-knee=6,"
+        "loudnorm=I=-16:LRA=7:TP=-1.5"
+    )
+
+    cmd = [
+        ffmpeg_bin,
+        "-y",
+        "-i", str(input_audio),
+        "-af", filter_chain,
+        "-c:a", "libmp3lame",
+        "-b:a", "192k",
+        str(temp_dest),
+    ]
+
+    try:
+        subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if temp_dest.resolve() != dest_path.resolve():
+            shutil.move(str(temp_dest), str(dest_path))
+        return dest_path
+    except Exception as exc:
+        logger.warning("Studio audio mastering failed (falling back to unmastered audio): %s", exc)
+        temp_dest.unlink(missing_ok=True)
+        if dest_path.resolve() != input_audio.resolve():
+            shutil.copyfile(input_audio, dest_path)
+        return dest_path
 
 
 def format_ass_time(seconds: float) -> str:
@@ -443,8 +510,12 @@ def synthesize_script(
         time_offset += exact_duration
 
     # Produce clean, pop-free master audio using FFmpeg concat
+    raw_master_audio_path = target_dir / "narration_raw.mp3"
+    concatenate_audio_files(scene_audio_paths, raw_master_audio_path)
+
+    # Apply broadcast vocal mastering to add warmth, clarity, and EBU R128 loudness
     master_audio_path = target_dir / "narration_master.mp3"
-    concatenate_audio_files(scene_audio_paths, master_audio_path)
+    apply_studio_mastering(raw_master_audio_path, master_audio_path)
 
     # Master ASS subtitles with scene boundary isolation
     master_sub_path = target_dir / "subtitles.ass"

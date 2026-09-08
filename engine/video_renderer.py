@@ -5,7 +5,7 @@ from pathlib import Path
 import shutil
 import subprocess
 import sys
-from typing import List, Optional
+from typing import List, Optional, Union
 
 # Ensure project root is on sys.path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -186,43 +186,88 @@ def concatenate_clips(
     return output_path
 
 
+DEFAULT_BGM_PATH = PROJECT_ROOT / "assets" / "audio" / "cinematic_ambient.mp3"
+
+
 def burn_audio_and_subtitles(
     video_track_path: Path,
     audio_path: Path,
     subtitle_path: Optional[Path],
     output_path: Path,
+    bgm_path: Optional[Union[Path, str]] = None,
+    bgm_volume: float = 0.08,
     ffmpeg_bin: Optional[str] = None,
 ) -> Path:
-    """Combine video track with master audio and burn ASS animated subtitles."""
+    """Combine video track with master audio, optional ducked BGM, and burn ASS animated subtitles."""
     ffmpeg = ffmpeg_bin or get_ffmpeg_binary()
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    cmd = [
-        ffmpeg,
-        "-y",
-        "-i", str(video_track_path),
-        "-i", str(audio_path),
-    ]
+    has_bgm = bgm_path is not None and Path(bgm_path).exists()
 
-    if subtitle_path and subtitle_path.exists():
-        # Escape special characters for the FFmpeg filter syntax
-        sub_escaped = str(subtitle_path.resolve()).replace("\\", "/").replace(":", "\\:").replace("'", "\\'")
-        # Burn ASS subtitles directly onto the video stream using libass
+    if has_bgm:
+        cmd = [
+            ffmpeg,
+            "-y",
+            "-i", str(video_track_path),
+            "-i", str(audio_path),
+            "-stream_loop", "-1",
+            "-i", str(bgm_path),
+        ]
+        filter_parts = []
+        if subtitle_path and subtitle_path.exists():
+            sub_escaped = str(subtitle_path.resolve()).replace("\\", "/").replace(":", "\\:").replace("'", "\\'")
+            filter_parts.append(f"[0:v]ass='{sub_escaped}'[vout]")
+            v_map = "[vout]"
+        else:
+            v_map = "0:v"
+
+        # Duck BGM underneath master narration (-22dB volume bed) with subtle fade-in and mix
+        filter_parts.append(
+            f"[2:a]volume={bgm_volume},afade=t=in:ss=0:d=1[bgm];"
+            f"[1:a][bgm]amix=inputs=2:duration=first:dropout_transition=2[aout]"
+        )
+
         cmd.extend([
-            "-vf", f"ass='{sub_escaped}'",
+            "-filter_complex", ";".join(filter_parts),
+            "-map", v_map,
+            "-map", "[aout]",
+            "-c:v", "libx264",
+            "-preset", "medium",
+            "-crf", "19",
+            "-c:a", "aac",
+            "-b:a", "192k",
+            "-pix_fmt", "yuv420p",
+            "-movflags", "+faststart",
+            "-shortest",
+            str(output_path),
         ])
+    else:
+        cmd = [
+            ffmpeg,
+            "-y",
+            "-i", str(video_track_path),
+            "-i", str(audio_path),
+        ]
 
-    cmd.extend([
-        "-c:v", "libx264",
-        "-preset", "medium",
-        "-crf", "19",
-        "-c:a", "aac",
-        "-b:a", "192k",
-        "-pix_fmt", "yuv420p",
-        "-movflags", "+faststart",
-        "-shortest",
-        str(output_path),
-    ])
+        if subtitle_path and subtitle_path.exists():
+            # Escape special characters for the FFmpeg filter syntax
+            sub_escaped = str(subtitle_path.resolve()).replace("\\", "/").replace(":", "\\:").replace("'", "\\'")
+            # Burn ASS subtitles directly onto the video stream using libass
+            cmd.extend([
+                "-vf", f"ass='{sub_escaped}'",
+            ])
+
+        cmd.extend([
+            "-c:v", "libx264",
+            "-preset", "medium",
+            "-crf", "19",
+            "-c:a", "aac",
+            "-b:a", "192k",
+            "-pix_fmt", "yuv420p",
+            "-movflags", "+faststart",
+            "-shortest",
+            str(output_path),
+        ])
 
     run_ffmpeg_command(cmd, error_context="Burning audio and subtitles into final MP4")
     return output_path
@@ -234,12 +279,14 @@ def render_video(
     output_path: Optional[Path] = None,
     render_dir: Optional[Path] = None,
     video_format: str = "short",
+    bgm_path: Optional[Union[Path, str, bool]] = None,
+    bgm_volume: float = 0.08,
 ) -> Path:
     """Orchestrates the entire FFmpeg rendering pipeline.
 
     1. Trims and normalizes each downloaded scene video to match scene audio duration.
     2. Concatenates all scene clips into a single video track.
-    3. Overlays narration audio and burns animated ASS subtitles.
+    3. Overlays narration audio, ducks ambient background music, and burns animated ASS subtitles.
     4. Produces a production-ready MP4 (1080x1920 for short, 1920x1080 for long).
     """
     work_dir = render_dir or (TEMP_DIR / "render")
@@ -247,6 +294,15 @@ def render_video(
 
     final_output = output_path or (OUTPUT_DIR / "final_video.mp4")
     final_output.parent.mkdir(parents=True, exist_ok=True)
+
+    # Resolve background music
+    resolved_bgm: Optional[Path] = None
+    if bgm_path is False or (isinstance(bgm_path, str) and bgm_path.lower() in ("none", "false", "off")):
+        resolved_bgm = None
+    elif isinstance(bgm_path, (str, Path)) and Path(bgm_path).exists():
+        resolved_bgm = Path(bgm_path)
+    elif bgm_path is None and DEFAULT_BGM_PATH.exists():
+        resolved_bgm = DEFAULT_BGM_PATH
 
     if video_format == "long":
         target_width, target_height = 1920, 1080
@@ -294,12 +350,18 @@ def render_video(
     concatenate_clips(normalized_clips, concat_video_path)
 
     # Step 3: Overlay audio and burn subtitles
-    logger.info("Burning audio and ASS subtitles into final video: %s", final_output)
+    logger.info(
+        "Burning audio and ASS subtitles into final video: %s (BGM: %s)",
+        final_output,
+        resolved_bgm.name if resolved_bgm else "None",
+    )
     burn_audio_and_subtitles(
         video_track_path=concat_video_path,
         audio_path=tts_result.audio_path,
         subtitle_path=tts_result.subtitle_path,
         output_path=final_output,
+        bgm_path=resolved_bgm,
+        bgm_volume=bgm_volume,
     )
 
     logger.info("Video rendering successfully completed: %s", final_output)

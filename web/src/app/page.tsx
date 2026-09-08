@@ -338,7 +338,7 @@ export default function LandingPage() {
                         <div className="w-0.5 bg-amber-400 rounded-full wave-bar-5" />
                       </div>
                       <span className="text-[9px] text-zinc-300 truncate font-mono">
-                        Neural Voice • Christopher (HD)
+                        Studio Voice • Brian (V2 HD)
                       </span>
                     </div>
                   </div>
@@ -462,11 +462,11 @@ export default function LandingPage() {
                 <div className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2">
                     <div className="h-7 w-7 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center text-xs font-bold text-white">
-                      C
+                      B
                     </div>
                     <div>
-                      <p className="font-bold text-white">Christopher Neural</p>
-                      <p className="text-[10px] text-zinc-400">Deep Cinematic Narration</p>
+                      <p className="font-bold text-white">Brian Multilingual (V2)</p>
+                      <p className="text-[10px] text-zinc-400">Conversational Viral Narrator</p>
                     </div>
                   </div>
                   <Volume2 className="h-4 w-4 text-amber-400" />

@@ -79,44 +79,70 @@ def main():
 
         logger.info("Video generation completed: %s (%d bytes)", result.video_path, result.file_size_bytes)
 
-        youtube_url = None
-        if args.publish_youtube and args.platform == "youtube":
-            is_short = (args.video_format == "short")
-            logger.info("Publishing video to YouTube (%s)...", "Shorts" if is_short else "Standard Video")
+        social_url = None
+        if args.publish_youtube:
+            target_platform = (args.platform or "youtube").lower()
             access_token = args.access_token
 
             if not access_token:
-                # Find connected YouTube account from database
+                # Find connected social account from database
                 accounts = get_social_accounts(user_id=args.user_id)
-                yt_acc = next((a for a in accounts if a.get("platform") == "youtube"), None)
-                if not yt_acc:
+                target_acc = next((a for a in accounts if a.get("platform") == target_platform), None)
+                if not target_acc:
                     raise RuntimeError(
-                        f"No connected YouTube account found for user '{args.user_id}'. "
-                        "Please link your YouTube account first via the Studio Dashboard."
+                        f"No connected {target_platform.title()} account found for user '{args.user_id}'. "
+                        f"Please link your {target_platform.title()} account first via the Studio Dashboard."
                     )
 
-                logger.info("Verifying access token expiration for account '%s'...", yt_acc.get("id"))
-                access_token, was_refreshed = asyncio.run(ensure_valid_access_token(yt_acc))
+                logger.info("Verifying access token expiration for %s account '%s'...", target_platform, target_acc.get("id"))
+                access_token, was_refreshed = asyncio.run(ensure_valid_access_token(target_acc))
                 if was_refreshed:
-                    logger.info("Access token was successfully refreshed prior to upload.")
+                    logger.info("%s access token was successfully refreshed prior to upload.", target_platform.title())
 
             tags_formatted = ' #'.join(result.script.tags) if result.script.tags else ""
+            is_short = (args.video_format == "short")
             if is_short:
                 desc = f"{result.script.description}\n\n#Shorts #{tags_formatted}"
             else:
                 desc = f"{result.script.description}\n\n#{tags_formatted}" if tags_formatted else result.script.description
 
-            upload_res = upload_video_to_youtube(
-                video_file_path=result.video_path,
-                title=result.script.title,
-                description=desc,
-                tags=result.script.tags,
-                access_token=access_token,
-                privacy_status=args.privacy,
-                video_format=args.video_format,
-            )
-            youtube_url = upload_res.youtube_url
-            logger.info("Published YouTube URL: %s", youtube_url)
+            if target_platform == "youtube":
+                logger.info("Publishing video to YouTube (%s)...", "Shorts" if is_short else "Standard Video")
+                upload_res = upload_video_to_youtube(
+                    video_file_path=result.video_path,
+                    title=result.script.title,
+                    description=desc,
+                    tags=result.script.tags,
+                    access_token=access_token,
+                    privacy_status=args.privacy,
+                    video_format=args.video_format,
+                )
+                social_url = upload_res.youtube_url
+                logger.info("Published YouTube URL: %s", social_url)
+
+            elif target_platform == "tiktok":
+                logger.info("Publishing video to TikTok feed...")
+                from engine.social.tiktok_uploader import upload_video_to_tiktok
+                tiktok_privacy = "PUBLIC_TO_EVERYONE" if args.privacy == "public" else "SELF_ONLY"
+                tt_res = upload_video_to_tiktok(
+                    video_file_path=result.video_path,
+                    title=result.script.title,
+                    access_token=access_token,
+                    privacy_level=tiktok_privacy,
+                )
+                social_url = tt_res.tiktok_url
+                logger.info("Published TikTok URL: %s", social_url)
+
+            elif target_platform == "instagram":
+                logger.info("Publishing video to Instagram Reels...")
+                from engine.social.instagram_uploader import upload_video_to_instagram
+                ig_res = upload_video_to_instagram(
+                    video_file_path=result.video_path,
+                    caption=desc,
+                    access_token=access_token,
+                )
+                social_url = ig_res.instagram_url
+                logger.info("Published Instagram Reels URL: %s", social_url)
 
         # Upload to persistent Supabase Storage CDN
         if job_id:
@@ -134,7 +160,7 @@ def main():
         except Exception as storage_err:
             logger.warning("Storage upload/pruning failed (falling back): %s", storage_err)
 
-        final_video_url = youtube_url or public_storage_url or f"/output/{result.video_path.name}"
+        final_video_url = social_url or public_storage_url or f"/output/{result.video_path.name}"
 
         if job_id:
             update_video_job_record(

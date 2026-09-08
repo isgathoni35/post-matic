@@ -5,7 +5,7 @@ from pathlib import Path
 import shutil
 import sys
 import time
-from typing import Callable, Dict, List, Optional
+from typing import Callable, Dict, List, Optional, Union
 
 # Ensure project root is on sys.path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -62,6 +62,7 @@ def generate_faceless_video(
     pexels_api_key: Optional[str] = None,
     preferred_model: Optional[str] = None,
     words_per_subtitle_line: int = 3,
+    bgm_path: Optional[Union[Path, str, bool]] = None,
     cleanup_temp: bool = True,
     progress_callback: Optional[ProgressCallback] = None,
 ) -> VideoGenerationResult:
@@ -138,6 +139,7 @@ def generate_faceless_video(
         tts_result=tts_result,
         output_path=dest_output,
         video_format=video_format,
+        bgm_path=bgm_path,
     )
     report_progress("rendering", 95)
 

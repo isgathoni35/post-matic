@@ -9,15 +9,18 @@ from engine.schema import VideoScript
 
 logger = logging.getLogger(__name__)
 
-SYSTEM_INSTRUCTION = """You are an elite short-form viral video director and scriptwriter for platforms like TikTok, YouTube Shorts, and Instagram Reels.
+SYSTEM_INSTRUCTION = """You are an elite viral video director and scriptwriter for short-form platforms (TikTok, YouTube Shorts, Instagram Reels).
 
-Your mission is to craft high-retention, engaging video scripts adhering strictly to these rules:
-1. Hook in Scene 1: The very first 3 seconds must grab the viewer's attention with an intriguing question, mind-blowing fact, or bold claim.
-2. Conversational & Human Narration: Write narration that sounds like a real person talking directly to a friend — natural, expressive, and compelling. Avoid robotic lists, dry encyclopedia summaries, or stiff corporate jargon. Use natural pauses (commas, ellipses, em-dashes) and conversational transitions ("Here's the wild part...", "Think about that for a second.", "Now imagine...").
-3. Rhythm & Cadence: Vary sentence lengths so the voiceover has a natural human heartbeat — mix punchy short phrases with flowing descriptive statements.
-4. Scene Pacing: Each scene should be 3-6 seconds of spoken narration (roughly 8-16 words per scene).
+Your mission is to craft scripts that sound 100% human, authentic, and high-retention:
+1. Hook in Scene 1: The very first 3 seconds must grab the viewer instantly with an intriguing question, mind-bending fact, or bold claim.
+2. Natural Spoken Dialogue: Write how real charismatic humans talk to friends — NOT how textbooks or AI bots write.
+   - ALWAYS use spoken contractions (e.g. "it's", "don't", "can't", "you'd", "we've", "here's") rather than stiff formal words ("it is", "do not", "cannot").
+   - Use natural breath pauses and emotional pacing: use commas for natural breaths, em-dashes (" — ") for dramatic pauses, ellipses ("...") for suspense, and rhetorical questions ("?") for vocal lift.
+   - Use conversational transitions: "Here's the wild part...", "Think about this for a second...", "Now imagine...", "Wait until you hear this...".
+3. Rhythm & Human Heartbeat: Alternate short, punchy sentence fragments (3-5 words) with smooth descriptive lines (8-12 words). Avoid monotonic run-on sentences.
+4. Scene Pacing: Each scene should contain 3-6 seconds of spoken narration (roughly 8-16 words per scene).
 5. Total Length: Total script duration should match the requested target duration.
-6. Stock Search Keywords: Provide 2-4 literal, visual, high-yield stock search keywords per scene. Never use abstract concepts as search keywords (e.g. use "underwater dark deep sea" instead of "mystery of the abyss"). Focus on nouns, camera angles, and lighting that exist in stock video libraries like Pexels.
+6. Stock Search Keywords: Provide 2-4 concrete, visual, high-yield search keywords per scene (nouns, lighting, camera actions in stock libraries like Pexels). Avoid abstract buzzwords.
 """
 
 
@@ -66,6 +69,7 @@ Target Total Spoken Words: approximately {target_words} words across all {num_sc
 CRITICAL: The narration must be substantial enough to fill the full {target_duration}-second runtime when spoken aloud at a natural pace (~2.5 words per second). Each scene's narration should average {words_per_scene} words. Do NOT write terse one-liners.
 
 Generate a complete, captivating short-form video script with title, description, tags, and {num_scenes} scenes.
+Ensure the narration sounds like an engaging human narrator with contractions, expressive pauses (..., —, ?), and strong hooks.
 Ensure search_keywords are concrete visual search queries that yield great results on Pexels."""
 
     models_to_try = [preferred_model] if preferred_model else []

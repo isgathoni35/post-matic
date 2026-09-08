@@ -74,11 +74,43 @@ const EDITORIAL_TOPICS = [
 
 export const VOICES = [
   {
+    id: "en-US-BrianMultilingualNeural",
+    name: "Brian",
+    role: "Deep & Conversational",
+    genre: "Viral TikTok & Storytelling",
+    badge: "🔥 Most Natural",
+    initials: "B",
+  },
+  {
+    id: "en-US-AvaMultilingualNeural",
+    name: "Ava",
+    role: "Warm & Engaging",
+    genre: "Lifestyle & Storyteller",
+    badge: "✨ Ultra Human",
+    initials: "A",
+  },
+  {
+    id: "en-US-AndrewMultilingualNeural",
+    name: "Andrew",
+    role: "Punchy & Dynamic",
+    genre: "Podcast & Explainer",
+    badge: "🎙️ Podcast",
+    initials: "An",
+  },
+  {
+    id: "en-US-EmmaMultilingualNeural",
+    name: "Emma",
+    role: "Friendly & Expressive",
+    genre: "Education & Advice",
+    badge: "🌟 Storyteller",
+    initials: "Em",
+  },
+  {
     id: "en-US-ChristopherNeural",
     name: "Christopher",
     role: "Deep & Cinematic",
-    genre: "Documentary & Storytelling",
-    badge: "Cinematic",
+    genre: "Classic Documentary",
+    badge: "Classic",
     initials: "C",
   },
   {
@@ -641,6 +673,11 @@ export function StudioConsoleView({
                           <span className="text-xs font-bold text-white tracking-tight truncate">
                             {v.name}
                           </span>
+                          {v.badge && (
+                            <span className="text-[8px] sm:text-[9px] px-1 py-0.5 rounded bg-amber-500/20 text-amber-300 font-medium border border-amber-500/30 shrink-0">
+                              {v.badge}
+                            </span>
+                          )}
                         </div>
 
                         {/* Audition Player Button */}
