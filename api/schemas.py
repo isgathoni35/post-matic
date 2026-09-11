@@ -61,6 +61,14 @@ class VideoGenerateRequest(BaseModel):
         default="youtube",
         description="Destination platform ('youtube', 'tiktok', 'instagram')",
     )
+    mode: str = Field(
+        default="shorts",
+        description="Generation mode: 'shorts' for faceless stock footage or 'story' for animated multi-character story",
+    )
+    story_style: str = Field(
+        default="anime",
+        description="Style for animated story ('anime', 'donghua', 'stickman', '3d_cartoon')",
+    )
 
 
 class PublishVideoRequest(BaseModel):

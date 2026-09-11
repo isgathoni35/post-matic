@@ -41,3 +41,101 @@ class VideoScript(BaseModel):
         ...,
         description="Ordered list of scenes comprising the video"
     )
+
+
+class Character(BaseModel):
+    """Represents a character with persona, assigned voice, and visual styling."""
+    id: str = Field(..., description="Unique slug for the character, e.g. 'shrek', 'donkey', 'kenji'")
+    name: str = Field(..., description="Display name of the character")
+    voice: str = Field(
+        default="en-US-BrianMultilingualNeural",
+        description="Assigned TTS voice identifier"
+    )
+    pitch: str = Field(
+        default="+0Hz",
+        description="TTS pitch adjustment (e.g. '-4Hz' for deep/ogre, '+4Hz' for high/sidekick)"
+    )
+    rate: str = Field(
+        default="+0%",
+        description="TTS speed adjustment (e.g. '+10%' for energetic/fast, '-5%' for slow/cinematic)"
+    )
+    visual_dna: str = Field(
+        ...,
+        description="Anchor physical description to keep character appearance consistent across all generated scenes"
+    )
+    subtitle_color: str = Field(
+        default="#FFFFFF",
+        description="Hex color code for this character's burned subtitles (e.g. '#22C55E' green for Shrek, '#F59E0B' amber for Donkey)"
+    )
+
+
+class SFXCue(BaseModel):
+    """Represents an action sound effect trigger within a dialogue line."""
+    sound_effect: str = Field(
+        ...,
+        description="Name of the sound effect (e.g. 'punch_heavy', 'flight_whoosh', 'glass_clink', 'sword_clash', 'superman_takeoff')"
+    )
+    offset_seconds: float = Field(
+        default=0.0,
+        description="Relative offset in seconds from the start of the spoken line"
+    )
+    volume: float = Field(
+        default=1.0,
+        description="Relative volume multiplier (0.5 to 2.0)"
+    )
+
+
+class DialogueLine(BaseModel):
+    """Represents a single spoken line of dialogue by a character."""
+    line_id: int = Field(..., description="Sequential index of the dialogue line, starting at 1")
+    speaker_id: str = Field(..., description="ID of the character speaking this line")
+    text: str = Field(..., description="The spoken text dialogue")
+    emotion: str = Field(
+        default="neutral",
+        description="Emotional delivery (e.g. 'angry', 'comedic', 'whispering', 'urgent', 'heroic')"
+    )
+    sfx: List[SFXCue] = Field(
+        default_factory=list,
+        description="Sound effects triggered during or around this dialogue line"
+    )
+
+
+class StoryScene(BaseModel):
+    """Represents a scene in a multi-character animated story."""
+    scene_id: int = Field(..., description="Sequential index of the scene, starting at 1")
+    dialogue: List[DialogueLine] = Field(
+        ...,
+        description="Ordered dialogue lines spoken by characters in this scene"
+    )
+    visual_description: str = Field(
+        ...,
+        description="Action and visual choreography occurring in this scene"
+    )
+    environment_anchor: str = Field(
+        ...,
+        description="Physical setting description to ensure background continuity (e.g. 'Swamp shack at twilight', 'Neo-Tokyo rooftop in rain')"
+    )
+    camera_movement: str = Field(
+        default="dramatic_zoom",
+        description="Dynamic camera motion: 'zoom_in_punch', 'action_shake', 'whoosh_pan_up', 'pan_left', 'slow_push_in'"
+    )
+
+
+class AnimatedStoryScript(BaseModel):
+    """Complete multi-character animated screenplay payload."""
+    title: str = Field(..., description="Catchy title for the animated story")
+    description: str = Field(..., description="SEO summary/caption for social publishing")
+    tags: List[str] = Field(default_factory=list, description="Relevant hashtags")
+    style: str = Field(
+        default="anime",
+        description="Visual aesthetic genre: 'anime', 'donghua', 'stickman', '3d_cartoon'"
+    )
+    characters: List[Character] = Field(
+        ...,
+        description="The cast of characters appearing in this story"
+    )
+    scenes: List[StoryScene] = Field(
+        ...,
+        description="Ordered list of animated story scenes"
+    )
+

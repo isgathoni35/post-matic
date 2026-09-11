@@ -14,6 +14,7 @@ from api.services.github_dispatcher import (
 )
 from engine.config import OUTPUT_DIR, TEMP_DIR
 from engine.media_downloader import fetch_script_media
+from engine.pipeline import generate_animated_story_video
 from engine.script_generator import generate_script
 from engine.tts_engine import DEFAULT_VOICE, synthesize_script
 from engine.video_renderer import render_video
@@ -31,6 +32,8 @@ def execute_video_pipeline_job(
     privacy: str = "public",
     video_format: str = "short",
     target_platform: str = "youtube",
+    mode: str = "shorts",
+    story_style: str = "anime",
 ) -> None:
     """Execute the end-to-end 5-stage video pipeline in a background task.
 
@@ -83,6 +86,54 @@ def execute_video_pipeline_job(
 
     # 2. Local Fallback Execution
     try:
+        if mode == "story":
+            logger.info("[%s] Executing Animated Story Pipeline (style: %s)...", job_id, story_style)
+
+            def progress_cb(status_name: str, pct: int, payload: Optional[dict] = None):
+                status_enum = {
+                    "scripting": VideoJobStatus.SCRIPTING,
+                    "synthesizing": VideoJobStatus.SYNTHESIZING,
+                    "foley_mixing": VideoJobStatus.SYNTHESIZING,
+                    "sourcing_visuals": VideoJobStatus.SOURCING_MEDIA,
+                    "rendering": VideoJobStatus.RENDERING,
+                }.get(status_name, VideoJobStatus.RENDERING)
+                update_video_job_record(
+                    job_id=job_id,
+                    status=status_enum,
+                    progress_pct=pct,
+                    script_data=payload if status_name == "scripting" else None,
+                )
+
+            dest_output_path = OUTPUT_DIR / f"video_{job_id}.mp4"
+            story_result = generate_animated_story_video(
+                topic=topic,
+                style=story_style,
+                target_duration=target_duration,
+                output_path=dest_output_path,
+                progress_callback=progress_cb,
+            )
+            final_video_path = story_result.video_path
+            file_size = final_video_path.stat().st_size
+            video_url = f"/output/video_{job_id}.mp4"
+
+            try:
+                from api.services.storage import upload_video_to_supabase, prune_expired_storage_videos
+                storage_url = upload_video_to_supabase(final_video_path, job_id=job_id)
+                if storage_url and not video_url.startswith("http"):
+                    video_url = storage_url
+                prune_expired_storage_videos(max_age_days=7, max_videos=20)
+            except Exception as storage_err:
+                logger.warning("[%s] Storage upload fallback: %s", job_id, storage_err)
+
+            update_video_job_record(
+                job_id=job_id,
+                status=VideoJobStatus.COMPLETED,
+                progress_pct=100,
+                video_url=video_url,
+                file_size_bytes=file_size,
+            )
+            return
+
         # STAGE 1: Scripting (15%)
         update_video_job_record(
             job_id=job_id,

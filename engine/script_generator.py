@@ -5,7 +5,7 @@ from google import genai
 from google.genai import types
 
 from engine.config import GEMINI_API_KEY, GEMINI_MODELS
-from engine.schema import VideoScript
+from engine.schema import VideoScript, AnimatedStoryScript
 
 logger = logging.getLogger(__name__)
 
@@ -113,6 +113,118 @@ Ensure search_keywords are concrete visual search queries that yield great resul
 
     raise RuntimeError(
         f"Failed to generate script across all candidate models. Last error: {last_error}"
+    )
+
+
+STORY_SYSTEM_INSTRUCTION = """You are an award-winning animation director and screenplay writer for viral animated short videos across YouTube Shorts, TikTok, and Instagram Reels.
+You specialize in diverse animation styles: Japanese Anime, Chinese 3D Donghua, Stickman Action combat, and 3D Feature Animation (e.g. comedic Shrek & Donkey style adventures).
+
+Your mission is to construct captivating, multi-character animated screenplays with dynamic dialogue, vocal personas, and action sound effect cues:
+
+1. Character Cast:
+   - Establish 2 to 3 vivid characters with contrasting personalities (e.g., serious hero vs quirky sidekick, martial arts rivals, ogre vs donkey).
+   - Assign appropriate edge-tts voices and pitch/rate adjustments:
+     * Deep/Authoritative/Ogre: "en-US-ChristopherNeural" (pitch: "-4Hz" or "-5Hz")
+     * Energetic/Comedic/Sidekick: "en-US-GuyNeural" (pitch: "+3Hz", rate: "+8%")
+     * Conversational Hero: "en-US-BrianMultilingualNeural" (pitch: "-1Hz")
+     * Expressive Heroine/Mage: "en-US-AvaMultilingualNeural" (pitch: "+1Hz")
+     * British Mentor/Elder: "en-GB-SoniaNeural"
+     * Dynamic Podcast/Young Hero: "en-US-AndrewMultilingualNeural"
+   - Anchor each character with a distinct 'visual_dna' description (clothing, hair, facial features, species/build) to keep character appearance 100% consistent across all scenes.
+   - Assign distinct high-contrast hex subtitle colors per character (e.g. #22C55E for green/nature characters, #F59E0B for energetic amber, #38BDF8 for cyber cyan, #F43F5E for rose/intense, #E2E8F0 for crisp white).
+
+2. Natural Spoken Dialogue:
+   - Write vibrant back-and-forth conversation with realistic human delivery.
+   - Use spoken contractions ("don't", "can't", "you'd", "we've", "it's").
+   - Include emotional inflection, rapid comedic banter or intense combat rivalries, and dramatic pauses (..., —, ?).
+
+3. Action Sound Effects (SFX / Foley) Cues:
+   - Embed realistic action SFX cues at key dialogue beats:
+     * Combat & Impacts: 'punch_heavy', 'punch_light', 'slap', 'sword_clash', 'body_slam'
+     * Superhero & Movement: 'flight_whoosh', 'sonic_boom', 'superman_takeoff', 'teleport_zap', 'fast_footsteps'
+     * Foley & Humor: 'glass_clink', 'door_slam', 'record_scratch', 'gulp', 'explosion_cinematic'
+   - Set offset_seconds relative to the start of each dialogue line.
+
+4. Consistent Environment & Dynamic Camera:
+   - Maintain the same 'environment_anchor' across scenes in the same location (e.g. 'Swamp shack at twilight', 'Neo-Tokyo rooftop in rain', 'Ancient martial arts mountaintop').
+   - Specify dynamic camera movement: 'zoom_in_punch', 'action_shake', 'whoosh_pan_up', 'pan_left', 'slow_push_in'.
+"""
+
+
+def generate_story_script(
+    topic: str,
+    style: str = "anime",
+    target_duration: int = 30,
+    target_scenes: Optional[int] = None,
+    api_key: Optional[str] = None,
+    preferred_model: Optional[str] = None,
+) -> AnimatedStoryScript:
+    """Generate a structured multi-character animated screenplay using the Gemini API.
+
+    Args:
+        topic: The story premise (e.g. 'Shrek and Donkey discover a cyberpunk artifact in the swamp').
+        style: Aesthetic genre ('anime', 'donghua', 'stickman', '3d_cartoon').
+        target_duration: Approximate target length in seconds (default: 30).
+        target_scenes: Optional number of scenes (defaults to duration // 7).
+        api_key: Optional override for Gemini API key.
+        preferred_model: Optional override for preferred Gemini model.
+
+    Returns:
+        AnimatedStoryScript: Strictly validated Pydantic model instance with cast, dialogue, and SFX cues.
+    """
+    client = get_gemini_client(api_key)
+
+    num_scenes = target_scenes or max(2, target_duration // 7)
+
+    prompt = f"""Topic: {topic}
+Animation Style: {style} (e.g. 'anime', 'donghua', 'stickman', or '3d_cartoon')
+Target Total Duration: approximately {target_duration} seconds.
+Target Scenes: exactly {num_scenes} scenes.
+
+Generate a complete, captivating multi-character animated screenplay with a full cast, multi-turn dialogue, embedded action SFX cues (such as punch_heavy, flight_whoosh, glass_clink, etc.), consistent character visual_dna anchors, and environment_anchor settings.
+Ensure the dialogue is punchy, authentic, comedic or intense according to the topic, and includes natural human contractions and expressive pauses."""
+
+    models_to_try = [preferred_model] if preferred_model else []
+    for m in GEMINI_MODELS:
+        if m not in models_to_try:
+            models_to_try.append(m)
+
+    last_error = None
+    for model_name in models_to_try:
+        try:
+            logger.info("Attempting story script generation with model: %s", model_name)
+            response = client.models.generate_content(
+                model=model_name,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    response_schema=AnimatedStoryScript,
+                    system_instruction=STORY_SYSTEM_INSTRUCTION,
+                    temperature=0.75,
+                ),
+            )
+
+            # Response parsed into Pydantic model
+            if response.parsed and isinstance(response.parsed, AnimatedStoryScript):
+                return response.parsed
+
+            # Fallback if parsed is a dict
+            if isinstance(response.parsed, dict):
+                return AnimatedStoryScript.model_validate(response.parsed)
+
+            # Fallback: parse text as JSON into Pydantic model
+            if response.text:
+                return AnimatedStoryScript.model_validate_json(response.text)
+
+            raise ValueError("Empty response received from Gemini API.")
+
+        except Exception as e:
+            logger.warning("Story generation with model '%s' failed: %s", model_name, e)
+            last_error = e
+            continue
+
+    raise RuntimeError(
+        f"Failed to generate story script across all candidate models. Last error: {last_error}"
     )
 
 

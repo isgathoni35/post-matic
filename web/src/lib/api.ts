@@ -14,6 +14,8 @@ export interface GenerateVideoPayload {
   privacy?: string;
   video_format?: "short" | "long";
   target_platform?: "youtube" | "tiktok" | "instagram";
+  mode?: "shorts" | "story";
+  story_style?: "anime" | "donghua" | "stickman" | "3d_cartoon";
 }
 
 export interface VideoJobResponse {

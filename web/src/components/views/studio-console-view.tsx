@@ -34,6 +34,9 @@ import {
   Maximize2,
   Radio,
   MicOff,
+  Palette,
+  Sword,
+  Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -185,6 +188,45 @@ const LONG_DURATIONS = [
   { value: 120, label: "120s", role: "Deep Dive" },
 ];
 
+const ANIMATION_STYLES = [
+  {
+    id: "anime",
+    name: "Japanese Anime",
+    tagline: "Studio Mappa & Ufotable",
+    icon: "🌸",
+    badge: "2D Masterwork",
+    desc: "Vibrant cel-shading, dynamic action lines & expressive anime eyes",
+    accent: "from-pink-500/20 to-purple-500/10 border-pink-500/30 text-pink-400",
+  },
+  {
+    id: "3d_cartoon",
+    name: "3D Feature Film",
+    tagline: "Shrek & Pixar Style",
+    icon: "🏰",
+    badge: "3D CGI",
+    desc: "DreamWorks / Pixar stylized character modeling & volumetric lighting",
+    accent: "from-emerald-500/20 to-amber-500/10 border-emerald-500/30 text-emerald-400",
+  },
+  {
+    id: "donghua",
+    name: "3D Donghua",
+    tagline: "Xianxia Cultivator",
+    icon: "🐉",
+    badge: "Mythical CGI",
+    desc: "Chinese fantasy animation, ethereal energy auras & martial arts",
+    accent: "from-cyan-500/20 to-blue-500/10 border-cyan-500/30 text-cyan-400",
+  },
+  {
+    id: "stickman",
+    name: "Stickman Combat",
+    tagline: "Alan Becker Style",
+    icon: "⚔️",
+    badge: "High Octane",
+    desc: "Fluid martial arts combat, neon velocity streaks & sonic impacts",
+    accent: "from-amber-500/20 to-red-500/10 border-amber-500/30 text-amber-400",
+  },
+];
+
 interface StudioConsoleViewProps {
   topic: string;
   setTopic: (t: string) => void;
@@ -202,6 +244,10 @@ interface StudioConsoleViewProps {
   activeJob: VideoJobResponse | null;
   onGenerate: () => void;
   onOpenSocialModal: () => void;
+  studioMode?: "shorts" | "story";
+  setStudioMode?: (m: "shorts" | "story") => void;
+  storyStyle?: "anime" | "donghua" | "stickman" | "3d_cartoon";
+  setStoryStyle?: (s: "anime" | "donghua" | "stickman" | "3d_cartoon") => void;
 }
 
 export function StudioConsoleView({
@@ -221,6 +267,10 @@ export function StudioConsoleView({
   activeJob,
   onGenerate,
   onOpenSocialModal,
+  studioMode = "shorts",
+  setStudioMode,
+  storyStyle = "anime",
+  setStoryStyle,
 }: StudioConsoleViewProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -531,6 +581,115 @@ export function StudioConsoleView({
         <div className={`lg:col-span-7 space-y-5 sm:space-y-6 min-w-0 w-full max-w-full ${mobileTab === "canvas" ? "hidden lg:block" : "block"}`}>
           {/* Main Control Card */}
           <div className="studio-card rounded-2xl p-4 sm:p-6 space-y-5 min-w-0 w-full max-w-full overflow-hidden">
+            {/* 0. Studio Creation Mode Switcher */}
+            <div className="space-y-2.5 pb-2">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
+                  <Palette className="h-3.5 w-3.5 text-amber-400" />
+                  Studio Creation Mode
+                </label>
+                <span className="text-[10px] text-zinc-500 font-medium">
+                  {studioMode === "story" ? "Multi-Character & SFX" : "Faceless Stock B-Roll"}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
+                <button
+                  type="button"
+                  onClick={() => setStudioMode && setStudioMode("shorts")}
+                  className={`p-3 sm:p-3.5 rounded-xl border text-left transition-all relative overflow-hidden flex items-start gap-3 ${
+                    studioMode === "shorts"
+                      ? "bg-amber-500/10 border-amber-500 text-white shadow-sm ring-1 ring-amber-500/20"
+                      : "bg-black/30 border-white/[0.06] text-zinc-400 hover:text-zinc-200 hover:border-white/[0.12]"
+                  }`}
+                >
+                  <div className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 ${
+                    studioMode === "shorts"
+                      ? "bg-amber-500 text-black font-bold"
+                      : "bg-white/[0.06] text-zinc-400"
+                  }`}>
+                    <Film className="h-4 w-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs font-bold text-white tracking-tight">Faceless Shorts</span>
+                    </div>
+                    <p className="text-[10px] text-zinc-400 mt-0.5 truncate">Stock video + AI narrator</p>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setStudioMode && setStudioMode("story")}
+                  className={`p-3 sm:p-3.5 rounded-xl border text-left transition-all relative overflow-hidden flex items-start gap-3 ${
+                    studioMode === "story"
+                      ? "bg-gradient-to-r from-purple-500/15 to-pink-500/10 border-purple-500 text-white shadow-sm ring-1 ring-purple-500/30"
+                      : "bg-black/30 border-white/[0.06] text-zinc-400 hover:text-zinc-200 hover:border-white/[0.12]"
+                  }`}
+                >
+                  <div className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 ${
+                    studioMode === "story"
+                      ? "bg-gradient-to-br from-purple-500 to-pink-500 text-white font-bold"
+                      : "bg-white/[0.06] text-zinc-400"
+                  }`}>
+                    <Sparkles className="h-4 w-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs font-bold text-white tracking-tight">Animated Story</span>
+                      <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-purple-500/25 text-purple-300 border border-purple-500/30">NEW</span>
+                    </div>
+                    <p className="text-[10px] text-zinc-400 mt-0.5 truncate">Multi-voice, Anime & Foley SFX</p>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            {/* Animation Style Selector (Only shown in Story Mode) */}
+            {studioMode === "story" && (
+              <div className="space-y-2.5 p-3.5 rounded-xl bg-purple-950/20 border border-purple-500/20 animate-in fade-in slide-in-from-top-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-purple-200 flex items-center gap-1.5">
+                    <Palette className="h-3.5 w-3.5 text-purple-400" />
+                    Animation Genre & Aesthetic
+                  </label>
+                  <span className="text-[10px] text-purple-300/80 font-mono">
+                    Consistent Characters & Foley SFX
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {ANIMATION_STYLES.map((st) => (
+                    <button
+                      key={st.id}
+                      type="button"
+                      onClick={() => setStoryStyle && setStoryStyle(st.id as any)}
+                      className={`p-2.5 rounded-lg border text-left transition-all relative flex flex-col justify-between gap-1.5 ${
+                        storyStyle === st.id
+                          ? "bg-purple-500/20 border-purple-400 text-white shadow-md ring-1 ring-purple-400/30"
+                          : "bg-black/40 border-white/[0.06] text-zinc-400 hover:text-zinc-200 hover:border-white/[0.12]"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-lg">{st.icon}</span>
+                        <Badge variant="outline" className="text-[8px] py-0 px-1 border-white/10 text-zinc-400">
+                          {st.badge}
+                        </Badge>
+                      </div>
+                      <div>
+                        <div className="text-[11px] font-bold text-white tracking-tight leading-tight">{st.name}</div>
+                        <div className="text-[9px] text-zinc-400 truncate mt-0.5">{st.tagline}</div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="flex items-center gap-2 pt-1 text-[10px] text-purple-300/70">
+                  <Zap className="h-3 w-3 text-purple-400 shrink-0" />
+                  <span>Includes automatic action sound effects (punches, flight whooshes, impacts) & colored speaker captions.</span>
+                </div>
+              </div>
+            )}
+
             {/* 1. Format Selector (Short vs Long) */}
             <div className="space-y-2.5 pb-2">
               <div className="flex items-center justify-between">
@@ -688,8 +847,14 @@ export function StudioConsoleView({
                     <Compass className="h-4 w-4" />
                   </div>
                   <div>
-                    <h2 className="text-sm font-bold text-white tracking-tight">What's your video about?</h2>
-                    <p className="text-[11px] text-zinc-400">Enter a prompt or pick a topic below</p>
+                    <h2 className="text-sm font-bold text-white tracking-tight">
+                      {studioMode === "story" ? "What's your animated story about?" : "What's your video about?"}
+                    </h2>
+                    <p className="text-[11px] text-zinc-400">
+                      {studioMode === "story"
+                        ? "Describe your characters, dialogue, action beats, and foley sound effects"
+                        : "Enter a prompt or pick a topic below"}
+                    </p>
                   </div>
                 </div>
                 <span className="text-[11px] font-mono text-zinc-500">{topic.length}/300</span>
@@ -698,7 +863,15 @@ export function StudioConsoleView({
               <div className="relative group">
                 <Textarea
                   placeholder={
-                    videoFormat === "long"
+                    studioMode === "story"
+                      ? storyStyle === "3d_cartoon"
+                        ? "e.g. Shrek and Donkey discover a high-tech glowing cube in the swamp with funny banter, whooshes, and a loud crash..."
+                        : storyStyle === "anime"
+                        ? "e.g. Two rival anime swordsmen duel atop a neon Tokyo tower with clashing katanas, sonic booms, and dramatic dialogue..."
+                        : storyStyle === "stickman"
+                        ? "e.g. An epic stickman martial arts fight with flying roundhouse kicks, sonic flight whooshes, and impact hits..."
+                        : "e.g. A 3D donghua cultivator takes flight with a sonic boom to battle a celestial dragon..."
+                      : videoFormat === "long"
                       ? "e.g. A comprehensive documentary on how ancient Roman concrete self-healed underwater over thousands of years..."
                       : "e.g. 3 terrifying facts about the deep sea midnight zone that science still cannot explain..."
                   }

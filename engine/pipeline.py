@@ -14,10 +14,23 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from engine.config import OUTPUT_DIR, TEMP_DIR
 from engine.media_downloader import DownloadedVideo, fetch_script_media
-from engine.schema import VideoScript
-from engine.script_generator import generate_script
-from engine.tts_engine import DEFAULT_VOICE, TTSResult, synthesize_script
-from engine.video_renderer import render_video
+from engine.schema import VideoScript, AnimatedStoryScript
+from engine.script_generator import generate_script, generate_story_script
+from engine.tts_engine import (
+    DEFAULT_VOICE,
+    TTSResult,
+    synthesize_script,
+    StoryTTSResult,
+    synthesize_story_dialogue,
+)
+from engine.video_renderer import (
+    render_video,
+    image_to_ken_burns_clip,
+    concatenate_clips,
+    burn_audio_and_subtitles,
+)
+from engine.image_generator import generate_story_scene_image
+from engine.sfx_manager import mix_sfx_and_bgm
 
 logger = logging.getLogger(__name__)
 
@@ -167,3 +180,202 @@ def generate_faceless_video(
         file_size_bytes=file_size,
         elapsed_time_seconds=elapsed,
     )
+
+
+def create_fallback_story_frame(scene_id: int, style: str, output_path: Path) -> Path:
+    """Create a high-contrast themed backdrop if AI generation is temporarily unavailable."""
+    import subprocess
+    import shutil
+    import imageio_ffmpeg
+
+    ffmpeg_bin = shutil.which("ffmpeg") or imageio_ffmpeg.get_ffmpeg_exe()
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    color_map = {
+        "anime": "0x1a1a2e",
+        "donghua": "0x0f3460",
+        "stickman": "0x111111",
+        "3d_cartoon": "0x2d4059",
+    }
+    bg_color = color_map.get(style.lower(), "0x1e1e24")
+
+    cmd = [
+        ffmpeg_bin, "-y",
+        "-f", "lavfi",
+        "-i", f"color=c={bg_color}:s=1080x1920:d=1",
+        "-frames:v", "1",
+        str(output_path),
+    ]
+    try:
+        subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    except Exception:
+        pass
+    return output_path
+
+
+@dataclass
+class StoryGenerationResult:
+    """Complete output payload from the animated story pipeline."""
+    video_path: Path
+    script: AnimatedStoryScript
+    tts_result: StoryTTSResult
+    duration_seconds: float
+    file_size_bytes: int
+    elapsed_time_seconds: float
+
+
+def generate_animated_story_video(
+    topic: str,
+    style: str = "anime",
+    target_duration: int = 25,
+    target_scenes: Optional[int] = None,
+    output_path: Optional[Path] = None,
+    gemini_api_key: Optional[str] = None,
+    preferred_model: Optional[str] = None,
+    words_per_subtitle_line: int = 3,
+    bgm_path: Optional[Union[Path, str]] = None,
+    cleanup_temp: bool = False,
+    progress_callback: Optional[ProgressCallback] = None,
+) -> StoryGenerationResult:
+    """Execute the end-to-end multi-character animated story video generation pipeline.
+
+    Stages:
+    1. Screenplay Generation with Cast & Action SFX Cues (Gemini LLM)
+    2. Multi-Voice Dialogue Synthesis & Speaker-Colored Subtitles (edge-tts)
+    3. Action SFX & Foley Audio Mixing with Ducked BGM (FFmpeg adelay/amix)
+    4. Style-Consistent Visual Generation with Character Visual DNA (Google Imagen 3)
+    5. Dynamic 2.5D Camera Motion (Fight Shakes, Flight Pans, Zooms) & Final Assembly
+    """
+    start_time = time.time()
+    logger.info("Starting animated story generation: '%s' (Style: %s, Target Duration: %ds)", topic, style, target_duration)
+
+    def report_progress(status: str, pct: int, payload: Optional[dict] = None):
+        if progress_callback:
+            try:
+                progress_callback(status, pct, payload)
+            except Exception as cb_err:
+                logger.warning("Progress callback failed: %s", cb_err)
+
+    # 1. Screenplay Generation
+    report_progress("scripting", 15)
+    print(f"\n[1/5] Directing multi-character screenplay for: '{topic}' (Style: {style})...")
+    story = generate_story_script(
+        topic=topic,
+        style=style,
+        target_duration=target_duration,
+        target_scenes=target_scenes,
+        api_key=gemini_api_key,
+        preferred_model=preferred_model,
+    )
+    print(f"      Title: \"{story.title}\"")
+    print(f"      Cast:  {', '.join([c.name for c in story.characters])} ({len(story.scenes)} scenes)")
+    report_progress("scripting", 25, story.model_dump())
+
+    # 2. Multi-Voice Dialogue Synthesis & Speaker Subtitles
+    report_progress("synthesizing", 35)
+    print("\n[2/5] Synthesizing multi-character dialogue and speaker-colored subtitles...")
+    tts_result = synthesize_story_dialogue(
+        story=story,
+        words_per_line=words_per_subtitle_line,
+        aspect_ratio="9:16",
+    )
+    print(f"      Spoken dialogue duration: {tts_result.total_duration:.2f}s ({len(tts_result.sfx_cues)} SFX cues)")
+    report_progress("synthesizing", 50)
+
+    # 3. Action SFX & Foley Mixing
+    report_progress("foley_mixing", 55)
+    print(f"\n[3/5] Mixing {len(tts_result.sfx_cues)} action sound effects (whooshes, punches, impacts)...")
+    story_audio_dir = TEMP_DIR / "tts_story"
+    story_audio_dir.mkdir(parents=True, exist_ok=True)
+    foley_mixed_audio = story_audio_dir / "story_foley_master.mp3"
+
+    mix_sfx_and_bgm(
+        speech_audio=tts_result.audio_path,
+        sfx_cues=tts_result.sfx_cues,
+        output_audio=foley_mixed_audio,
+        bgm_path=bgm_path,
+    )
+    report_progress("foley_mixing", 65)
+
+    # 4. Style-Anchored Visual Generation
+    report_progress("sourcing_visuals", 70)
+    print(f"\n[4/5] Generating style-anchored keyframes ({style})...")
+    cast_map = {c.id: c for c in story.characters}
+    scene_clips: List[Path] = []
+    render_temp_dir = TEMP_DIR / "story_render"
+    render_temp_dir.mkdir(parents=True, exist_ok=True)
+
+    for idx, scene in enumerate(story.scenes):
+        scene_dur = tts_result.scene_durations[idx] if idx < len(tts_result.scene_durations) else 4.0
+        # Determine characters present in this scene
+        present_char_ids = {line.speaker_id for line in scene.dialogue}
+        char_dna_list = [cast_map[cid].visual_dna for cid in present_char_ids if cid in cast_map]
+
+        scene_image = generate_story_scene_image(
+            scene_id=scene.scene_id,
+            visual_description=scene.visual_description,
+            environment_anchor=scene.environment_anchor,
+            character_dna_list=char_dna_list,
+            style=style,
+            api_key=gemini_api_key,
+        )
+
+        if not scene_image or not scene_image.exists():
+            fallback_path = render_temp_dir / f"fallback_scene_{scene.scene_id}.jpg"
+            scene_image = create_fallback_story_frame(scene.scene_id, style, fallback_path)
+
+        # 5. Dynamic 2.5D Camera Motion (Fight Shakes, Flight Pans, Zooms)
+        scene_clip_path = render_temp_dir / f"scene_{scene.scene_id}_clip.mp4"
+        image_to_ken_burns_clip(
+            image_path=scene_image,
+            target_duration=scene_dur,
+            output_path=scene_clip_path,
+            camera_movement=scene.camera_movement,
+        )
+        scene_clips.append(scene_clip_path)
+
+    report_progress("rendering", 85)
+
+    # Concatenate all visual scene clips
+    concatenated_video = render_temp_dir / "story_concatenated.mp4"
+    concatenate_clips(scene_clips, concatenated_video)
+
+    # Burn final audio and speaker-colored subtitles
+    timestamp_slug = int(time.time())
+    dest_output = output_path or (OUTPUT_DIR / f"story_{style}_{timestamp_slug}.mp4")
+
+    print("\n[5/5] Burning character-colored ASS subtitles & Foley audio...")
+    final_video = burn_audio_and_subtitles(
+        video_track_path=concatenated_video,
+        audio_path=foley_mixed_audio,
+        subtitle_path=tts_result.subtitle_path,
+        output_path=dest_output,
+        bgm_path=None,  # BGM was already mixed into foley_mixed_audio
+    )
+    report_progress("rendering", 100)
+
+    elapsed = time.time() - start_time
+    file_size = final_video.stat().st_size
+
+    print(f"\n=======================================================")
+    print(f" ANIMATED STORY GENERATED! Runtime: {elapsed:.1f}s")
+    print(f" File:     {final_video}")
+    print(f" Size:     {file_size / (1024 * 1024):.2f} MB")
+    print(f" Duration: {tts_result.total_duration:.2f}s")
+    print(f" Title:    {story.title}")
+    print(f" Style:    {style}")
+    print(f" Cast:     {', '.join([c.name for c in story.characters])}")
+    print(f"=======================================================\n")
+
+    if cleanup_temp:
+        cleanup_temp_dir()
+
+    return StoryGenerationResult(
+        video_path=final_video,
+        script=story,
+        tts_result=tts_result,
+        duration_seconds=tts_result.total_duration,
+        file_size_bytes=file_size,
+        elapsed_time_seconds=elapsed,
+    )
+

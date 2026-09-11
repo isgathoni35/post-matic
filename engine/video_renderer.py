@@ -67,18 +67,55 @@ def image_to_ken_burns_clip(
     target_height: int = 1920,
     target_fps: int = 30,
     zoom_in: bool = True,
+    camera_movement: str = "slow_push_in",
     ffmpeg_bin: Optional[str] = None,
 ) -> Path:
-    """Convert a static image into a 1080x1920 vertical video with cinematic Ken Burns camera motion."""
+    """Convert a static image into a vertical video with cinematic 2.5D camera motion.
+
+    Supports action shakes, flight whoosh pans, punch zooms, and subtle Ken Burns drift.
+    """
     ffmpeg = ffmpeg_bin or get_ffmpeg_binary()
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # Smooth, subtle slow zoom expression
-    zoom_expr = "min(zoom+0.0012,1.15)" if zoom_in else "if(lte(zoom,1.0),1.15,max(1.001,zoom-0.0012))"
+    mode = camera_movement.lower() if camera_movement else ("slow_push_in" if zoom_in else "zoom_out")
+
+    if "shake" in mode or "combat" in mode:
+        # Action combat camera shake
+        zoom_expr = "1.08"
+        x_expr = "'iw/2-(iw/zoom/2)+10*sin(40*on)'"
+        y_expr = "'ih/2-(ih/zoom/2)+10*cos(40*on)'"
+    elif "whoosh" in mode or "flight" in mode or "up" in mode or "superman" in mode:
+        # Fast upward flight takeoff pan
+        zoom_expr = "1.12"
+        x_expr = "'iw/2-(iw/zoom/2)'"
+        y_expr = f"'max(0, (ih/2-(ih/zoom/2)) - (on/({target_fps}*{max(1.0, target_duration)}))*120)'"
+    elif "punch" in mode or "fast_zoom" in mode:
+        # High impact dynamic push-in
+        zoom_expr = "min(zoom+0.0035,1.25)"
+        x_expr = "'iw/2-(iw/zoom/2)'"
+        y_expr = "'ih/2-(ih/zoom/2)'"
+    elif "pan_left" in mode:
+        zoom_expr = "1.10"
+        x_expr = f"'(on/({target_fps}*{max(1.0, target_duration)}))*(iw-(iw/zoom))'"
+        y_expr = "'ih/2-(ih/zoom/2)'"
+    elif "pan_right" in mode:
+        zoom_expr = "1.10"
+        x_expr = f"'(1-on/({target_fps}*{max(1.0, target_duration)}))*(iw-(iw/zoom))'"
+        y_expr = "'ih/2-(ih/zoom/2)'"
+    elif mode == "zoom_out":
+        zoom_expr = "if(lte(zoom,1.0),1.15,max(1.001,zoom-0.0012))"
+        x_expr = "'iw/2-(iw/zoom/2)'"
+        y_expr = "'ih/2-(ih/zoom/2)'"
+    else:
+        # Default smooth cinematic slow push-in
+        zoom_expr = "min(zoom+0.0012,1.15)"
+        x_expr = "'iw/2-(iw/zoom/2)'"
+        y_expr = "'ih/2-(ih/zoom/2)'"
+
     filtergraph = (
         f"scale={target_width}:{target_height}:force_original_aspect_ratio=increase,"
         f"crop={target_width}:{target_height},"
-        f"zoompan=z='{zoom_expr}':d=1:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s={target_width}x{target_height}:fps={target_fps},"
+        f"zoompan=z='{zoom_expr}':d=1:x={x_expr}:y={y_expr}:s={target_width}x{target_height}:fps={target_fps},"
         f"setsar=1,fps={target_fps},format=yuv420p"
     )
 
@@ -96,7 +133,7 @@ def image_to_ken_burns_clip(
         str(output_path),
     ]
 
-    run_ffmpeg_command(cmd, error_context=f"Rendering Ken Burns clip for {image_path.name}")
+    run_ffmpeg_command(cmd, error_context=f"Rendering 2.5D camera clip ({mode}) for {image_path.name}")
     return output_path
 
 
@@ -107,17 +144,18 @@ def process_scene_clip(
     target_width: int = 1080,
     target_height: int = 1920,
     target_fps: int = 30,
+    camera_movement: str = "slow_push_in",
     ffmpeg_bin: Optional[str] = None,
 ) -> Path:
     """Trim and normalize a single video clip or still AI image to target duration and 1080x1920 9:16 aspect ratio.
 
     Applies aspect ratio scaling with center crop (`force_original_aspect_ratio=increase,crop=1080:1920`),
-    sets frame rate to 30fps and pixel format to yuv420p. If the input is an image, applies Ken Burns motion.
+    sets frame rate to 30fps and pixel format to yuv420p. If the input is an image, applies 2.5D camera motion.
     """
     ffmpeg = ffmpeg_bin or get_ffmpeg_binary()
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # If the scene asset is a still image (e.g. from Google Imagen 3), animate it with Ken Burns
+    # If the scene asset is a still image (e.g. from Google Imagen 3), animate it with 2.5D camera motion
     if video_path.suffix.lower() in IMAGE_EXTENSIONS:
         return image_to_ken_burns_clip(
             image_path=video_path,
@@ -126,6 +164,7 @@ def process_scene_clip(
             target_width=target_width,
             target_height=target_height,
             target_fps=target_fps,
+            camera_movement=camera_movement,
             ffmpeg_bin=ffmpeg,
         )
 

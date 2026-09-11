@@ -61,6 +61,8 @@ export default function StudioPage() {
   const [autoPublishYouTube, setAutoPublishYouTube] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSocialModalOpen, setIsSocialModalOpen] = useState(false);
+  const [studioMode, setStudioMode] = useState<"shorts" | "story">("shorts");
+  const [storyStyle, setStoryStyle] = useState<"anime" | "donghua" | "stickman" | "3d_cartoon">("anime");
 
   // Active Job and User Jobs List
   const [activeJob, setActiveJob] = useState<VideoJobResponse | null>(null);
@@ -223,6 +225,8 @@ export default function StudioPage() {
         publish_youtube: autoPublishYouTube,
         video_format: videoFormat,
         target_platform: targetPlatform,
+        mode: studioMode,
+        story_style: storyStyle,
       });
 
       const normalizedResponse = normalizeJob(response);
@@ -306,6 +310,10 @@ export default function StudioPage() {
                 activeJob={activeJob}
                 onGenerate={handleGenerateVideo}
                 onOpenSocialModal={() => setIsSocialModalOpen(true)}
+                studioMode={studioMode}
+                setStudioMode={setStudioMode}
+                storyStyle={storyStyle}
+                setStoryStyle={setStoryStyle}
               />
             )}
 

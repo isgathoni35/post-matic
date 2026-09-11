@@ -18,7 +18,14 @@ if str(PROJECT_ROOT) not in sys.path:
 import edge_tts
 import imageio_ffmpeg
 from engine.config import TEMP_DIR
-from engine.schema import VideoScript
+from engine.schema import (
+    VideoScript,
+    AnimatedStoryScript,
+    Character,
+    DialogueLine,
+    StoryScene,
+    SFXCue,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -90,16 +97,40 @@ def condition_narration_for_natural_speech(text: str) -> str:
 
 
 
+def hex_to_ass_color(hex_str: str) -> str:
+    """Convert a standard #RRGGBB or #RGB hex string to ASS &H00BBGGRR format."""
+    clean = hex_str.strip().lstrip("#")
+    if len(clean) == 3:
+        clean = "".join([c * 2 for c in clean])
+    if len(clean) != 6:
+        return "&H00FFFFFF"  # Default white
+    r = clean[0:2].upper()
+    g = clean[2:4].upper()
+    b = clean[4:6].upper()
+    return f"&H00{b}{g}{r}"
+
+
 @dataclass
 class WordTiming:
-    """Individual word timing in seconds."""
+    """Individual word timing in seconds with speaker and styling metadata."""
     text: str
     start: float
     end: float
+    speaker_id: str = "narrator"
+    speaker_name: str = "Narrator"
+    color_hex: str = "#FFFFFF"
 
     @property
     def duration(self) -> float:
         return max(0.0, self.end - self.start)
+
+
+@dataclass
+class PositionedSFX:
+    """Action sound effect cue placed at an absolute timestamp on the master timeline."""
+    sound_effect: str
+    timestamp_seconds: float
+    volume: float = 1.0
 
 
 @dataclass
@@ -118,6 +149,16 @@ class TTSResult:
     subtitle_path: Path
     total_duration: float
     scene_results: List[SceneAudioResult] = field(default_factory=list)
+
+
+@dataclass
+class StoryTTSResult:
+    """Result of multi-character story dialogue synthesis."""
+    audio_path: Path
+    subtitle_path: Path
+    total_duration: float
+    scene_durations: List[float]
+    sfx_cues: List[PositionedSFX] = field(default_factory=list)
 
 
 def get_audio_duration(file_path: Path, fallback_duration: float = 0.0) -> float:
@@ -364,6 +405,64 @@ def generate_ass_subtitles(
     return output_file
 
 
+def generate_story_ass_subtitles(
+    words: Union[List[WordTiming], List[List[WordTiming]]],
+    output_file: Path,
+    words_per_line: int = 3,
+    font_name: str = "Arial Black",
+    font_size: Optional[int] = None,
+    highlight_color: str = "&H0000FFFF",  # Bright Yellow (ABGR)
+    margin_v: Optional[int] = None,
+    aspect_ratio: str = "9:16",
+) -> Path:
+    """Generate animated ASS subtitles with per-character color coding and active-word yellow pop."""
+    if not words:
+        output_file.write_text(create_ass_header(margin_v=margin_v, aspect_ratio=aspect_ratio), encoding="utf-8")
+        return output_file
+
+    lines = [create_ass_header(
+        font_name=font_name,
+        font_size=font_size,
+        primary_color="&H00FFFFFF",
+        highlight_color=highlight_color,
+        margin_v=margin_v,
+        aspect_ratio=aspect_ratio,
+    )]
+
+    if isinstance(words[0], WordTiming):
+        scenes_words_list: List[List[WordTiming]] = [words]  # type: ignore
+    else:
+        scenes_words_list = words  # type: ignore
+
+    for scene_words in scenes_words_list:
+        if not scene_words:
+            continue
+
+        chunks = [scene_words[i:i + words_per_line] for i in range(0, len(scene_words), words_per_line)]
+
+        for chunk in chunks:
+            for active_idx, active_word in enumerate(chunk):
+                start_str = format_ass_time(active_word.start)
+                end_str = format_ass_time(active_word.end)
+
+                formatted_words = []
+                for idx, w in enumerate(chunk):
+                    cleaned_text = w.text.strip().upper()
+                    char_ass_color = hex_to_ass_color(w.color_hex)
+                    if idx == active_idx:
+                        # Active word highlighted in bright yellow, then returns to speaker's color
+                        formatted_words.append(f"{{\\c{highlight_color}&}}{cleaned_text}{{\\c{char_ass_color}&}}")
+                    else:
+                        formatted_words.append(f"{{\\c{char_ass_color}&}}{cleaned_text}")
+
+                line_text = " ".join(formatted_words)
+                lines.append(f"Dialogue: 0,{start_str},{end_str},Default,,0,0,0,,{line_text}\n")
+
+    output_file.parent.mkdir(parents=True, exist_ok=True)
+    output_file.write_text("".join(lines), encoding="utf-8")
+    return output_file
+
+
 async def synthesize_speech_async(
     text: str,
     voice: str = DEFAULT_VOICE,
@@ -533,6 +632,133 @@ def synthesize_script(
         subtitle_path=master_sub_path,
         total_duration=total_duration,
         scene_results=scene_results,
+    )
+
+
+def synthesize_story_dialogue(
+    story: AnimatedStoryScript,
+    output_dir: Optional[Path] = None,
+    words_per_line: int = 3,
+    aspect_ratio: str = "9:16",
+) -> StoryTTSResult:
+    """Synthesize multi-character dialogue for an AnimatedStoryScript.
+
+    Sequentially routes each dialogue line to its character's assigned voice,
+    adjusts pitch and rate, probes exact line durations, tracks positioned SFX cues,
+    concatenates into scene and master audio tracks, applies broadcast vocal mastering,
+    and creates character-colored animated ASS subtitles.
+    """
+    target_dir = output_dir or (TEMP_DIR / "tts_story")
+    target_dir.mkdir(parents=True, exist_ok=True)
+
+    cast: dict[str, Character] = {char.id: char for char in story.characters}
+    default_char = Character(
+        id="narrator",
+        name="Narrator",
+        voice=DEFAULT_VOICE,
+        pitch="+0Hz",
+        rate="+0%",
+        visual_dna="Omniscient narrator",
+        subtitle_color="#FFFFFF",
+    )
+
+    all_scenes_words: List[List[WordTiming]] = []
+    scene_audio_paths: List[Path] = []
+    scene_durations: List[float] = []
+    all_sfx_cues: List[PositionedSFX] = []
+
+    global_time = 0.0
+
+    for scene in story.scenes:
+        scene_dialogue_audios: List[Path] = []
+        scene_words_accum: List[WordTiming] = []
+        scene_start_time = global_time
+
+        for line in scene.dialogue:
+            char = cast.get(line.speaker_id, default_char)
+            voice = char.voice or DEFAULT_VOICE
+            rate = char.rate or "+0%"
+            pitch = char.pitch or "+0Hz"
+
+            line_audio_path = target_dir / f"scene_{scene.scene_id}_line_{line.line_id}.mp3"
+            conditioned_text = condition_narration_for_natural_speech(line.text)
+
+            _, line_words = asyncio.run(
+                synthesize_speech_async(
+                    text=conditioned_text,
+                    voice=voice,
+                    rate=rate,
+                    volume="+0%",
+                    pitch=pitch,
+                    output_audio_path=line_audio_path,
+                )
+            )
+
+            fallback_dur = line_words[-1].end if line_words else 1.0
+            line_duration = get_audio_duration(line_audio_path, fallback_duration=fallback_dur)
+
+            # Register action SFX cues relative to line start on global timeline
+            for cue in line.sfx:
+                sfx_timestamp = global_time + max(0.0, cue.offset_seconds)
+                all_sfx_cues.append(
+                    PositionedSFX(
+                        sound_effect=cue.sound_effect,
+                        timestamp_seconds=sfx_timestamp,
+                        volume=cue.volume,
+                    )
+                )
+
+            # Adjust word timings to global timeline with speaker color metadata
+            for w in line_words:
+                scene_words_accum.append(
+                    WordTiming(
+                        text=w.text,
+                        start=w.start + global_time,
+                        end=w.end + global_time,
+                        speaker_id=char.id,
+                        speaker_name=char.name,
+                        color_hex=char.subtitle_color,
+                    )
+                )
+
+            scene_dialogue_audios.append(line_audio_path)
+            # Add a slight natural conversational pause between dialogue lines (150ms)
+            global_time += line_duration + 0.15
+
+        # Concatenate dialogue lines into a unified scene audio track
+        scene_master_audio = target_dir / f"scene_{scene.scene_id}_audio.mp3"
+        concatenate_audio_files(scene_dialogue_audios, scene_master_audio)
+        scene_audio_paths.append(scene_master_audio)
+
+        scene_total_dur = global_time - scene_start_time
+        scene_durations.append(scene_total_dur)
+        all_scenes_words.append(scene_words_accum)
+
+    # Concatenate all scenes into story raw master
+    raw_story_audio = target_dir / "story_narration_raw.mp3"
+    concatenate_audio_files(scene_audio_paths, raw_story_audio)
+
+    # Master the dialogue audio track with broadcast EQ and loudness normalization
+    master_story_audio = target_dir / "story_narration_master.mp3"
+    apply_studio_mastering(raw_story_audio, master_story_audio)
+
+    # Generate multi-character animated ASS subtitles
+    master_sub_path = target_dir / "story_subtitles.ass"
+    generate_story_ass_subtitles(
+        words=all_scenes_words,
+        output_file=master_sub_path,
+        words_per_line=words_per_line,
+        aspect_ratio=aspect_ratio,
+    )
+
+    total_duration = get_audio_duration(master_story_audio, fallback_duration=global_time)
+
+    return StoryTTSResult(
+        audio_path=master_story_audio,
+        subtitle_path=master_sub_path,
+        total_duration=total_duration,
+        scene_durations=scene_durations,
+        sfx_cues=all_sfx_cues,
     )
 
 

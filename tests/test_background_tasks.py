@@ -141,6 +141,8 @@ def test_api_generate_triggers_background_task():
             privacy="public",
             video_format="short",
             target_platform="youtube",
+            mode="shorts",
+            story_style="anime",
         )
 
 
