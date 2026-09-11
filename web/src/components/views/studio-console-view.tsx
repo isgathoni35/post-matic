@@ -33,11 +33,35 @@ import {
   Compass,
   Maximize2,
   Radio,
+  MicOff,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { VideoJobResponse } from "@/lib/api";
+
+interface SpeechRecognitionErrorEvent extends Event {
+  error: string;
+  message?: string;
+}
+
+interface SpeechRecognitionEvent extends Event {
+  resultIndex: number;
+  results: SpeechRecognitionResultList;
+}
+
+interface SpeechRecognitionInstance extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onstart: (() => void) | null;
+  onresult: ((event: SpeechRecognitionEvent) => void) | null;
+  onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
+  onend: (() => void) | null;
+  start: () => void;
+  stop: () => void;
+  abort: () => void;
+}
 
 const EDITORIAL_TOPICS = [
   {
@@ -235,19 +259,137 @@ export function StudioConsoleView({
   const togglePlayVoiceSample = (voiceId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (auditionVoiceId === voiceId) {
-      auditionAudioRef.current?.pause();
+      if (auditionAudioRef.current) {
+        auditionAudioRef.current.pause();
+        auditionAudioRef.current.currentTime = 0;
+      }
       setAuditionVoiceId(null);
     } else {
       if (auditionAudioRef.current) {
         auditionAudioRef.current.pause();
+        auditionAudioRef.current.currentTime = 0;
       }
       const audio = new Audio(`/audio/samples/${voiceId}.mp3`);
       auditionAudioRef.current = audio;
+      setAuditionVoiceId(voiceId);
+
       audio.play().catch((err) => {
         console.warn("Audio audition error:", err);
+        setAuditionVoiceId(null);
       });
-      setAuditionVoiceId(voiceId);
       audio.onended = () => setAuditionVoiceId(null);
+      audio.onerror = () => {
+        console.warn(`Audio sample failed to load for ${voiceId}`);
+        setAuditionVoiceId(null);
+      };
+    }
+  };
+
+  // Voice Dictation (Speech-to-Text) Controller
+  const [isDictating, setIsDictating] = useState(false);
+  const [dictationSupported, setDictationSupported] = useState(true);
+  const [dictationNotice, setDictationNotice] = useState<string | null>(null);
+  const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const hasSupport = !!(
+        (window as any).SpeechRecognition ||
+        (window as any).webkitSpeechRecognition
+      );
+      setDictationSupported(hasSupport);
+    }
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.abort();
+        } catch {
+          // ignore
+        }
+      }
+    };
+  }, []);
+
+  const toggleDictation = () => {
+    if (!dictationSupported) {
+      setDictationNotice("Voice dictation is supported on Chrome, Edge, and Safari.");
+      setTimeout(() => setDictationNotice(null), 4500);
+      return;
+    }
+
+    if (isDictating) {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.stop();
+        } catch {
+          // ignore
+        }
+      }
+      setIsDictating(false);
+      return;
+    }
+
+    const SpeechRecClass =
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition;
+
+    if (!SpeechRecClass) return;
+
+    try {
+      const recognition = new SpeechRecClass() as SpeechRecognitionInstance;
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = "en-US";
+
+      const initialBaseText = topic.trim();
+
+      recognition.onstart = () => {
+        setIsDictating(true);
+        setDictationNotice(null);
+      };
+
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
+        let currentTranscript = "";
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const item = event.results[i];
+          if (item[0]) {
+            currentTranscript += item[0].transcript;
+          }
+        }
+
+        const cleanedCurrent = currentTranscript.trim();
+        if (cleanedCurrent) {
+          const separator = initialBaseText.length > 0 ? " " : "";
+          const combined = `${initialBaseText}${separator}${cleanedCurrent}`.slice(0, 300);
+          setTopic(combined);
+        }
+      };
+
+      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+        console.warn("Speech recognition error:", event.error);
+        if (event.error === "not-allowed" || event.error === "service-not-allowed") {
+          setDictationNotice("Microphone access denied. Please grant microphone permissions.");
+          setTimeout(() => setDictationNotice(null), 5000);
+        } else if (event.error === "no-speech") {
+          // Silent timeout, gracefully handled
+        }
+        setIsDictating(false);
+      };
+
+      recognition.onend = () => {
+        setIsDictating(false);
+      };
+
+      recognitionRef.current = recognition;
+      recognition.start();
+    } catch (err) {
+      console.warn("Could not start speech recognition:", err);
+      setIsDictating(false);
+      setDictationNotice("Unable to access microphone.");
+      setTimeout(() => setDictationNotice(null), 4500);
     }
   };
 
@@ -553,17 +695,74 @@ export function StudioConsoleView({
                 <span className="text-[11px] font-mono text-zinc-500">{topic.length}/300</span>
               </div>
 
-              <Textarea
-                placeholder={
-                  videoFormat === "long"
-                    ? "e.g. A comprehensive documentary on how ancient Roman concrete self-healed underwater over thousands of years..."
-                    : "e.g. 3 terrifying facts about the deep sea midnight zone that science still cannot explain..."
-                }
-                value={topic}
-                onChange={(e) => setTopic(e.target.value)}
-                className="min-h-[95px] sm:min-h-[105px] text-sm bg-black/40 border-white/[0.08] focus:border-amber-500/40 focus:ring-amber-500/20 resize-none rounded-xl leading-relaxed text-zinc-100 placeholder:text-zinc-600 font-sans"
-                maxLength={300}
-              />
+              <div className="relative group">
+                <Textarea
+                  placeholder={
+                    videoFormat === "long"
+                      ? "e.g. A comprehensive documentary on how ancient Roman concrete self-healed underwater over thousands of years..."
+                      : "e.g. 3 terrifying facts about the deep sea midnight zone that science still cannot explain..."
+                  }
+                  value={topic}
+                  onChange={(e) => setTopic(e.target.value)}
+                  className={`min-h-[105px] sm:min-h-[115px] pb-10 text-sm bg-black/40 border-white/[0.08] focus:border-amber-500/40 focus:ring-amber-500/20 resize-none rounded-xl leading-relaxed text-zinc-100 placeholder:text-zinc-600 font-sans transition-all ${
+                    isDictating ? "border-amber-500/60 ring-1 ring-amber-500/30 bg-amber-500/[0.03]" : ""
+                  }`}
+                  maxLength={300}
+                />
+
+                {/* Floating Dictation Action Bar (Bottom-Right of Textarea) */}
+                <div className="absolute bottom-2.5 right-2.5 flex items-center gap-1.5 sm:gap-2">
+                  {topic.length > 0 && !isDictating && (
+                    <button
+                      type="button"
+                      onClick={() => setTopic("")}
+                      className="px-2 py-1 rounded-lg text-[10px] font-medium text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.05] transition-colors"
+                      title="Clear prompt"
+                    >
+                      Clear
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={toggleDictation}
+                    title={isDictating ? "Stop listening" : "Dictate prompt with voice"}
+                    className={`h-7 px-2.5 rounded-lg flex items-center gap-1.5 text-[11px] font-semibold transition-all border shadow-sm ${
+                      isDictating
+                        ? "bg-red-500/20 border-red-500/50 text-red-300 animate-pulse ring-1 ring-red-500/30"
+                        : "bg-white/[0.06] hover:bg-white/[0.12] text-zinc-300 hover:text-white border-white/[0.08]"
+                    }`}
+                  >
+                    {isDictating ? (
+                      <>
+                        <span className="relative flex h-2 w-2">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                        </span>
+                        <span>Listening...</span>
+                        <div className="flex items-end gap-[2px] h-3 ml-0.5">
+                          <span className="w-[2px] bg-red-400 rounded-full eq-bar-1" />
+                          <span className="w-[2px] bg-red-400 rounded-full eq-bar-2" />
+                          <span className="w-[2px] bg-red-400 rounded-full eq-bar-3" />
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <Mic className="h-3.5 w-3.5 text-amber-400" />
+                        <span>Dictate</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {/* Dictation Toast Notice */}
+                {dictationNotice && (
+                  <div className="absolute -top-9 right-0 bg-zinc-900 text-amber-300 text-[11px] px-2.5 py-1 rounded-lg border border-amber-500/30 shadow-lg flex items-center gap-1.5 animate-in fade-in slide-in-from-bottom-1 z-10">
+                    <AlertCircle className="h-3 w-3 shrink-0" />
+                    <span>{dictationNotice}</span>
+                  </div>
+                )}
+              </div>
 
               {/* Quick Ideas */}
               <div className="space-y-2 pt-1 min-w-0 w-full max-w-full">

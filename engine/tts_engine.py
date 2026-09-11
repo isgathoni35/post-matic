@@ -235,7 +235,7 @@ def apply_studio_mastering(
     try:
         subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if temp_dest.resolve() != dest_path.resolve():
-            shutil.move(str(temp_dest), str(dest_path))
+            os.replace(str(temp_dest), str(dest_path))
         return dest_path
     except Exception as exc:
         logger.warning("Studio audio mastering failed (falling back to unmastered audio): %s", exc)
