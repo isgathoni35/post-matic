@@ -25,6 +25,8 @@ export interface GenerateVideoPayload {
   mode?: "shorts" | "story";
   story_style?: "anime" | "donghua" | "stickman" | "3d_cartoon";
   characters?: CustomCharacterPayload[];
+  series_id?: string;
+  episode_number?: number;
 }
 
 export interface VideoJobResponse {
@@ -39,6 +41,8 @@ export interface VideoJobResponse {
   duration_seconds?: number | null;
   file_size_bytes?: number | null;
   error_message?: string | null;
+  series_id?: string | null;
+  episode_number?: number | null;
 }
 
 /**
@@ -60,6 +64,8 @@ export function normalizeJob(raw: Partial<VideoJobResponse> | { [key: string]: u
     duration_seconds: typeof item.duration_seconds === "number" ? item.duration_seconds : null,
     file_size_bytes: typeof item.file_size_bytes === "number" ? item.file_size_bytes : null,
     error_message: (item.error_message as string) || null,
+    series_id: (item.series_id as string) || null,
+    episode_number: typeof item.episode_number === "number" ? item.episode_number : null,
   };
 }
 
@@ -296,3 +302,123 @@ export async function publishVideoToYouTube(
 ): Promise<PublishVideoResult> {
   return publishVideoToPlatform(jobId, "youtube", userId, privacy);
 }
+
+export interface SeriesEpisodeSummary {
+  ep: number;
+  title: string;
+  summary: string;
+}
+
+export interface ShowBible {
+  title?: string;
+  genre?: string;
+  tone?: string;
+  premise?: string;
+  world_rules?: string[];
+  recurring_characters?: any[];
+  episode_summaries?: SeriesEpisodeSummary[];
+}
+
+export interface SeriesEpisodeItem {
+  id: string;
+  topic: string;
+  status: string;
+  video_url?: string | null;
+  duration_seconds?: number | null;
+  episode_number?: number | null;
+  created_at: string;
+}
+
+export interface SeriesItem {
+  id: string;
+  user_id: string;
+  title: string;
+  genre?: string | null;
+  tone?: string | null;
+  bible_json?: ShowBible | null;
+  episode_count: number;
+  created_at: string;
+  updated_at: string;
+  episodes?: SeriesEpisodeItem[];
+}
+
+export interface CreateSeriesPayload {
+  user_id: string;
+  title: string;
+  genre?: string;
+  tone?: string;
+  premise?: string;
+  world_rules?: string[];
+  recurring_characters?: any[];
+}
+
+/**
+ * Lists all series belonging to the user.
+ */
+export async function fetchUserSeries(userId?: string): Promise<SeriesItem[]> {
+  const url = userId
+    ? `${API_BASE_URL}/api/series?user_id=${encodeURIComponent(userId)}`
+    : `${API_BASE_URL}/api/series`;
+  const response = await fetch(url, { method: "GET" });
+  if (!response.ok) {
+    throw new Error("Failed to fetch user series");
+  }
+  return response.json();
+}
+
+/**
+ * Creates a new serialized narrative ecosystem.
+ */
+export async function createSeries(payload: CreateSeriesPayload): Promise<SeriesItem> {
+  const response = await fetch(`${API_BASE_URL}/api/series`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    throw new Error("Failed to create series");
+  }
+  return response.json();
+}
+
+/**
+ * Retrieves detailed info and episode timeline for a series.
+ */
+export async function fetchSeriesDetail(seriesId: string): Promise<SeriesItem> {
+  const response = await fetch(`${API_BASE_URL}/api/series/${seriesId}`, { method: "GET" });
+  if (!response.ok) {
+    throw new Error("Failed to fetch series details");
+  }
+  return response.json();
+}
+
+/**
+ * Manually updates Show Bible parameters.
+ */
+export async function updateSeriesBible(
+  seriesId: string,
+  payload: Partial<ShowBible>
+): Promise<SeriesItem> {
+  const response = await fetch(`${API_BASE_URL}/api/series/${seriesId}/bible`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    throw new Error("Failed to update series Show Bible");
+  }
+  return response.json();
+}
+
+/**
+ * Deletes a series.
+ */
+export async function deleteSeries(seriesId: string): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/api/series/${seriesId}`, {
+    method: "DELETE",
+  });
+  if (!response.ok && response.status !== 204) {
+    throw new Error("Failed to delete series");
+  }
+}
+

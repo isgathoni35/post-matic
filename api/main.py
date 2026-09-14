@@ -13,7 +13,7 @@ from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from api.routers import social, video
+from api.routers import series, social, video
 from api.services.github_dispatcher import is_github_dispatch_enabled
 from engine.config import GITHUB_REPO, OUTPUT_DIR
 
@@ -49,6 +49,7 @@ app.mount("/output", StaticFiles(directory=str(OUTPUT_DIR)), name="output")
 api_router = APIRouter(prefix="/api")
 api_router.include_router(video.router)
 api_router.include_router(social.router)
+api_router.include_router(series.router)
 app.include_router(api_router)
 
 

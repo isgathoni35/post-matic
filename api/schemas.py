@@ -1,6 +1,6 @@
 """Pydantic schemas for FastAPI request and response payloads."""
 from enum import Enum
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 from pydantic import AliasChoices, BaseModel, Field
 
 
@@ -82,6 +82,14 @@ class VideoGenerateRequest(BaseModel):
         default=None,
         description="Optional list of custom characters with names, voices, and reference photos",
     )
+    series_id: Optional[str] = Field(
+        default=None,
+        description="Optional Series UUID to link this episode to a continuous universe",
+    )
+    episode_number: Optional[int] = Field(
+        default=None,
+        description="Episode sequence number within the series",
+    )
 
 
 class PublishVideoRequest(BaseModel):
@@ -112,6 +120,8 @@ class VideoJobResponse(BaseModel):
     duration_seconds: Optional[float] = Field(None, description="Final video duration in seconds")
     file_size_bytes: Optional[int] = Field(None, description="Final video file size in bytes")
     error_message: Optional[str] = Field(None, description="Failure reason if status is failed")
+    series_id: Optional[str] = Field(None, description="Associated Series UUID")
+    episode_number: Optional[int] = Field(None, description="Episode sequence number")
 
 
 class SocialAuthUrlResponse(BaseModel):
@@ -130,3 +140,36 @@ class SocialAccountResponse(BaseModel):
     token_expires_at: Optional[str] = Field(None, description="ISO timestamp of token expiration")
     created_at: str = Field(..., description="ISO 8601 creation timestamp")
     updated_at: str = Field(..., description="ISO 8601 update timestamp")
+
+
+class CreateSeriesRequest(BaseModel):
+    """Payload to create a new narrative series."""
+    user_id: str = Field(..., description="User UUID owning the series")
+    title: str = Field(..., min_length=1, max_length=150, description="Title of the series")
+    genre: Optional[str] = Field(default=None, description="Genre (e.g. 'Sci-Fi', 'Historical', 'Finance')")
+    tone: Optional[str] = Field(default=None, description="Tone (e.g. 'Dramatic', 'Comedic', 'Fast-Paced')")
+    premise: Optional[str] = Field(default=None, description="Core series premise or narrative universe")
+    world_rules: Optional[List[str]] = Field(default=None, description="Key rules and lore constraints")
+    recurring_characters: Optional[List[Any]] = Field(default=None, description="Recurring cast members")
+
+
+class UpdateSeriesBibleRequest(BaseModel):
+    """Payload to update Show Bible attributes manually."""
+    premise: Optional[str] = None
+    world_rules: Optional[List[str]] = None
+    tone: Optional[str] = None
+    recurring_characters: Optional[List[Any]] = None
+
+
+class SeriesResponse(BaseModel):
+    """Detailed series schema including its Show Bible and episode count."""
+    id: str = Field(..., description="Unique UUID of the series")
+    user_id: str = Field(..., description="Owner user UUID")
+    title: str = Field(..., description="Series title")
+    genre: Optional[str] = Field(default=None)
+    tone: Optional[str] = Field(default=None)
+    bible_json: Optional[dict] = Field(default_factory=dict)
+    episode_count: int = Field(default=0)
+    created_at: str = Field(...)
+    updated_at: str = Field(...)
+    episodes: Optional[List[dict]] = Field(default=None)

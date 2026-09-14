@@ -47,6 +47,8 @@ def create_video_job_record(
     user_id: Optional[str] = None,
     video_format: str = "short",
     target_platform: str = "youtube",
+    series_id: Optional[str] = None,
+    episode_number: Optional[int] = None,
 ) -> VideoJobResponse:
     """Create a new video job record in Supabase (with fallback to in-memory store)."""
     now_str = get_iso_now()
@@ -57,6 +59,8 @@ def create_video_job_record(
         progress_pct=0,
         created_at=now_str,
         updated_at=now_str,
+        series_id=series_id,
+        episode_number=episode_number,
     )
 
     client = get_supabase_client()
@@ -70,6 +74,8 @@ def create_video_job_record(
                 "status": VideoJobStatus.PENDING.value,
                 "progress_pct": 0,
                 "user_id": user_id,
+                "series_id": series_id,
+                "episode_number": episode_number,
                 "created_at": now_str,
                 "updated_at": now_str,
                 "script_data": {
@@ -107,6 +113,8 @@ def get_video_job_record(job_id: str) -> Optional[VideoJobResponse]:
                     duration_seconds=row.get("duration_seconds"),
                     file_size_bytes=row.get("file_size_bytes"),
                     error_message=row.get("error_message"),
+                    series_id=row.get("series_id"),
+                    episode_number=row.get("episode_number"),
                 )
         except Exception as e:
             logger.warning("Supabase table fetch failed (using fallback): %s", e)

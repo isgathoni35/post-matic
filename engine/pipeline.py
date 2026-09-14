@@ -238,6 +238,7 @@ def generate_animated_story_video(
     bgm_path: Optional[Union[Path, str]] = None,
     cleanup_temp: bool = False,
     progress_callback: Optional[ProgressCallback] = None,
+    series_context: Optional[str] = None,
 ) -> StoryGenerationResult:
     """Execute the end-to-end multi-character animated story video generation pipeline.
 
@@ -276,6 +277,7 @@ def generate_animated_story_video(
         custom_characters=resolved_characters if resolved_characters else None,
         api_key=gemini_api_key,
         preferred_model=preferred_model,
+        series_context=series_context,
     )
     print(f"      Title: \"{story.title}\"")
     print(f"      Cast:  {', '.join([c.name for c in story.characters])} ({len(story.scenes)} scenes)")

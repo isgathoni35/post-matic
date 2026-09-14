@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import {
-  PlusCircle,
   Video,
   Layers,
   Share2,
@@ -38,7 +37,12 @@ export function MobileNav({
     {
       id: "studio" as ActiveWorkspaceView,
       label: "Studio",
-      icon: PlusCircle,
+      icon: Sparkles,
+    },
+    {
+      id: "series" as ActiveWorkspaceView,
+      label: "Series",
+      icon: Video,
     },
     {
       id: "library" as ActiveWorkspaceView,
@@ -97,27 +101,27 @@ export function MobileNav({
               <button
                 type="button"
                 onClick={() => handleSelectView("settings")}
-                className={`flex items-center gap-3 p-3 rounded-xl border text-left text-xs font-semibold transition-all ${
+                className={`flex items-center gap-3 p-3 rounded-lg text-left text-sm transition-all ${
                   activeView === "settings"
-                    ? "bg-amber-500/15 text-amber-400 border-amber-500/30"
-                    : "bg-black/30 border-white/[0.06] text-zinc-300 hover:text-white"
+                    ? "bg-white/[0.08] text-white"
+                    : "text-zinc-400 hover:text-white"
                 }`}
               >
-                <Settings className="h-4 w-4 text-amber-400" />
+                <Settings className="h-4 w-4" />
                 <span>Settings</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => handleSelectView("logs")}
-                className={`flex items-center gap-3 p-3 rounded-xl border text-left text-xs font-semibold transition-all ${
+                className={`flex items-center gap-3 p-3 rounded-lg text-left text-sm transition-all ${
                   activeView === "logs"
-                    ? "bg-amber-500/15 text-amber-400 border-amber-500/30"
-                    : "bg-black/30 border-white/[0.06] text-zinc-300 hover:text-white"
+                    ? "bg-white/[0.08] text-white"
+                    : "text-zinc-400 hover:text-white"
                 }`}
               >
-                <Terminal className="h-4 w-4 text-amber-400" />
-                <span>Engine Logs</span>
+                <Terminal className="h-4 w-4" />
+                <span>Logs</span>
               </button>
             </div>
 

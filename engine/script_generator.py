@@ -40,6 +40,7 @@ def generate_script(
     target_scenes: Optional[int] = None,
     api_key: Optional[str] = None,
     preferred_model: Optional[str] = None,
+    series_context: Optional[str] = None,
 ) -> VideoScript:
     """Generate a structured video script using the Gemini API.
 
@@ -49,6 +50,7 @@ def generate_script(
         target_scenes: Optional number of scenes (defaults to duration // 5).
         api_key: Optional override for Gemini API key.
         preferred_model: Optional override for preferred Gemini model.
+        series_context: Optional Show Bible continuity context for episodic series.
 
     Returns:
         VideoScript: Strictly validated Pydantic model instance.
@@ -61,7 +63,9 @@ def generate_script(
     target_words = int(target_duration * 2.5)
     words_per_scene = max(8, round(target_words / num_scenes))
 
-    prompt = f"""Topic: {topic}
+    series_prefix = f"{series_context}\n\n" if series_context else ""
+
+    prompt = f"""{series_prefix}Topic: {topic}
 Target Duration: approximately {target_duration} seconds.
 Target Scenes: exactly {num_scenes} scenes.
 Target Total Spoken Words: approximately {target_words} words across all {num_scenes} scenes (~{words_per_scene} words per scene).
@@ -182,6 +186,7 @@ def generate_story_script(
     custom_characters: Optional[List[Character]] = None,
     api_key: Optional[str] = None,
     preferred_model: Optional[str] = None,
+    series_context: Optional[str] = None,
 ) -> AnimatedStoryScript:
     """Generate a structured multi-character animated screenplay using the Gemini API.
 
@@ -193,6 +198,7 @@ def generate_story_script(
         custom_characters: Optional user-provided custom cast with visual DNA and assigned voices.
         api_key: Optional override for Gemini API key.
         preferred_model: Optional override for preferred Gemini model.
+        series_context: Optional Show Bible continuity context for episodic series.
 
     Returns:
         AnimatedStoryScript: Strictly validated Pydantic model instance with cast, dialogue, and SFX cues.
@@ -209,7 +215,9 @@ def generate_story_script(
         ]
         cast_clause = "\nSTRICT CAST DIRECTIVE:\nThe screenplay MUST exclusively star the following user-defined cast:\n" + "\n".join(cast_lines) + "\nIn the returned 'characters' list, you MUST preserve these exact characters with their identical IDs, names, and visual DNA. All dialogue lines must be assigned to these characters using their exact 'speaker_id'.\n"
 
-    prompt = f"""Topic: {topic}
+    series_prefix = f"{series_context}\n\n" if series_context else ""
+
+    prompt = f"""{series_prefix}Topic: {topic}
 Animation Style: {style} (e.g. 'anime', 'donghua', 'stickman', or '3d_cartoon')
 Target Total Duration: approximately {target_duration} seconds.
 Target Scenes: exactly {num_scenes} scenes.{cast_clause}

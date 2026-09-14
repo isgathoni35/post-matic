@@ -2,42 +2,56 @@
 
 @layer base {
   :root {
-    --background: #090b10;
-    --background-subtle: #0e121b;
-    --card: #121622;
-    --card-foreground: #f4f5f8;
-    --popover: #121622;
-    --popover-foreground: #f4f5f8;
-    
-    --primary: #f59e0b;
-    --primary-hover: #d97706;
-    --primary-foreground: #090b10;
+    /* Core Backgrounds - depth through tone, not borders */
+    --background: #0c0c0e;
+    --background-subtle: #111115;
+    --background-raised: #16161a;
 
-    --secondary: #1a202e;
-    --secondary-hover: #232b3e;
-    --secondary-foreground: #e2e6ee;
+    /* Cards */
+    --card: #111115;
+    --card-foreground: #f0f0f2;
+    --popover: #1a1a1f;
+    --popover-foreground: #f0f0f2;
 
-    --muted: #141926;
-    --muted-foreground: #8f9aa9;
+    /* Single accent — indigo. Used sparingly for the ONE primary action. */
+    --primary: #6366f1;
+    --primary-hover: #5254cc;
+    --primary-foreground: #ffffff;
 
-    --accent: #f59e0b;
+    /* Secondary surfaces */
+    --secondary: #1a1a1f;
+    --secondary-hover: #202027;
+    --secondary-foreground: #d4d4d8;
+
+    /* Muted text and surfaces */
+    --muted: #18181c;
+    --muted-foreground: #71717a;
+
+    /* Accent matches primary */
+    --accent: #6366f1;
     --accent-foreground: #ffffff;
 
+    /* Status colors — used only for meaning, never decoration */
     --destructive: #ef4444;
     --destructive-foreground: #ffffff;
+    --success: #22c55e;
+    --warning: #f59e0b;
 
-    --border: rgba(255, 255, 255, 0.08);
-    --border-strong: rgba(255, 255, 255, 0.16);
-    --input: rgba(255, 255, 255, 0.06);
-    --ring: rgba(245, 158, 11, 0.35);
+    /* Borders: subtle and consistent */
+    --border: rgba(255, 255, 255, 0.06);
+    --border-strong: rgba(255, 255, 255, 0.12);
+    --input: rgba(255, 255, 255, 0.05);
+    --ring: rgba(99, 102, 241, 0.4);
 
-    --radius: 0.75rem;
+    /* Tighter radius — more purposeful, less bubbly */
+    --radius: 0.5rem;
   }
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-background-subtle: var(--background-subtle);
+  --color-background-raised: var(--background-raised);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
@@ -54,6 +68,8 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
   --color-border: var(--border);
   --color-border-strong: var(--border-strong);
   --color-input: var(--input);
@@ -70,172 +86,143 @@ html {
 }
 
 body {
-  background-color: #08090d;
+  background-color: var(--background);
   color: var(--card-foreground);
   font-family: var(--font-sans);
   overflow-x: hidden;
   max-width: 100vw;
   width: 100%;
   position: relative;
-  letter-spacing: -0.015em;
-  background-image: 
-    radial-gradient(ellipse 60% 22% at 50% 0%, rgba(245, 158, 11, 0.025), transparent 70%);
-  background-attachment: fixed;
+  letter-spacing: -0.012em;
 }
 
-/* Custom Sleek Scrollbar */
-::-webkit-scrollbar {
+/* ─────────────────────────────────────────────
+   Scrollbar
+───────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #2a2a30; border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: #3a3a44; }
+
+/* ─────────────────────────────────────────────
+   Surface Utilities
+   Philosophy: background color difference for depth,
+   not borders or box-shadows.
+───────────────────────────────────────────── */
+
+/* Base raised surface — cards, panels */
+.pm-surface {
+  background-color: var(--card);
+  border-radius: var(--radius);
+}
+
+/* Raised surface — modals, popovers, dropdowns */
+.pm-surface-raised {
+  background-color: var(--popover);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* Interactive surface — hover only, no glow */
+.pm-surface-interactive {
+  background-color: var(--card);
+  border-radius: var(--radius);
+  transition: background-color 0.15s ease;
+  cursor: pointer;
+}
+.pm-surface-interactive:hover {
+  background-color: var(--background-raised);
+}
+
+/* Step panel — inside the Studio wizard */
+.pm-step-panel {
+  background-color: var(--background-subtle);
+  border-radius: calc(var(--radius) + 2px);
+  padding: 1.5rem;
+}
+
+/* ─────────────────────────────────────────────
+   Live Status Indicator
+───────────────────────────────────────────── */
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+.pm-live-dot {
   width: 6px;
   height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: #090b10;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #232a3b;
   border-radius: 9999px;
+  background-color: var(--warning);
+  animation: live-pulse 1.5s ease-in-out infinite;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #333d54;
+/* ─────────────────────────────────────────────
+   Platform Safe Zone Guides
+───────────────────────────────────────────── */
+.safezone-guide-header {
+  border-bottom: 1px dashed rgba(99, 102, 241, 0.3);
+  background: linear-gradient(180deg, rgba(99, 102, 241, 0.04) 0%, transparent 100%);
+}
+.safezone-guide-footer {
+  border-top: 1px dashed rgba(99, 102, 241, 0.3);
+  background: linear-gradient(0deg, rgba(99, 102, 241, 0.04) 0%, transparent 100%);
+}
+.safezone-guide-actionbar {
+  border-left: 1px dashed rgba(99, 102, 241, 0.3);
+  background: linear-gradient(270deg, rgba(99, 102, 241, 0.03) 0%, transparent 100%);
 }
 
-/* Studio Glass & Human-Crafted Surface Utilities */
-.studio-glass {
-  background: rgba(15, 18, 28, 0.82);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+/* ─────────────────────────────────────────────
+   Audio Waveform Animation
+───────────────────────────────────────────── */
+@keyframes wave-bounce {
+  0%, 100% { height: 4px; }
+  50% { height: 18px; }
 }
+.wave-bar-1 { animation: wave-bounce 1.1s ease-in-out infinite 0.0s; }
+.wave-bar-2 { animation: wave-bounce 1.1s ease-in-out infinite 0.25s; }
+.wave-bar-3 { animation: wave-bounce 1.1s ease-in-out infinite 0.1s; }
+.wave-bar-4 { animation: wave-bounce 1.1s ease-in-out infinite 0.45s; }
+.wave-bar-5 { animation: wave-bounce 1.1s ease-in-out infinite 0.35s; }
 
-.studio-card {
-  background: #121622;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  box-shadow: 0 2px 12px -2px rgba(0, 0, 0, 0.4), inset 0 1px 0 0 rgba(255, 255, 255, 0.04);
+/* ─────────────────────────────────────────────
+   Equalizer Bars
+───────────────────────────────────────────── */
+@keyframes eq-pulse-1 { 0%, 100% { height: 4px; } 50% { height: 14px; } }
+@keyframes eq-pulse-2 { 0%, 100% { height: 10px; } 50% { height: 5px; } }
+@keyframes eq-pulse-3 { 0%, 100% { height: 5px; } 50% { height: 16px; } }
+@keyframes eq-pulse-4 { 0%, 100% { height: 12px; } 50% { height: 7px; } }
+.eq-bar-1 { animation: eq-pulse-1 0.7s ease-in-out infinite; }
+.eq-bar-2 { animation: eq-pulse-2 0.85s ease-in-out infinite 0.15s; }
+.eq-bar-3 { animation: eq-pulse-3 0.65s ease-in-out infinite 0.3s; }
+.eq-bar-4 { animation: eq-pulse-4 0.9s ease-in-out infinite 0.1s; }
+
+/* ─────────────────────────────────────────────
+   Slow Spin / Shimmer / Fade
+───────────────────────────────────────────── */
+@keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.animate-spin-slow { animation: spin-slow 8s linear infinite; }
+
+@keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }
+.animate-shimmer { animation: shimmer 2s ease-in-out infinite; }
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
+.animate-fade-up { animation: fade-up 0.25s ease-out both; }
 
-.studio-card-interactive {
-  background: #121622;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
-  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.studio-card-interactive:hover {
-  border-color: rgba(255, 255, 255, 0.14);
-  transform: translateY(-1px);
-  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
-}
-
-/* Creator Surface Bento Styling */
-.creator-surface {
-  background: linear-gradient(180deg, rgba(20, 25, 38, 0.85) 0%, rgba(13, 16, 25, 0.95) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(12px);
-}
-
-.creator-surface-interactive {
-  background: linear-gradient(180deg, rgba(20, 25, 38, 0.85) 0%, rgba(13, 16, 25, 0.95) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(12px);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.creator-surface-interactive:hover {
-  border-color: rgba(255, 255, 255, 0.14);
-  transform: translateY(-1px);
-  box-shadow: 0 12px 32px -6px rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
-}
-
-/* Timeline & Video Track Utility */
+/* ─────────────────────────────────────────────
+   Timeline Track
+───────────────────────────────────────────── */
 .timeline-track {
   background: repeating-linear-gradient(
     90deg,
-    rgba(255, 255, 255, 0.03) 0px,
-    rgba(255, 255, 255, 0.03) 1px,
+    rgba(255, 255, 255, 0.025) 0px,
+    rgba(255, 255, 255, 0.025) 1px,
     transparent 1px,
     transparent 24px
   );
 }
 
-/* Audio Waveform Animation */
-@keyframes wave-bounce {
-  0%, 100% {
-    height: 6px;
-  }
-  50% {
-    height: 24px;
-  }
-}
-
-.wave-bar-1 { animation: wave-bounce 1.1s ease-in-out infinite 0.1s; }
-.wave-bar-2 { animation: wave-bounce 1.1s ease-in-out infinite 0.3s; }
-.wave-bar-3 { animation: wave-bounce 1.1s ease-in-out infinite 0.2s; }
-.wave-bar-4 { animation: wave-bounce 1.1s ease-in-out infinite 0.5s; }
-.wave-bar-5 { animation: wave-bounce 1.1s ease-in-out infinite 0.4s; }
-
-/* Rotating disc for Shorts audio player */
-@keyframes spin-slow {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.animate-spin-slow {
-  animation: spin-slow 8s linear infinite;
-}
-
-/* Subtle Shimmer */
-@keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
-}
-
-.animate-shimmer {
-  animation: shimmer 2.2s infinite;
-}
-
-/* Precision Hardware Bezel */
-.hardware-bezel {
-  background: linear-gradient(175deg, #242a38 0%, #151923 25%, #0e1119 75%, #181d2a 100%);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 
-    0 0 0 1px rgba(0, 0, 0, 0.8),
-    0 24px 64px -12px rgba(0, 0, 0, 0.85),
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.18),
-    inset 0 -1px 1px 0 rgba(0, 0, 0, 0.5);
-}
-
-/* Platform Safe Zone Guides */
-.safezone-guide-header {
-  border-bottom: 1px dashed rgba(245, 158, 11, 0.35);
-  background: linear-gradient(180deg, rgba(245, 158, 11, 0.05) 0%, transparent 100%);
-}
-
-.safezone-guide-footer {
-  border-top: 1px dashed rgba(245, 158, 11, 0.35);
-  background: linear-gradient(0deg, rgba(245, 158, 11, 0.05) 0%, transparent 100%);
-}
-
-.safezone-guide-actionbar {
-  border-left: 1px dashed rgba(245, 158, 11, 0.35);
-  background: linear-gradient(270deg, rgba(245, 158, 11, 0.04) 0%, transparent 100%);
-}
-
-/* Equalizer Bars for Audition Mini-Player */
-@keyframes eq-pulse-1 { 0%, 100% { height: 4px; } 50% { height: 16px; } }
-@keyframes eq-pulse-2 { 0%, 100% { height: 12px; } 50% { height: 6px; } }
-@keyframes eq-pulse-3 { 0%, 100% { height: 6px; } 50% { height: 18px; } }
-@keyframes eq-pulse-4 { 0%, 100% { height: 14px; } 50% { height: 8px; } }
-
-.eq-bar-1 { animation: eq-pulse-1 0.7s ease-in-out infinite; }
-.eq-bar-2 { animation: eq-pulse-2 0.85s ease-in-out infinite 0.15s; }
-.eq-bar-3 { animation: eq-pulse-3 0.65s ease-in-out infinite 0.3s; }
-.eq-bar-4 { animation: eq-pulse-4 0.9s ease-in-out infinite 0.1s; }

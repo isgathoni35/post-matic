@@ -35,6 +35,8 @@ def execute_video_pipeline_job(
     mode: str = "shorts",
     story_style: str = "anime",
     characters: Optional[List[Any]] = None,
+    series_id: Optional[str] = None,
+    episode_number: Optional[int] = None,
 ) -> None:
     """Execute the end-to-end 5-stage video pipeline in a background task.
 
@@ -44,12 +46,27 @@ def execute_video_pipeline_job(
     """
     selected_voice = voice or DEFAULT_VOICE
     logger.info(
-        "Starting background video generation job '%s' for topic '%s' (format: %s, platform: %s)",
+        "Starting background video generation job '%s' for topic '%s' (format: %s, platform: %s, series: %s, ep: %s)",
         job_id,
         topic,
         video_format,
         target_platform,
+        series_id,
+        episode_number,
     )
+
+    # Preload Series Context if associated with a Series
+    series_context: Optional[str] = None
+    if series_id:
+        try:
+            from engine.series_engine import get_series, build_series_context_prompt
+            series_data = get_series(series_id)
+            if series_data:
+                bible_json = series_data.get("bible_json") or {}
+                series_context = build_series_context_prompt(bible_json, next_episode_num=episode_number)
+                logger.info("[%s] Injected series context for series '%s' (Episode %s)", job_id, series_data.get("title"), episode_number)
+        except Exception as s_err:
+            logger.warning("[%s] Failed to load series context: %s", job_id, s_err)
 
     # 1. Check if GitHub Actions Cloud Compute offloading is enabled
     if is_github_dispatch_enabled():
@@ -113,6 +130,7 @@ def execute_video_pipeline_job(
                 custom_characters=characters,
                 output_path=dest_output_path,
                 progress_callback=progress_cb,
+                series_context=series_context,
             )
             final_video_path = story_result.video_path
             file_size = final_video_path.stat().st_size
@@ -126,6 +144,21 @@ def execute_video_pipeline_job(
                 prune_expired_storage_videos(max_age_days=7, max_videos=20)
             except Exception as storage_err:
                 logger.warning("[%s] Storage upload fallback: %s", job_id, storage_err)
+
+            if series_id:
+                try:
+                    from engine.series_engine import update_series_bible
+                    update_series_bible(
+                        series_id=series_id,
+                        new_episode_summary={
+                            "ep": episode_number or 1,
+                            "title": story_result.script.title,
+                            "summary": getattr(story_result.script, "synopsis", topic),
+                        },
+                    )
+                    logger.info("[%s] Updated Show Bible for series %s", job_id, series_id)
+                except Exception as s_update_err:
+                    logger.warning("[%s] Failed to update series bible: %s", job_id, s_update_err)
 
             update_video_job_record(
                 job_id=job_id,
@@ -146,6 +179,7 @@ def execute_video_pipeline_job(
         script = generate_script(
             topic=topic,
             target_duration=target_duration,
+            series_context=series_context,
         )
         script_dict = script.model_dump()
         update_video_job_record(
@@ -266,6 +300,21 @@ def execute_video_pipeline_job(
             prune_expired_storage_videos(max_age_days=7, max_videos=20)
         except Exception as storage_err:
             logger.warning("[%s] Storage upload/prune fallback: %s", job_id, storage_err)
+
+        if series_id:
+            try:
+                from engine.series_engine import update_series_bible
+                update_series_bible(
+                    series_id=series_id,
+                    new_episode_summary={
+                        "ep": episode_number or 1,
+                        "title": script.title,
+                        "summary": script.description or topic,
+                    },
+                )
+                logger.info("[%s] Updated Show Bible for series %s", job_id, series_id)
+            except Exception as s_update_err:
+                logger.warning("[%s] Failed to update series bible: %s", job_id, s_update_err)
 
         # STAGE 5: Completed (100%)
         update_video_job_record(

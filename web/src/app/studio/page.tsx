@@ -10,6 +10,8 @@ import { createClient } from "@/lib/supabase/client";
 import { generateVideoJob, getVideoJobStatus, VideoJobResponse, normalizeJob, CustomCharacterPayload } from "@/lib/api";
 import { SocialAccountsModal } from "@/components/social/social-accounts-modal";
 import { StudioConsoleView, VOICES } from "@/components/views/studio-console-view";
+import { SeriesView } from "@/components/views/series-view";
+import { SeriesDetailView } from "@/components/views/series-detail-view";
 import { RenderLibraryView } from "@/components/views/render-library-view";
 import { JobQueueView } from "@/components/views/job-queue-view";
 import { SocialChannelsView } from "@/components/views/social-channels-view";
@@ -39,7 +41,7 @@ export default function StudioPage() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("postmatic_active_view") as ActiveWorkspaceView | null;
-      if (saved && ["studio", "library", "queue", "social", "logs", "settings"].includes(saved)) {
+      if (saved && ["studio", "series", "library", "queue", "social", "logs", "settings"].includes(saved)) {
         setActiveView(saved);
       }
     }
@@ -64,6 +66,8 @@ export default function StudioPage() {
   const [studioMode, setStudioMode] = useState<"shorts" | "story">("shorts");
   const [storyStyle, setStoryStyle] = useState<"anime" | "donghua" | "stickman" | "3d_cartoon">("anime");
   const [customCharacters, setCustomCharacters] = useState<CustomCharacterPayload[]>([]);
+  const [activeSeries, setActiveSeries] = useState<{ id: string; title: string; nextEpisode: number } | null>(null);
+  const [selectedSeriesId, setSelectedSeriesId] = useState<string | null>(null);
 
   // Active Job and User Jobs List
   const [activeJob, setActiveJob] = useState<VideoJobResponse | null>(null);
@@ -229,6 +233,8 @@ export default function StudioPage() {
         mode: studioMode,
         story_style: storyStyle,
         characters: studioMode === "story" && customCharacters.length > 0 ? customCharacters : undefined,
+        series_id: activeSeries?.id,
+        episode_number: activeSeries?.nextEpisode,
       });
 
       const normalizedResponse = normalizeJob(response);
@@ -255,6 +261,18 @@ export default function StudioPage() {
     handleViewChange("studio");
   };
 
+  const handleStartEpisodeGeneration = (series: { id: string; title: string; nextEpisode: number }) => {
+    setActiveSeries(series);
+    handleViewChange("studio");
+  };
+
+  const handleSelectJobById = (jobId: string) => {
+    const existingJob = jobs.find((j) => (j.job_id || j.id) === jobId);
+    if (existingJob) {
+      handleSelectJobFromGalleryOrQueue(existingJob);
+    }
+  };
+
   // Loading / Auth Guard State
   if (isLoading || !user) {
     return (
@@ -277,7 +295,7 @@ export default function StudioPage() {
   const completedJobsCount = jobs.filter((j) => j.status === "completed").length;
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#090b10] text-zinc-100 overflow-x-hidden w-full max-w-full">
+    <div className="min-h-screen flex flex-col bg-[#0c0c0e] text-zinc-100 overflow-x-hidden w-full max-w-full">
       {/* Top Navigation Bar */}
       <Header onOpenSocialModal={() => setIsSocialModalOpen(true)} />
 
@@ -318,7 +336,27 @@ export default function StudioPage() {
                 setStoryStyle={setStoryStyle}
                 customCharacters={customCharacters}
                 setCustomCharacters={setCustomCharacters}
+                seriesTitle={activeSeries?.title}
+                seriesEpisode={activeSeries?.nextEpisode}
+                onClearSeries={() => setActiveSeries(null)}
               />
+            )}
+
+            {activeView === "series" && (
+              selectedSeriesId ? (
+                <SeriesDetailView
+                  seriesId={selectedSeriesId}
+                  onBack={() => setSelectedSeriesId(null)}
+                  onStartEpisodeGeneration={handleStartEpisodeGeneration}
+                  onSelectVideoJob={handleSelectJobById}
+                />
+              ) : (
+                <SeriesView
+                  userId={user?.id}
+                  onSelectSeriesDetail={(id) => setSelectedSeriesId(id)}
+                  onStartEpisodeGeneration={handleStartEpisodeGeneration}
+                />
+              )
             )}
 
             {activeView === "library" && (

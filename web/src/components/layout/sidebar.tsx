@@ -7,15 +7,14 @@ import {
   Share2,
   Terminal,
   Settings,
-  PlusCircle,
-  Cpu,
   Sparkles,
+  BookOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { BrandIcon } from "@/components/ui/brand-logo";
 
 export type ActiveWorkspaceView =
   | "studio"
+  | "series"
   | "library"
   | "queue"
   | "social"
@@ -43,108 +42,123 @@ export function Sidebar({
   activeJobsCount = 0,
   completedJobsCount = 0,
 }: SidebarProps) {
-  const navItems: NavItem[] = [
-    { id: "studio", label: "Studio Console", icon: PlusCircle },
+  const primaryNav: NavItem[] = [
+    { id: "studio", label: "Studio", icon: Sparkles },
+    { id: "series", label: "Series", icon: BookOpen },
+  ];
+
+  const secondaryNav: NavItem[] = [
     {
       id: "library",
-      label: "Render Library",
+      label: "Library",
       icon: Video,
       badge: completedJobsCount > 0 ? String(completedJobsCount) : undefined,
       badgeType: "count",
     },
     {
       id: "queue",
-      label: "Job Queue",
+      label: "Queue",
       icon: Layers,
-      badge: activeJobsCount > 0 ? `${activeJobsCount} Active` : undefined,
+      badge: activeJobsCount > 0 ? String(activeJobsCount) : undefined,
       badgeType: activeJobsCount > 0 ? "live" : undefined,
     },
-    { id: "social", label: "Social Accounts", icon: Share2 },
-    { id: "logs", label: "Engine Logs", icon: Terminal },
-    { id: "settings", label: "Settings", icon: Settings },
+    { id: "social", label: "Channels", icon: Share2 },
+    { id: "logs", label: "Logs", icon: Terminal },
   ];
 
-  return (
-    <aside className="w-64 shrink-0 border-r border-white/[0.08] bg-[#090b0e] flex flex-col justify-between hidden md:flex min-h-[calc(100vh-4rem)] p-4">
-      <div className="space-y-6">
-        {/* Navigation Section */}
-        <div className="space-y-1">
-          <p className="px-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-500 mb-2">
-            Workspaces
-          </p>
-          <nav className="space-y-1">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = activeView === item.id;
+  const renderNavItem = (item: NavItem) => {
+    const Icon = item.icon;
+    const isActive = activeView === item.id;
 
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => onViewChange(item.id)}
-                  className={cn(
-                    "w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all group",
-                    isActive
-                      ? "bg-amber-500/10 text-white font-semibold border border-amber-500/30 shadow-md shadow-amber-500/5"
-                      : "text-zinc-400 hover:bg-white/[0.04] hover:text-white"
-                  )}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <Icon
-                      className={cn(
-                        "h-4 w-4 transition-colors",
-                        isActive
-                          ? "text-amber-400"
-                          : "text-zinc-500 group-hover:text-zinc-300"
-                      )}
-                    />
-                    <span>{item.label}</span>
-                  </div>
-                  {item.badge && (
-                    <span
-                      className={cn(
-                        "text-[10px] font-mono px-2 py-0.5 rounded-full font-medium",
-                        item.badgeType === "live"
-                          ? "bg-amber-500/20 text-amber-400 border border-amber-500/30 animate-pulse font-semibold"
-                          : "bg-white/[0.06] text-zinc-300 border border-white/[0.08]"
-                      )}
-                    >
-                      {item.badge}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+    return (
+      <button
+        key={item.id}
+        type="button"
+        onClick={() => onViewChange(item.id)}
+        className={cn(
+          "w-full flex items-center justify-between px-3 py-2 rounded-md text-sm transition-colors duration-150",
+          isActive
+            ? "bg-white/[0.06] text-white font-medium"
+            : "text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.03]"
+        )}
+      >
+        <div className="flex items-center gap-2.5">
+          {/* Active indicator bar */}
+          <span
+            className={cn(
+              "w-0.5 h-4 rounded-full transition-all duration-200",
+              isActive ? "bg-indigo-500" : "bg-transparent"
+            )}
+          />
+          <Icon className={cn("h-4 w-4 shrink-0", isActive ? "text-white" : "text-zinc-500")} />
+          <span>{item.label}</span>
+        </div>
+        {item.badge && (
+          <span
+            className={cn(
+              "text-[11px] font-mono tabular-nums px-1.5 py-0.5 rounded",
+              item.badgeType === "live"
+                ? "bg-amber-500/15 text-amber-400"
+                : "bg-white/[0.06] text-zinc-400"
+            )}
+          >
+            {item.badge}
+          </span>
+        )}
+      </button>
+    );
+  };
+
+  return (
+    <aside className="w-52 shrink-0 border-r border-white/[0.05] bg-[#0c0c0e] flex flex-col hidden md:flex min-h-[calc(100vh-3.5rem)]">
+      <div className="flex-1 py-4 px-3 space-y-6 overflow-y-auto">
+        {/* Primary: Create */}
+        <div>
+          <p className="px-3 mb-1 text-[11px] font-medium text-zinc-600 uppercase tracking-wider">
+            Create
+          </p>
+          <nav className="space-y-0.5">
+            {primaryNav.map(renderNavItem)}
+          </nav>
+        </div>
+
+        {/* Divider */}
+        <div className="border-t border-white/[0.05]" />
+
+        {/* Secondary: Manage */}
+        <div>
+          <p className="px-3 mb-1 text-[11px] font-medium text-zinc-600 uppercase tracking-wider">
+            Manage
+          </p>
+          <nav className="space-y-0.5">
+            {secondaryNav.map(renderNavItem)}
           </nav>
         </div>
       </div>
 
-      {/* Creator Channel & Cloud Quota Card */}
-      <div className="creator-surface rounded-2xl p-4 space-y-3 shadow-lg">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <BrandIcon size="xs" glow={false} />
-            <span className="text-xs font-semibold text-white">Creator Studio</span>
-          </div>
-          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-semibold border border-emerald-500/20">
-            Free Tier
-          </span>
-        </div>
-        <div className="space-y-1.5 text-[11px] text-zinc-400">
-          <div className="flex justify-between">
-            <span>Resolution</span>
-            <span className="font-semibold text-zinc-300">1080x1920 HD</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Cloud Compute</span>
-            <span className="font-semibold text-emerald-400">Unlimited Free</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Direct Publishing</span>
-            <span className="font-semibold text-zinc-300">YouTube Shorts</span>
-          </div>
-        </div>
+      {/* Bottom: Settings */}
+      <div className="p-3 border-t border-white/[0.05]">
+        <button
+          type="button"
+          onClick={() => onViewChange("settings")}
+          className={cn(
+            "w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors duration-150",
+            activeView === "settings"
+              ? "bg-white/[0.06] text-white font-medium"
+              : "text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.03]"
+          )}
+        >
+          <span
+            className={cn(
+              "w-0.5 h-4 rounded-full transition-all duration-200",
+              activeView === "settings" ? "bg-indigo-500" : "bg-transparent"
+            )}
+          />
+          <Settings className="h-4 w-4 shrink-0" />
+          <span>Settings</span>
+        </button>
       </div>
     </aside>
   );
 }
+
