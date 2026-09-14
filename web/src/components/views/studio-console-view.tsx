@@ -349,7 +349,7 @@ export function StudioConsoleView({
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto space-y-6">
+    <div className="w-full max-w-6xl mx-auto space-y-6">
       {/* Series Context Banner (if in Series Mode) */}
       {seriesTitle && (
         <div className="flex items-center justify-between px-4 py-2.5 rounded-lg bg-indigo-950/40 border border-indigo-500/20 text-indigo-200 text-sm">
@@ -382,7 +382,7 @@ export function StudioConsoleView({
           {/* Step 1 Tab */}
           <button
             onClick={() => setCurrentStep(1)}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-all ${
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
               currentStep === 1
                 ? "bg-white/[0.08] text-white"
                 : topic.trim()
@@ -412,7 +412,7 @@ export function StudioConsoleView({
               if (topic.trim()) setCurrentStep(2);
             }}
             disabled={!topic.trim()}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-all ${
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
               currentStep === 2
                 ? "bg-white/[0.08] text-white"
                 : !topic.trim()
@@ -442,7 +442,7 @@ export function StudioConsoleView({
               if (activeJob) setCurrentStep(3);
             }}
             disabled={!activeJob}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-all ${
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
               currentStep === 3
                 ? "bg-white/[0.08] text-white"
                 : !activeJob
@@ -481,13 +481,13 @@ export function StudioConsoleView({
           {/* Top Controls: Production Mode & Aspect Ratio */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Production Mode Toggle */}
-            <div className="bg-[#111115] p-3 rounded-lg border border-white/[0.04]">
+            <div className="pm-surface p-4 rounded-xl border border-white/[0.06]">
               <label className="text-xs font-medium text-zinc-400 block mb-2">Production Mode</label>
-              <div className="grid grid-cols-2 gap-1.5 bg-black/40 p-1 rounded-md">
+              <div className="grid grid-cols-2 gap-1.5 bg-[#0c0c0e] p-1 rounded-lg border border-white/[0.06]">
                 <button
                   type="button"
                   onClick={() => setStudioMode("shorts")}
-                  className={`py-2 px-3 rounded text-xs font-medium transition-all ${
+                  className={`py-2 px-3 rounded-md text-xs font-medium transition-all ${
                     studioMode === "shorts"
                       ? "bg-indigo-600 text-white shadow-sm"
                       : "text-zinc-400 hover:text-white"
@@ -498,7 +498,7 @@ export function StudioConsoleView({
                 <button
                   type="button"
                   onClick={() => setStudioMode("story")}
-                  className={`py-2 px-3 rounded text-xs font-medium transition-all ${
+                  className={`py-2 px-3 rounded-md text-xs font-medium transition-all ${
                     studioMode === "story"
                       ? "bg-indigo-600 text-white shadow-sm"
                       : "text-zinc-400 hover:text-white"
@@ -510,16 +510,16 @@ export function StudioConsoleView({
             </div>
 
             {/* Video Aspect Ratio Toggle */}
-            <div className="bg-[#111115] p-3 rounded-lg border border-white/[0.04]">
+            <div className="pm-surface p-4 rounded-xl border border-white/[0.06]">
               <label className="text-xs font-medium text-zinc-400 block mb-2">Format & Framing</label>
-              <div className="grid grid-cols-2 gap-1.5 bg-black/40 p-1 rounded-md">
+              <div className="grid grid-cols-2 gap-1.5 bg-[#0c0c0e] p-1 rounded-lg border border-white/[0.06]">
                 <button
                   type="button"
                   onClick={() => {
                     setVideoFormat("short");
                     setTargetDuration(60);
                   }}
-                  className={`py-2 px-3 rounded text-xs font-medium flex items-center justify-center gap-2 transition-all ${
+                  className={`py-2 px-3 rounded-md text-xs font-medium flex items-center justify-center gap-2 transition-all ${
                     videoFormat === "short"
                       ? "bg-indigo-600 text-white shadow-sm"
                       : "text-zinc-400 hover:text-white"
@@ -534,7 +534,7 @@ export function StudioConsoleView({
                     setVideoFormat("long");
                     setTargetDuration(180);
                   }}
-                  className={`py-2 px-3 rounded text-xs font-medium flex items-center justify-center gap-2 transition-all ${
+                  className={`py-2 px-3 rounded-md text-xs font-medium flex items-center justify-center gap-2 transition-all ${
                     videoFormat === "long"
                       ? "bg-indigo-600 text-white shadow-sm"
                       : "text-zinc-400 hover:text-white"
@@ -548,7 +548,7 @@ export function StudioConsoleView({
           </div>
 
           {/* Main Idea Prompt Input */}
-          <div className="bg-[#111115] p-5 rounded-lg border border-white/[0.04] space-y-3">
+          <div className="pm-surface p-5 rounded-xl border border-white/[0.06] space-y-3">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-sm font-semibold text-white">Video Topic & Narrative Prompt</h3>
@@ -559,7 +559,7 @@ export function StudioConsoleView({
               <button
                 type="button"
                 onClick={toggleDictation}
-                className={`p-2 rounded-md transition-colors flex items-center gap-1.5 text-xs font-medium ${
+                className={`p-2 rounded-lg transition-colors flex items-center gap-1.5 text-xs font-medium ${
                   isDictating
                     ? "bg-red-500/20 text-red-400 border border-red-500/30"
                     : "bg-white/[0.04] text-zinc-400 hover:text-white hover:bg-white/[0.08]"
@@ -588,7 +588,7 @@ export function StudioConsoleView({
                   ? "e.g. A rogue AI hacker in Neo-Tokyo gets trapped inside a corporate mainframe and must bargain with an eccentric digital ghost to break free..."
                   : "e.g. The forgotten history of the Library of Alexandria and the real truth behind how the ancient world lost its most valuable knowledge..."
               }
-              className="min-h-[160px] resize-y bg-[#0c0c0e] border-white/[0.06] focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-zinc-100 text-sm leading-relaxed p-4 rounded-md"
+              className="min-h-[160px] resize-y bg-[#0c0c0e] border-white/[0.06] focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-zinc-100 text-sm leading-relaxed p-4 rounded-lg"
             />
 
             <div className="flex items-center justify-between text-xs text-zinc-500 pt-1">
@@ -600,12 +600,13 @@ export function StudioConsoleView({
           {/* Step 1 Actions */}
           <div className="flex items-center justify-end pt-2">
             <Button
+              variant="primary"
               onClick={() => setCurrentStep(2)}
               disabled={!topic.trim()}
-              className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2.5 rounded-md font-medium text-sm flex items-center gap-2 shadow-sm transition-all disabled:opacity-40"
+              className="h-10 px-6 text-xs font-semibold rounded-lg"
             >
               <span>Continue to Settings</span>
-              <ArrowRight className="w-4 h-4" />
+              <ArrowRight className="w-4 h-4 ml-1.5" />
             </Button>
           </div>
         </div>
@@ -617,7 +618,7 @@ export function StudioConsoleView({
       {currentStep === 2 && (
         <div className="space-y-6 animate-in fade-in duration-200">
           {/* Quick Summary Bar */}
-          <div className="flex items-center justify-between p-3 rounded-lg bg-[#111115] border border-white/[0.04]">
+          <div className="flex items-center justify-between p-3.5 rounded-xl pm-surface border border-white/[0.06]">
             <div className="flex items-center gap-3 overflow-hidden">
               <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Concept:</span>
               <p className="text-xs text-zinc-200 truncate max-w-md sm:max-w-xl">{topic}</p>
@@ -631,7 +632,7 @@ export function StudioConsoleView({
           </div>
 
           {/* Voice Audition Selector */}
-          <div className="bg-[#111115] p-5 rounded-lg border border-white/[0.04] space-y-4">
+          <div className="pm-surface p-5 rounded-xl border border-white/[0.06] space-y-4">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-sm font-semibold text-white">Narrator & Voice Profile</h3>
@@ -654,7 +655,7 @@ export function StudioConsoleView({
                     className={`p-3 rounded-lg border cursor-pointer transition-all flex items-center justify-between group ${
                       isSelected
                         ? "bg-indigo-950/30 border-indigo-500/50"
-                        : "bg-[#0c0c0e] border-white/[0.04] hover:border-white/[0.1] hover:bg-white/[0.02]"
+                        : "bg-[#0c0c0e] border-white/[0.06] hover:border-white/[0.12] hover:bg-white/[0.02]"
                     }`}
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
@@ -697,7 +698,7 @@ export function StudioConsoleView({
           {/* Configuration Grid: Duration, Platform & Distribution */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Duration Selector */}
-            <div className="bg-[#111115] p-4 rounded-lg border border-white/[0.04] space-y-3">
+            <div className="pm-surface p-5 rounded-xl border border-white/[0.06] space-y-3">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-medium text-zinc-300 flex items-center gap-1.5">
                   <Clock className="w-3.5 h-3.5 text-zinc-400" />
@@ -713,10 +714,10 @@ export function StudioConsoleView({
                       key={sec}
                       type="button"
                       onClick={() => setTargetDuration(sec)}
-                      className={`py-2 text-xs font-medium rounded transition-all ${
+                      className={`py-2 text-xs font-medium rounded-lg transition-all ${
                         targetDuration === sec
                           ? "bg-indigo-600 text-white"
-                          : "bg-[#0c0c0e] text-zinc-400 hover:text-white border border-white/[0.04]"
+                          : "bg-[#0c0c0e] text-zinc-400 hover:text-white border border-white/[0.06]"
                       }`}
                     >
                       {sec}s (Short)
@@ -730,10 +731,10 @@ export function StudioConsoleView({
                       key={sec}
                       type="button"
                       onClick={() => setTargetDuration(sec)}
-                      className={`py-2 text-xs font-medium rounded transition-all ${
+                      className={`py-2 text-xs font-medium rounded-lg transition-all ${
                         targetDuration === sec
                           ? "bg-indigo-600 text-white"
-                          : "bg-[#0c0c0e] text-zinc-400 hover:text-white border border-white/[0.04]"
+                          : "bg-[#0c0c0e] text-zinc-400 hover:text-white border border-white/[0.06]"
                       }`}
                     >
                       {sec / 60} min
@@ -744,7 +745,7 @@ export function StudioConsoleView({
             </div>
 
             {/* Platform & Social Target */}
-            <div className="bg-[#111115] p-4 rounded-lg border border-white/[0.04] space-y-3">
+            <div className="pm-surface p-5 rounded-xl border border-white/[0.06] space-y-3">
               <label className="text-xs font-medium text-zinc-300 block">Primary Destination</label>
               <div className="grid grid-cols-3 gap-2">
                 {[
@@ -756,10 +757,10 @@ export function StudioConsoleView({
                     key={p.id}
                     type="button"
                     onClick={() => setTargetPlatform(p.id as any)}
-                    className={`py-2 text-xs font-medium rounded transition-all ${
+                    className={`py-2 text-xs font-medium rounded-lg transition-all ${
                       targetPlatform === p.id
                         ? "bg-indigo-600 text-white"
-                        : "bg-[#0c0c0e] text-zinc-400 hover:text-white border border-white/[0.04]"
+                        : "bg-[#0c0c0e] text-zinc-400 hover:text-white border border-white/[0.06]"
                     }`}
                   >
                     {p.label}
@@ -771,7 +772,7 @@ export function StudioConsoleView({
 
           {/* Animated Story Mode Settings (Conditional) */}
           {studioMode === "story" && (
-            <div className="bg-[#111115] p-5 rounded-lg border border-white/[0.04] space-y-5">
+            <div className="pm-surface p-5 rounded-xl border border-white/[0.06] space-y-5">
               <div>
                 <h3 className="text-sm font-semibold text-white">Story Style & Art Direction</h3>
                 <p className="text-xs text-zinc-400">
@@ -794,7 +795,7 @@ export function StudioConsoleView({
                     className={`py-2.5 px-3 rounded-lg text-xs font-medium border text-center transition-all ${
                       storyStyle === st.id
                         ? "bg-indigo-600 text-white border-indigo-500"
-                        : "bg-[#0c0c0e] text-zinc-400 border-white/[0.04] hover:text-white"
+                        : "bg-[#0c0c0e] text-zinc-400 border-white/[0.06] hover:text-white"
                     }`}
                   >
                     {st.label}
@@ -818,7 +819,7 @@ export function StudioConsoleView({
                       variant="outline"
                       size="sm"
                       onClick={handleAddCharacter}
-                      className="text-xs h-7 border-white/[0.08] bg-transparent text-zinc-300 hover:text-white"
+                      className="text-xs h-7 border-white/[0.08] bg-transparent text-zinc-300 hover:text-white rounded-lg"
                     >
                       <UserPlus className="w-3 h-3 mr-1" />
                       Add Character
@@ -852,7 +853,7 @@ export function StudioConsoleView({
                             type="text"
                             value={char.name}
                             onChange={(e) => handleUpdateCharacter(idx, "name", e.target.value)}
-                            className="w-full bg-[#16161a] border border-white/[0.06] rounded px-2 py-1 text-xs text-white"
+                            className="w-full bg-[#16161a] border border-white/[0.06] rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500"
                             placeholder="Hero Name"
                           />
                         </div>
@@ -862,7 +863,7 @@ export function StudioConsoleView({
                           <select
                             value={char.voice || VOICES[0].id}
                             onChange={(e) => handleUpdateCharacter(idx, "voice", e.target.value)}
-                            className="w-full bg-[#16161a] border border-white/[0.06] rounded px-2 py-1 text-xs text-white"
+                            className="w-full bg-[#16161a] border border-white/[0.06] rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500"
                           >
                             {VOICES.map((v) => (
                               <option key={v.id} value={v.id}>
@@ -878,7 +879,7 @@ export function StudioConsoleView({
                             type="text"
                             value={char.visual_notes || ""}
                             onChange={(e) => handleUpdateCharacter(idx, "visual_notes", e.target.value)}
-                            className="w-full bg-[#16161a] border border-white/[0.06] rounded px-2 py-1 text-xs text-zinc-300"
+                            className="w-full bg-[#16161a] border border-white/[0.06] rounded-lg px-2.5 py-1.5 text-xs text-zinc-300 focus:outline-none focus:border-indigo-500"
                             placeholder="Black trench coat, neon glasses"
                           />
                         </div>
@@ -889,7 +890,7 @@ export function StudioConsoleView({
                             type="file"
                             accept="image/*"
                             onChange={(e) => handleImageFileChange(idx, e)}
-                            className="text-[10px] text-zinc-400 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:bg-zinc-800 file:text-zinc-300"
+                            className="text-[10px] text-zinc-400 file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-[10px] file:bg-zinc-800 file:text-zinc-300"
                           />
                         </div>
                       </div>
@@ -901,7 +902,7 @@ export function StudioConsoleView({
           )}
 
           {/* Auto-publish checkbox */}
-          <div className="flex items-center justify-between p-3 rounded-lg bg-[#111115] border border-white/[0.04]">
+          <div className="flex items-center justify-between p-3.5 rounded-xl pm-surface border border-white/[0.06]">
             <div className="flex items-center gap-2.5">
               <input
                 id="auto-pub"
@@ -922,18 +923,19 @@ export function StudioConsoleView({
             <Button
               variant="outline"
               onClick={() => setCurrentStep(1)}
-              className="border-white/[0.08] text-zinc-400 hover:text-white px-4 py-2 text-xs flex items-center gap-1.5"
+              className="border-white/[0.08] text-zinc-400 hover:text-white px-4 py-2 text-xs flex items-center gap-1.5 rounded-lg"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>Back to Idea</span>
             </Button>
 
             <Button
+              variant="primary"
               onClick={handleStartGeneration}
               disabled={isSubmitting || !topic.trim()}
-              className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2.5 rounded-md font-medium text-sm flex items-center gap-2 shadow-sm transition-all disabled:opacity-40"
+              className="h-10 px-6 text-xs font-semibold rounded-lg"
             >
-              <Sparkles className="w-4 h-4" />
+              <Sparkles className="w-4 h-4 mr-1.5" />
               <span>Start Video Generation</span>
             </Button>
           </div>
@@ -946,7 +948,7 @@ export function StudioConsoleView({
       {currentStep === 3 && (
         <div className="space-y-6 animate-in fade-in duration-200">
           {/* Status Banner */}
-          <div className="p-5 rounded-lg bg-[#111115] border border-white/[0.04] space-y-3">
+          <div className="pm-surface p-5 rounded-xl border border-white/[0.06] space-y-3">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
                 <div className="flex items-center gap-2">
@@ -1021,11 +1023,11 @@ export function StudioConsoleView({
           </div>
 
           {/* Video Preview Center */}
-          <div className="flex flex-col items-center justify-center p-6 rounded-lg bg-[#111115] border border-white/[0.04]">
+          <div className="flex flex-col items-center justify-center p-6 rounded-xl pm-surface border border-white/[0.06]">
             {videoSrc && isCompleted ? (
               <div className="w-full flex flex-col items-center space-y-4">
                 <div
-                  className={`relative rounded-lg overflow-hidden bg-black shadow-xl border border-white/[0.08] ${
+                  className={`relative rounded-xl overflow-hidden bg-black border border-white/[0.08] ${
                     videoFormat === "short"
                       ? "w-full max-w-[320px] aspect-[9/16]"
                       : "w-full max-w-[640px] aspect-[16/9]"
@@ -1048,15 +1050,17 @@ export function StudioConsoleView({
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <Button className="bg-white hover:bg-zinc-200 text-black font-semibold text-xs h-9 px-4 rounded-md flex items-center gap-2">
+                    <Button variant="secondary" size="sm" className="h-9 px-4 text-xs font-semibold rounded-lg flex items-center gap-2">
                       <Download className="w-3.5 h-3.5" />
                       <span>Download MP4</span>
                     </Button>
                   </a>
 
                   <Button
+                    variant="primary"
+                    size="sm"
                     onClick={onOpenSocialModal}
-                    className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs h-9 px-4 rounded-md flex items-center gap-2"
+                    className="h-9 px-4 text-xs font-semibold rounded-lg flex items-center gap-2"
                   >
                     <Share2 className="w-3.5 h-3.5" />
                     <span>Publish to Channels</span>
@@ -1064,8 +1068,9 @@ export function StudioConsoleView({
 
                   <Button
                     variant="outline"
+                    size="sm"
                     onClick={() => setCurrentStep(1)}
-                    className="border-white/[0.08] text-zinc-400 hover:text-white text-xs h-9 px-4"
+                    className="border-white/[0.08] text-zinc-400 hover:text-white text-xs h-9 px-4 rounded-lg"
                   >
                     <RotateCcw className="w-3.5 h-3.5 mr-1.5" />
                     <span>Create New Video</span>
@@ -1074,7 +1079,7 @@ export function StudioConsoleView({
               </div>
             ) : isRendering ? (
               <div
-                className={`w-full flex flex-col items-center justify-center rounded-lg bg-black/50 border border-white/[0.04] p-8 text-center space-y-4 ${
+                className={`w-full flex flex-col items-center justify-center rounded-xl bg-black/50 border border-white/[0.06] p-8 text-center space-y-4 ${
                   videoFormat === "short"
                     ? "max-w-[320px] aspect-[9/16]"
                     : "max-w-[640px] aspect-[16/9]"
@@ -1099,8 +1104,10 @@ export function StudioConsoleView({
                   </p>
                 </div>
                 <Button
+                  variant="secondary"
+                  size="sm"
                   onClick={() => setCurrentStep(2)}
-                  className="bg-zinc-800 hover:bg-zinc-700 text-white text-xs px-4 py-2"
+                  className="rounded-lg text-xs"
                 >
                   Return to Settings
                 </Button>
@@ -1110,8 +1117,10 @@ export function StudioConsoleView({
                 <Film className="w-10 h-10 text-zinc-700 mx-auto" />
                 <p className="text-sm font-medium text-zinc-400">No active render job</p>
                 <Button
+                  variant="primary"
+                  size="sm"
                   onClick={() => setCurrentStep(1)}
-                  className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-4 py-2"
+                  className="rounded-lg text-xs font-semibold"
                 >
                   Start New Video
                 </Button>

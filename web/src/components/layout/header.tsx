@@ -19,7 +19,7 @@ export function Header({ onOpenSocialModal }: HeaderProps = {}) {
   const userInitial = user?.email ? user.email.charAt(0).toUpperCase() : "U";
 
   return (
-    <header className="sticky top-0 z-40 w-full h-14 sm:h-16 studio-glass border-b border-white/[0.08] px-3.5 sm:px-8 flex items-center justify-between">
+    <header className="sticky top-0 z-40 w-full h-14 sm:h-16 bg-[#0c0c0e]/95 backdrop-blur-xl border-b border-white/[0.08] px-3.5 sm:px-8 flex items-center justify-between">
       <div className="flex items-center gap-3 sm:gap-6">
         <BrandLogo size="sm" badgeText="Studio" />
       </div>
@@ -46,7 +46,7 @@ export function Header({ onOpenSocialModal }: HeaderProps = {}) {
               onClick={() => setShowDropdown(!showDropdown)}
               className="flex items-center gap-2.5 p-1 rounded-xl hover:bg-white/[0.05] transition-colors border border-transparent hover:border-white/[0.08]"
             >
-              <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-amber-500 to-amber-700 flex items-center justify-center text-xs font-bold text-black border border-amber-400/40 shadow-sm">
+              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center text-xs font-bold text-white border border-indigo-400/30 shadow-sm">
                 {userInitial}
               </div>
               <div className="hidden sm:flex flex-col text-left">
@@ -61,7 +61,7 @@ export function Header({ onOpenSocialModal }: HeaderProps = {}) {
 
             {/* Dropdown Menu */}
             {showDropdown && (
-              <div className="absolute right-0 mt-2 w-56 rounded-2xl studio-card p-2 shadow-2xl z-50 space-y-1 bg-[#121622] border border-white/[0.1] animate-in fade-in zoom-in-95 duration-150">
+              <div className="absolute right-0 mt-2 w-56 rounded-2xl pm-surface-raised p-2 shadow-2xl z-50 space-y-1 border border-white/[0.1] animate-in fade-in zoom-in-95 duration-150">
                 <div className="px-3 py-2 border-b border-white/[0.06]">
                   <p className="text-xs font-medium text-white truncate">{user.email}</p>
                   <span className="text-[10px] text-emerald-400 flex items-center gap-1 mt-0.5">
@@ -72,7 +72,7 @@ export function Header({ onOpenSocialModal }: HeaderProps = {}) {
                 <Link
                   href="/"
                   onClick={() => setShowDropdown(false)}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-zinc-300 hover:text-white hover:bg-white/[0.06] transition-colors"
+                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-zinc-300 hover:text-white hover:bg-white/[0.06] transition-colors"
                 >
                   <Home className="h-3.5 w-3.5" />
                   PostMatic Home
@@ -84,7 +84,7 @@ export function Header({ onOpenSocialModal }: HeaderProps = {}) {
                     await signOut();
                     window.location.href = "/";
                   }}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-rose-400 hover:bg-rose-500/10 transition-colors"
+                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-rose-400 hover:bg-rose-500/10 transition-colors"
                 >
                   <LogOut className="h-3.5 w-3.5" />
                   Sign Out
@@ -94,7 +94,7 @@ export function Header({ onOpenSocialModal }: HeaderProps = {}) {
           </div>
         ) : (
           <Link href="/login">
-            <Button variant="primary" size="sm" className="h-9 px-4 text-xs font-semibold rounded-xl shadow-lg shadow-amber-500/20">
+            <Button variant="primary" size="sm" className="h-9 px-4 text-xs font-semibold rounded-lg">
               <LogIn className="h-3.5 w-3.5 mr-1" />
               Sign In
             </Button>

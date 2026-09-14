@@ -36,11 +36,11 @@ export default function LoginPage() {
 
   if (user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#090b10] p-4 text-center">
+      <div className="min-h-screen flex items-center justify-center bg-[#0c0c0e] p-4 text-center">
         <div className="flex flex-col items-center gap-3 animate-in fade-in duration-300">
-          <BrandIcon size="lg" glow={true} className="shadow-2xl shadow-amber-500/25 animate-pulse" />
+          <BrandIcon size="lg" glow={false} />
           <div className="flex items-center gap-2 text-sm font-medium text-zinc-400">
-            <Loader2 className="h-4 w-4 animate-spin text-amber-500" />
+            <Loader2 className="h-4 w-4 animate-spin text-indigo-500" />
             <span>Taking you to your studio...</span>
           </div>
         </div>
@@ -75,12 +75,12 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-[#090b10] text-zinc-100 selection:bg-amber-500/30 selection:text-amber-200">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-[#0c0c0e] text-zinc-100 selection:bg-indigo-500/30 selection:text-indigo-200">
       {/* Left Feature & Story Panel (Visible on lg+) */}
-      <div className="hidden lg:flex flex-col justify-between w-1/2 p-12 xl:p-16 border-r border-white/[0.08] bg-[#0d1017] relative overflow-hidden">
+      <div className="hidden lg:flex flex-col justify-between w-1/2 p-12 xl:p-16 border-r border-white/[0.08] bg-[#111115] relative overflow-hidden">
         {/* Background Ambient Glows */}
-        <div className="absolute -top-24 -left-24 w-96 h-96 bg-amber-500/[0.08] rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-indigo-500/[0.06] rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -top-24 -left-24 w-96 h-96 bg-indigo-500/[0.06] rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-violet-500/[0.04] rounded-full blur-3xl pointer-events-none" />
 
         {/* Brand */}
         <div className="z-10">
@@ -90,7 +90,7 @@ export default function LoginPage() {
         {/* Middle Value Proposition Callout */}
         <div className="space-y-8 z-10 my-auto max-w-lg">
           <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-semibold">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold">
               <Sparkles className="h-3.5 w-3.5" />
               Creator Autopilot
             </div>
@@ -117,7 +117,7 @@ export default function LoginPage() {
             </div>
 
             <div className="flex items-start gap-3 p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-              <div className="h-6 w-6 rounded-lg bg-amber-500/15 border border-amber-500/25 flex items-center justify-center text-amber-400 shrink-0 mt-0.5">
+              <div className="h-6 w-6 rounded-lg bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center text-indigo-400 shrink-0 mt-0.5">
                 <CheckCircle2 className="h-3.5 w-3.5" />
               </div>
               <div>
@@ -156,9 +156,9 @@ export default function LoginPage() {
           <div className="flex items-center justify-between pb-2">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-xs font-medium text-zinc-300 hover:text-white transition-all group shadow-sm"
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-xs font-medium text-zinc-300 hover:text-white transition-all group shadow-sm"
             >
-              <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform text-amber-400" />
+              <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform text-indigo-400" />
               <span>Back to Home</span>
             </Link>
             <span className="text-[11px] font-mono text-zinc-500">POST-MATIC</span>
@@ -181,7 +181,7 @@ export default function LoginPage() {
           </div>
 
           {/* Tab Switcher */}
-          <div className="grid grid-cols-2 p-1 rounded-xl bg-white/[0.04] border border-white/[0.08]">
+          <div className="grid grid-cols-2 p-1 rounded-lg bg-white/[0.04] border border-white/[0.08]">
             <button
               type="button"
               onClick={() => setMode("signin")}
@@ -239,7 +239,7 @@ export default function LoginPage() {
           {/* Divider */}
           <div className="relative flex items-center justify-center">
             <div className="w-full border-t border-white/[0.08]" />
-            <span className="absolute px-3 bg-[#090b10] text-[11px] text-zinc-500 uppercase font-mono tracking-wider">
+            <span className="absolute px-3 bg-[#0c0c0e] text-[11px] text-zinc-500 uppercase font-mono tracking-wider">
               or email
             </span>
           </div>
@@ -278,7 +278,7 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => toast.info("Check your email for reset instructions.")}
-                    className="text-[11px] text-amber-400 hover:underline"
+                    className="text-[11px] text-indigo-400 hover:underline"
                   >
                     Forgot?
                   </button>
@@ -308,7 +308,7 @@ export default function LoginPage() {
             <Button
               type="submit"
               variant="primary"
-              className="w-full h-11 text-xs font-semibold mt-2 shadow-lg shadow-amber-500/20"
+              className="w-full h-11 text-xs font-semibold mt-2"
               isLoading={isLoading}
             >
               {mode === "signin" ? "Sign In to Studio" : "Create Free Account"}

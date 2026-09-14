@@ -8,8 +8,8 @@ const Card = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "rounded-xl text-card-foreground",
-      interactive ? "studio-card-interactive" : "studio-card",
+      "text-card-foreground",
+      interactive ? "pm-surface-interactive" : "pm-surface",
       className
     )}
     {...props}

@@ -126,22 +126,29 @@ export function SeriesView({
   return (
     <div className="w-full max-w-6xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.06] pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.06] pb-4">
         <div>
-          <h1 className="text-xl font-bold text-white flex items-center gap-2.5">
-            <Film className="w-5 h-5 text-indigo-400" />
-            <span>Series Ecosystem</span>
-          </h1>
-          <p className="text-xs text-zinc-400 mt-1">
+          <div className="flex items-center gap-2.5 mb-1">
+            <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+              <BookOpen className="w-5 h-5 text-indigo-400" />
+              <span>Series Ecosystem</span>
+            </h1>
+            <Badge variant="primary" className="text-[10px] font-mono font-semibold">
+              {seriesList.length} {seriesList.length === 1 ? "Universe" : "Universes"}
+            </Badge>
+          </div>
+          <p className="text-xs text-zinc-400">
             Produce multi-episode content universes with autonomous AI continuity, Show Bibles, and persistent lore.
           </p>
         </div>
 
         <Button
+          variant="primary"
+          size="sm"
           onClick={() => setShowCreateModal(true)}
-          className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold h-9 px-4 rounded-md flex items-center gap-2 shadow-sm"
+          className="h-9 text-xs font-semibold"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-3.5 h-3.5 mr-1.5" />
           <span>New Series</span>
         </Button>
       </div>
@@ -154,8 +161,8 @@ export function SeriesView({
         </div>
       ) : seriesList.length === 0 ? (
         /* Empty State */
-        <div className="flex flex-col items-center justify-center py-16 px-4 text-center rounded-lg bg-[#111115] border border-white/[0.04] space-y-4">
-          <div className="w-12 h-12 rounded-full bg-indigo-950/40 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+        <div className="flex flex-col items-center justify-center py-16 px-4 text-center rounded-xl pm-surface border border-white/[0.06] space-y-4">
+          <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
             <Clapperboard className="w-6 h-6" />
           </div>
           <div className="space-y-1">
@@ -165,8 +172,10 @@ export function SeriesView({
             </p>
           </div>
           <Button
+            variant="primary"
+            size="sm"
             onClick={() => setShowCreateModal(true)}
-            className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 py-2"
+            className="h-9 text-xs font-semibold px-4"
           >
             Create Your First Series
           </Button>
@@ -181,7 +190,7 @@ export function SeriesView({
               <div
                 key={series.id}
                 onClick={() => onSelectSeriesDetail(series.id)}
-                className="group relative bg-[#111115] hover:bg-[#141419] border border-white/[0.05] hover:border-indigo-500/40 rounded-lg p-5 transition-all cursor-pointer flex flex-col justify-between space-y-4"
+                className="group relative pm-surface hover:border-indigo-500/30 border border-white/[0.06] rounded-xl p-5 transition-all cursor-pointer flex flex-col justify-between space-y-4"
               >
                 <div className="space-y-2.5">
                   <div className="flex items-start justify-between gap-2">
@@ -205,7 +214,7 @@ export function SeriesView({
 
                     <button
                       onClick={(e) => handleDeleteSeries(series.id, e)}
-                      className="text-zinc-600 hover:text-red-400 p-1 rounded transition-colors"
+                      className="text-zinc-600 hover:text-red-400 p-1 rounded-md transition-colors"
                       title="Delete series"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -225,6 +234,7 @@ export function SeriesView({
 
                   <Button
                     size="sm"
+                    variant="secondary"
                     onClick={(e) => {
                       e.stopPropagation();
                       onStartEpisodeGeneration({
@@ -233,7 +243,7 @@ export function SeriesView({
                         nextEpisode: nextEp,
                       });
                     }}
-                    className="h-7 text-[11px] bg-white/[0.06] hover:bg-indigo-600 text-zinc-200 hover:text-white border border-white/[0.06] hover:border-transparent transition-all flex items-center gap-1.5"
+                    className="h-7 text-[11px] hover:bg-primary hover:text-primary-foreground transition-all flex items-center gap-1.5"
                   >
                     <Sparkles className="w-3 h-3" />
                     <span>Next Ep #{nextEp}</span>
@@ -247,8 +257,8 @@ export function SeriesView({
 
       {/* Create Series Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-xs p-4 animate-in fade-in duration-150">
-          <div className="bg-[#111115] border border-white/[0.08] rounded-xl max-w-lg w-full p-6 space-y-5 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+          <div className="pm-surface-raised border border-white/[0.1] rounded-2xl max-w-lg w-full p-6 space-y-5 shadow-2xl">
             <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
               <div>
                 <h3 className="text-sm font-semibold text-white">Create New Series</h3>
@@ -256,7 +266,7 @@ export function SeriesView({
               </div>
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="text-zinc-500 hover:text-white text-xs"
+                className="text-zinc-500 hover:text-white text-xs p-1 rounded-md"
               >
                 ✕
               </button>
@@ -295,7 +305,7 @@ export function SeriesView({
                     key={idx}
                     type="button"
                     onClick={() => applyPreset(preset)}
-                    className="text-[11px] py-1 px-2.5 rounded bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 hover:text-white border border-white/[0.04] transition-all"
+                    className="text-[11px] py-1 px-2.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 hover:text-white border border-white/[0.06] transition-all"
                   >
                     {preset.title.split("&")[0].trim()}
                   </button>
@@ -312,7 +322,7 @@ export function SeriesView({
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
                   placeholder="e.g. Chronicles of King Solomon"
-                  className="w-full bg-[#0c0c0e] border border-white/[0.08] rounded-md px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[#0c0c0e] border border-white/[0.08] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/30"
                 />
               </div>
 
@@ -324,7 +334,7 @@ export function SeriesView({
                     value={newGenre}
                     onChange={(e) => setNewGenre(e.target.value)}
                     placeholder="e.g. Historical, Sci-Fi"
-                    className="w-full bg-[#0c0c0e] border border-white/[0.08] rounded-md px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-[#0c0c0e] border border-white/[0.08] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/30"
                   />
                 </div>
 
@@ -335,7 +345,7 @@ export function SeriesView({
                     value={newTone}
                     onChange={(e) => setNewTone(e.target.value)}
                     placeholder="e.g. Dramatic, Humorous"
-                    className="w-full bg-[#0c0c0e] border border-white/[0.08] rounded-md px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-[#0c0c0e] border border-white/[0.08] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/30"
                   />
                 </div>
               </div>
@@ -347,7 +357,7 @@ export function SeriesView({
                   value={newPremise}
                   onChange={(e) => setNewPremise(e.target.value)}
                   placeholder="What is the master storyline connecting these episodes?"
-                  className="w-full bg-[#0c0c0e] border border-white/[0.08] rounded-md p-3 text-xs text-white focus:outline-none focus:border-indigo-500 resize-none"
+                  className="w-full bg-[#0c0c0e] border border-white/[0.08] rounded-lg p-3 text-xs text-white focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/30 resize-none"
                 />
               </div>
 
@@ -360,7 +370,7 @@ export function SeriesView({
                   value={newWorldRules}
                   onChange={(e) => setNewWorldRules(e.target.value)}
                   placeholder="e.g. Ancient Jerusalem setting only. Fast narrative pacing."
-                  className="w-full bg-[#0c0c0e] border border-white/[0.08] rounded-md p-3 text-xs text-white focus:outline-none focus:border-indigo-500 resize-none"
+                  className="w-full bg-[#0c0c0e] border border-white/[0.08] rounded-lg p-3 text-xs text-white focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/30 resize-none"
                 />
               </div>
 
@@ -368,15 +378,18 @@ export function SeriesView({
                 <Button
                   type="button"
                   variant="outline"
+                  size="sm"
                   onClick={() => setShowCreateModal(false)}
-                  className="text-xs h-8 px-3 border-white/[0.08] text-zinc-400 hover:text-white"
+                  className="text-xs h-9 px-4"
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
+                  variant="primary"
+                  size="sm"
                   disabled={isCreating || !newTitle.trim()}
-                  className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs h-8 px-4 font-semibold"
+                  className="text-xs h-9 px-4 font-semibold"
                 >
                   {isCreating ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" /> : null}
                   <span>Create Universe</span>

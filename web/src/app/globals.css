@@ -142,6 +142,26 @@ body {
   padding: 1.5rem;
 }
 
+/* Legacy Fallbacks mapped to design tokens */
+.studio-glass {
+  background-color: rgba(12, 12, 14, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+.studio-card {
+  background-color: var(--card);
+  border-radius: var(--radius);
+}
+.studio-card-interactive {
+  background-color: var(--card);
+  border-radius: var(--radius);
+  transition: background-color 0.15s ease;
+  cursor: pointer;
+}
+.studio-card-interactive:hover {
+  background-color: var(--background-raised);
+}
+
 /* ─────────────────────────────────────────────
    Live Status Indicator
 ───────────────────────────────────────────── */

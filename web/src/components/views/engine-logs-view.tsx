@@ -58,17 +58,18 @@ export function EngineLogsView({ activeJobId }: EngineLogsViewProps) {
   ]);
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-300">
+    <div className="w-full max-w-6xl mx-auto space-y-6 animate-in fade-in duration-300">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/[0.06]">
         <div>
           <div className="flex items-center gap-2.5 mb-1">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
-              Engine Telemetry & Logs
+            <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+              <Terminal className="w-5 h-5 text-indigo-400" />
+              <span>Engine Telemetry & Logs</span>
             </h1>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <Badge variant="success" pulse className="text-[10px] font-mono font-semibold">
               Live Stream
-            </span>
+            </Badge>
           </div>
           <p className="text-xs text-zinc-400">
             Real-time stdout/stderr telemetry across Gemini LLM, edge-tts, Pexels CDN, and FFmpeg encoders.
@@ -97,13 +98,13 @@ export function EngineLogsView({ activeJobId }: EngineLogsViewProps) {
       </div>
 
       {/* Terminal View Window */}
-      <div className="rounded-2xl bg-[#090b0e] border border-white/[0.08] shadow-2xl overflow-hidden font-mono text-xs">
+      <div className="rounded-xl pm-surface border border-white/[0.06] overflow-hidden font-mono text-xs">
         {/* Terminal Titlebar */}
-        <div className="px-4 py-3 bg-black/60 border-b border-white/[0.06] flex items-center justify-between">
+        <div className="px-4 py-3 bg-[#16161a] border-b border-white/[0.06] flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="h-3 w-3 rounded-full bg-red-500/70" />
-            <div className="h-3 w-3 rounded-full bg-amber-500/70" />
-            <div className="h-3 w-3 rounded-full bg-emerald-500/70" />
+            <div className="h-2.5 w-2.5 rounded-full bg-red-500/70" />
+            <div className="h-2.5 w-2.5 rounded-full bg-amber-500/70" />
+            <div className="h-2.5 w-2.5 rounded-full bg-emerald-500/70" />
             <span className="ml-2 text-[11px] text-zinc-400 font-medium">
               postmatic-engine-daemon.stdout
             </span>
@@ -115,9 +116,9 @@ export function EngineLogsView({ activeJobId }: EngineLogsViewProps) {
         </div>
 
         {/* Log Entries */}
-        <div className="p-4 sm:p-6 space-y-2.5 overflow-x-auto min-h-[360px] bg-[#07090c]">
+        <div className="p-4 sm:p-6 space-y-2.5 overflow-x-auto min-h-[360px] bg-[#0c0c0e]">
           {logs.map((log, idx) => (
-            <div key={idx} className="flex items-start gap-3 leading-relaxed hover:bg-white/[0.02] p-1 rounded">
+            <div key={idx} className="flex items-start gap-3 leading-relaxed hover:bg-white/[0.02] p-1 rounded-md">
               <span className="text-zinc-500 select-none text-[11px] shrink-0">{log.time}</span>
               <span
                 className={`text-[10px] font-bold px-1.5 py-0.2 rounded shrink-0 ${
@@ -130,7 +131,7 @@ export function EngineLogsView({ activeJobId }: EngineLogsViewProps) {
               >
                 {log.level}
               </span>
-              <span className="text-amber-400/90 shrink-0 font-medium">{log.module}:</span>
+              <span className="text-indigo-400/90 shrink-0 font-medium">{log.module}:</span>
               <span className="text-zinc-300">{log.message}</span>
             </div>
           ))}

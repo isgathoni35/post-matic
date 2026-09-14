@@ -1,30 +1,39 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
   <defs>
+    <!-- Obsidian Dark Surface Gradient matching current theme -->
     <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#1e2536" />
-      <stop offset="50%" stop-color="#121622" />
-      <stop offset="100%" stop-color="#080a10" />
+      <stop offset="0%" stop-color="#1e1f2b" />
+      <stop offset="50%" stop-color="#13131c" />
+      <stop offset="100%" stop-color="#0c0c10" />
     </linearGradient>
-    <linearGradient id="aperture-grad-1" x1="4" y1="4" x2="28" y2="28" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#fbbf24" />
-      <stop offset="55%" stop-color="#f59e0b" />
-      <stop offset="100%" stop-color="#ea580c" />
-    </linearGradient>
-    <linearGradient id="aperture-grad-2" x1="28" y1="4" x2="4" y2="28" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#fef08a" />
-      <stop offset="100%" stop-color="#f59e0b" />
-    </linearGradient>
-    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.3" />
-      <stop offset="100%" stop-color="#f59e0b" stop-opacity="0" />
+
+    <!-- Electric Indigo Glow -->
+    <radialGradient id="indigo-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#6366f1" stop-opacity="0.4" />
+      <stop offset="70%" stop-color="#4f46e5" stop-opacity="0.12" />
+      <stop offset="100%" stop-color="#6366f1" stop-opacity="0" />
     </radialGradient>
+
+    <!-- Metallic Silver Aperture Loops -->
+    <linearGradient id="aperture-grad-1" x1="4" y1="4" x2="28" y2="28" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="50%" stop-color="#e4e4e7" />
+      <stop offset="100%" stop-color="#94a3b8" />
+    </linearGradient>
+
+    <!-- Electric Indigo Play Iris Center -->
+    <linearGradient id="aperture-grad-2" x1="14" y1="12" x2="21" y2="20" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#a5b4fc" />
+      <stop offset="50%" stop-color="#6366f1" />
+      <stop offset="100%" stop-color="#4338ca" />
+    </linearGradient>
   </defs>
 
-  <!-- Titanium Rounded Bezel Container -->
-  <rect x="1" y="1" width="30" height="30" rx="8" fill="url(#bg-grad)" stroke="#ffffff" stroke-opacity="0.16" stroke-width="1" />
+  <!-- Titanium Bezel Container with Highlight Border -->
+  <rect x="1" y="1" width="30" height="30" rx="8" fill="url(#bg-grad)" stroke="#ffffff" stroke-opacity="0.18" stroke-width="1" />
   
-  <!-- Subtle Amber Glow -->
-  <circle cx="16" cy="16" r="12" fill="url(#glow)" />
+  <!-- Subtle Indigo Glow -->
+  <circle cx="16" cy="16" r="12" fill="url(#indigo-glow)" />
 
   <!-- Continuous Loop Segments forming Aperture S -->
   <path

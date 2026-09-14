@@ -119,7 +119,7 @@ export function SeriesDetailView({
   const episodes = series.episodes || [];
 
   return (
-    <div className="w-full max-w-5xl mx-auto space-y-6">
+    <div className="w-full max-w-6xl mx-auto space-y-6">
       {/* Navigation & Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.06] pb-4">
         <div className="flex items-center gap-3">
@@ -127,13 +127,13 @@ export function SeriesDetailView({
             variant="outline"
             size="sm"
             onClick={onBack}
-            className="border-white/[0.08] text-zinc-400 hover:text-white h-8 w-8 p-0"
+            className="border-white/[0.08] text-zinc-400 hover:text-white h-9 w-9 p-0 rounded-lg"
           >
             <ArrowLeft className="w-4 h-4" />
           </Button>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-lg font-bold text-white">{series.title}</h1>
+              <h1 className="text-xl font-bold tracking-tight text-white">{series.title}</h1>
               {series.genre && (
                 <Badge variant="outline" className="border-indigo-500/30 text-indigo-300 text-[10px] py-0 px-2">
                   {series.genre}
@@ -147,6 +147,8 @@ export function SeriesDetailView({
         </div>
 
         <Button
+          variant="primary"
+          size="sm"
           onClick={() =>
             onStartEpisodeGeneration({
               id: series.id,
@@ -154,15 +156,15 @@ export function SeriesDetailView({
               nextEpisode: nextEpNum,
             })
           }
-          className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold h-9 px-4 rounded-md flex items-center gap-2 shadow-sm"
+          className="h-9 text-xs font-semibold"
         >
-          <Sparkles className="w-4 h-4" />
+          <Sparkles className="w-3.5 h-3.5 mr-1.5" />
           <span>Produce Episode #{nextEpNum}</span>
         </Button>
       </div>
 
       {/* Show Bible Section */}
-      <div className="p-5 rounded-lg bg-[#111115] border border-white/[0.04] space-y-4">
+      <div className="p-5 rounded-xl pm-surface border border-white/[0.06] space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <BookOpen className="w-4 h-4 text-indigo-400" />
@@ -176,16 +178,16 @@ export function SeriesDetailView({
               if (isEditingBible) handleSaveBible();
               else setIsEditingBible(true);
             }}
-            className="text-xs text-indigo-400 hover:text-indigo-300 h-7 px-2"
+            className="text-xs text-indigo-400 hover:text-indigo-300 h-8 px-2.5 rounded-lg"
           >
             {isEditingBible ? (
               <>
-                {isSavingBible ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Save className="w-3 h-3 mr-1" />}
+                {isSavingBible ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" /> : <Save className="w-3.5 h-3.5 mr-1" />}
                 <span>Save Bible</span>
               </>
             ) : (
               <>
-                <Edit3 className="w-3 h-3 mr-1" />
+                <Edit3 className="w-3.5 h-3.5 mr-1" />
                 <span>Edit Bible</span>
               </>
             )}
@@ -200,7 +202,7 @@ export function SeriesDetailView({
                 rows={3}
                 value={editablePremise}
                 onChange={(e) => setEditablePremise(e.target.value)}
-                className="w-full bg-[#0c0c0e] border border-white/[0.08] rounded p-2.5 text-xs text-white resize-none"
+                className="w-full bg-[#0c0c0e] border border-white/[0.08] rounded-lg p-3 text-xs text-white focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/30 resize-none"
               />
             </div>
 
@@ -210,20 +212,20 @@ export function SeriesDetailView({
                 rows={3}
                 value={editableRules}
                 onChange={(e) => setEditableRules(e.target.value)}
-                className="w-full bg-[#0c0c0e] border border-white/[0.08] rounded p-2.5 text-xs text-white resize-none"
+                className="w-full bg-[#0c0c0e] border border-white/[0.08] rounded-lg p-3 text-xs text-white focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/30 resize-none"
               />
             </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-            <div className="space-y-1.5 bg-[#0c0c0e] p-3.5 rounded-md border border-white/[0.03]">
+            <div className="space-y-1.5 bg-[#0c0c0e] p-4 rounded-lg border border-white/[0.04]">
               <span className="text-[10px] uppercase tracking-wider font-semibold text-zinc-500">Overarching Premise</span>
               <p className="text-zinc-300 leading-relaxed">
                 {bible.premise || "No master premise specified."}
               </p>
             </div>
 
-            <div className="space-y-1.5 bg-[#0c0c0e] p-3.5 rounded-md border border-white/[0.03]">
+            <div className="space-y-1.5 bg-[#0c0c0e] p-4 rounded-lg border border-white/[0.04]">
               <span className="text-[10px] uppercase tracking-wider font-semibold text-zinc-500">Canon Rules & Lore</span>
               {bible.world_rules && bible.world_rules.length > 0 ? (
                 <ul className="space-y-1 text-zinc-300">
@@ -255,10 +257,11 @@ export function SeriesDetailView({
         </div>
 
         {episodes.length === 0 ? (
-          <div className="text-center py-12 rounded-lg bg-[#111115] border border-white/[0.04] space-y-3">
+          <div className="text-center py-12 rounded-xl pm-surface border border-white/[0.06] space-y-3">
             <Film className="w-8 h-8 text-zinc-600 mx-auto" />
             <p className="text-xs text-zinc-400">No episodes rendered yet for this series.</p>
             <Button
+              variant="primary"
               size="sm"
               onClick={() =>
                 onStartEpisodeGeneration({
@@ -267,7 +270,7 @@ export function SeriesDetailView({
                   nextEpisode: 1,
                 })
               }
-              className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3 py-1.5"
+              className="h-9 text-xs font-semibold px-4"
             >
               Produce Episode #1
             </Button>
@@ -286,10 +289,10 @@ export function SeriesDetailView({
               return (
                 <div
                   key={ep.id}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-lg bg-[#111115] border border-white/[0.04] hover:border-white/[0.08] transition-all gap-3"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl pm-surface border border-white/[0.06] hover:border-white/[0.12] transition-all gap-3"
                 >
                   <div className="flex items-start gap-3 min-w-0">
-                    <div className="w-8 h-8 rounded-full bg-indigo-950/40 border border-indigo-500/20 text-indigo-300 flex items-center justify-center font-bold text-xs shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 flex items-center justify-center font-bold text-xs shrink-0">
                       {epNum}
                     </div>
                     <div className="min-w-0">
@@ -334,9 +337,9 @@ export function SeriesDetailView({
                         <Button
                           size="sm"
                           variant="outline"
-                          className="text-xs h-7 px-2.5 border-white/[0.06] text-zinc-300 hover:text-white"
+                          className="text-xs h-8 px-3"
                         >
-                          <Download className="w-3 h-3 mr-1" />
+                          <Download className="w-3 h-3 mr-1.5" />
                           <span>Download</span>
                         </Button>
                       </a>
@@ -345,10 +348,11 @@ export function SeriesDetailView({
                     {onSelectVideoJob && (
                       <Button
                         size="sm"
+                        variant="secondary"
                         onClick={() => onSelectVideoJob(ep.id)}
-                        className="text-xs h-7 px-2.5 bg-white/[0.06] hover:bg-white/[0.1] text-zinc-300 hover:text-white"
+                        className="text-xs h-8 px-3"
                       >
-                        <Play className="w-3 h-3 mr-1" />
+                        <Play className="w-3 h-3 mr-1.5" />
                         <span>View</span>
                       </Button>
                     )}

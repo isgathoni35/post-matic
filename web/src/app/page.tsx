@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import {
   Sparkles,
   ArrowRight,
   Play,
+  Pause,
   Share2,
   Mic,
   Video,
@@ -19,12 +20,14 @@ import {
   Volume2,
   Sliders,
   Check,
+  X,
   Zap,
   Clock,
   Layers,
   Film,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { BrandLogo } from "@/components/ui/brand-logo";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -61,8 +64,8 @@ const PREVIEW_TOPICS = [
     title: "The Mystery of Self-Healing Concrete",
     hook: "The Romans built harbors 2,000 years ago that are still standing today because of a chemical secret modern engineers lost...",
     keyword: "ANCIENT",
-    bgGradient: "from-amber-950 via-stone-950 to-black",
-    radialColor: "rgba(245, 158, 11, 0.18)",
+    bgGradient: "from-slate-900 via-stone-950 to-black",
+    radialColor: "rgba(99, 102, 241, 0.18)",
     likes: "189.2K",
     comments: "1,940",
     bookmarks: "31.2K",
@@ -108,80 +111,131 @@ const BENTO_NICHES = [
 export default function LandingPage() {
   const { user, isLoading } = useAuth();
   const [activeTopicIndex, setActiveTopicIndex] = useState(0);
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
   const activeTopic = PREVIEW_TOPICS[activeTopicIndex];
 
+  const voiceSampleMap: Record<string, string> = {
+    ocean: "en-US-BrianMultilingualNeural",
+    psychology: "en-US-AvaMultilingualNeural",
+    history: "en-US-AndrewMultilingualNeural",
+  };
+
+  const playAudioForTopic = (index: number) => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
+    const topicId = PREVIEW_TOPICS[index]?.id || "ocean";
+    const voiceFile = voiceSampleMap[topicId] || "en-US-BrianMultilingualNeural";
+    const audio = new Audio(`/audio/samples/${voiceFile}.mp3`);
+    audioRef.current = audio;
+    setIsPlayingAudio(true);
+    audio.play().catch(() => setIsPlayingAudio(false));
+    audio.onended = () => setIsPlayingAudio(false);
+  };
+
+  const toggleAudio = (index?: number) => {
+    const targetIdx = index !== undefined ? index : activeTopicIndex;
+    if (isPlayingAudio) {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+      setIsPlayingAudio(false);
+    } else {
+      playAudioForTopic(targetIdx);
+    }
+  };
+
+  const handleSelectTopic = (index: number) => {
+    setActiveTopicIndex(index);
+    if (isPlayingAudio) {
+      playAudioForTopic(index);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+    };
+  }, []);
+
   return (
-    <div className="min-h-screen flex flex-col bg-[#090b10] text-zinc-100 selection:bg-amber-500/30 selection:text-amber-200 overflow-x-hidden relative w-full max-w-full">
+    <div className="min-h-screen flex flex-col bg-[#0c0c0e] text-zinc-100 selection:bg-indigo-500/30 selection:text-indigo-200 overflow-x-hidden relative w-full max-w-full">
       {/* Warm Ambient Environmental Lighting (Contained within overflow-hidden boundary) */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] max-w-[100vw] h-[650px] bg-gradient-to-b from-amber-500/[0.08] via-orange-500/[0.04] to-transparent blur-3xl" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] max-w-[100vw] h-[650px] bg-gradient-to-b from-indigo-500/[0.06] via-indigo-500/[0.02] to-transparent blur-3xl" />
         <div className="absolute top-[450px] right-0 w-[600px] max-w-[100vw] h-[500px] bg-gradient-to-l from-indigo-500/[0.04] to-transparent blur-3xl" />
       </div>
 
-      {/* Navigation Header */}
-      <header className="sticky top-0 z-50 w-full h-18 studio-glass border-b border-white/[0.08] px-6 sm:px-12 flex items-center justify-between">
-        {/* Bespoke Logo */}
-        <BrandLogo size="md" badgeText="Studio" />
+      {/* Navigation Header - Aligned to max-w-6xl container */}
+      <header className="sticky top-0 z-50 w-full h-14 sm:h-16 bg-[#0c0c0e]/95 backdrop-blur-xl border-b border-white/[0.08] px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto w-full h-full flex items-center justify-between">
+          {/* Bespoke Logo */}
+          <BrandLogo size="sm" badgeText="Studio" />
 
-        {/* Center Navigation Links */}
-        <nav className="hidden md:flex items-center gap-8 text-xs font-medium text-zinc-400">
-          <a href="#demo" className="hover:text-white transition-colors">Live Preview</a>
-          <a href="#how-it-works" className="hover:text-white transition-colors">How It Works</a>
-          <a href="#niches" className="hover:text-white transition-colors">Trending Niches</a>
-          <a href="#workflow" className="hover:text-white transition-colors">Timeline Engine</a>
-        </nav>
+          {/* Center Navigation Links */}
+          <nav className="hidden md:flex items-center gap-8 text-xs font-medium text-zinc-400">
+            <a href="#demo" className="hover:text-white transition-colors">Live Preview</a>
+            <a href="#how-it-works" className="hover:text-white transition-colors">How It Works</a>
+            <a href="#niches" className="hover:text-white transition-colors">Trending Niches</a>
+            <a href="#workflow" className="hover:text-white transition-colors">Timeline Engine</a>
+          </nav>
 
-        {/* Right CTA */}
-        <div className="flex items-center gap-3">
-          {isLoading ? (
-            <div className="h-9 w-24 rounded-xl bg-white/[0.05] animate-pulse" />
-          ) : user ? (
-            <Link href="/studio">
-              <Button
-                variant="primary"
-                size="sm"
-                className="h-10 px-5 text-xs font-semibold rounded-xl shadow-lg shadow-amber-500/20"
-              >
-                Enter Studio
-                <ArrowRight className="h-3.5 w-3.5 ml-1.5" />
-              </Button>
-            </Link>
-          ) : (
-            <>
-              <Link href="/login">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-9 text-xs font-medium text-zinc-300 hover:text-white"
-                >
-                  Sign In
-                </Button>
-              </Link>
-              <Link href="/login">
+          {/* Right CTA */}
+          <div className="flex items-center gap-3">
+            {isLoading ? (
+              <div className="h-9 w-24 rounded-lg bg-white/[0.05] animate-pulse" />
+            ) : user ? (
+              <Link href="/studio">
                 <Button
                   variant="primary"
                   size="sm"
-                  className="h-9 px-4 text-xs font-semibold rounded-xl shadow-lg shadow-amber-500/20"
+                  className="h-9 px-4 text-xs font-semibold rounded-lg"
                 >
-                  Start Free
-                  <Sparkles className="h-3.5 w-3.5 ml-1.5" />
+                  Enter Studio
+                  <ArrowRight className="h-3.5 w-3.5 ml-1.5" />
                 </Button>
               </Link>
-            </>
-          )}
+            ) : (
+              <>
+                <Link href="/login">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-9 text-xs font-medium text-zinc-300 hover:text-white rounded-lg"
+                  >
+                    Sign In
+                  </Button>
+                </Link>
+                <Link href="/login">
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    className="h-9 px-4 text-xs font-semibold rounded-lg"
+                  >
+                    Start Free
+                    <Sparkles className="h-3.5 w-3.5 ml-1.5" />
+                  </Button>
+                </Link>
+              </>
+            )}
+          </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section id="demo" className="relative pt-12 sm:pt-20 pb-20 px-6 sm:px-12 max-w-7xl mx-auto w-full">
+      <section id="demo" className="relative pt-12 sm:pt-20 pb-20 px-6 sm:px-12 max-w-6xl mx-auto w-full">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
           {/* Hero Left: Creator Value Proposition */}
           <div className="lg:col-span-7 space-y-8 text-center lg:text-left">
             {/* Contextual Status Badge */}
             <div>
               {user ? (
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/25 text-xs font-medium text-amber-300 backdrop-blur-sm">
-                  <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-xs font-medium text-indigo-300 backdrop-blur-sm">
+                  <span className="h-2 w-2 rounded-full bg-indigo-400" />
                   <span>Welcome back, {user.email?.split("@")[0]}</span>
                   <span className="text-zinc-500">•</span>
                   <Link href="/studio" className="underline hover:text-white font-semibold">
@@ -190,10 +244,10 @@ export default function LandingPage() {
                 </div>
               ) : (
                 <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-xs font-medium text-zinc-300 backdrop-blur-sm">
-                  <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
+                  <span className="h-2 w-2 rounded-full bg-indigo-400" />
                   <span>The Autonomous Short-Form Studio</span>
                   <span className="text-zinc-500">•</span>
-                  <span className="text-amber-400 font-semibold">Zero Video Editing Required</span>
+                  <span className="text-indigo-400 font-semibold">Zero Video Editing Required</span>
                 </div>
               )}
             </div>
@@ -201,7 +255,7 @@ export default function LandingPage() {
             {/* Human-Centered Headline */}
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.08]">
               Turn any idea into <br />
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-indigo-300 to-violet-400">
                 viral vertical videos
               </span>{" "}
               in 30 seconds.
@@ -221,10 +275,10 @@ export default function LandingPage() {
                   <button
                     key={topic.id}
                     type="button"
-                    onClick={() => setActiveTopicIndex(i)}
-                    className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 ${
+                    onClick={() => handleSelectTopic(i)}
+                    className={`px-3.5 py-2 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer ${
                       activeTopicIndex === i
-                        ? "bg-amber-500 text-black shadow-lg shadow-amber-500/25 scale-105"
+                        ? "bg-primary text-primary-foreground shadow-xs"
                         : "bg-white/[0.04] border border-white/[0.08] text-zinc-300 hover:text-white hover:bg-white/[0.08]"
                     }`}
                   >
@@ -239,7 +293,7 @@ export default function LandingPage() {
               <Link href={user ? "/studio" : "/login"} className="w-full sm:w-auto">
                 <Button
                   variant="primary"
-                  className="w-full sm:w-auto h-13 px-8 text-sm font-semibold rounded-2xl shadow-xl shadow-amber-500/25 group"
+                  className="w-full sm:w-auto h-12 px-7 text-sm font-semibold rounded-lg group"
                 >
                   {user ? "Return to Your Studio" : "Start Creating For Free"}
                   <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -248,9 +302,9 @@ export default function LandingPage() {
               <a href="#how-it-works" className="w-full sm:w-auto">
                 <Button
                   variant="secondary"
-                  className="w-full sm:w-auto h-13 px-6 text-sm font-medium rounded-2xl border-white/[0.08] hover:bg-white/[0.05]"
+                  className="w-full sm:w-auto h-12 px-6 text-sm font-medium rounded-lg border-white/[0.08] hover:bg-white/[0.05]"
                 >
-                  <Play className="h-4 w-4 mr-2 text-amber-400 fill-amber-400" />
+                  <Play className="h-4 w-4 mr-2 text-indigo-400 fill-indigo-400" />
                   See Creation Architecture
                 </Button>
               </a>
@@ -275,7 +329,7 @@ export default function LandingPage() {
 
           {/* Hero Right: Dynamic Interactive Smartphone Player Showcase */}
           <div className="lg:col-span-5 flex justify-center lg:justify-end">
-            <div className="relative w-full max-w-[330px] aspect-[9/18.5] rounded-[48px] p-3.5 bg-gradient-to-b from-[#252c3c] via-[#141824] to-[#090c12] shadow-[0_32px_80px_-16px_rgba(0,0,0,0.9)] border border-white/[0.14]">
+            <div className="relative w-full max-w-[330px] aspect-[9/18.5] rounded-[48px] p-3.5 bg-gradient-to-b from-[#1a1a24] via-[#121218] to-[#0c0c10] shadow-[0_32px_80px_-16px_rgba(0,0,0,0.9)] border border-white/[0.14]">
               {/* Inner Screen */}
               <div className="relative w-full h-full rounded-[38px] overflow-hidden bg-black flex flex-col justify-between p-4 select-none">
                 {/* Simulated Visual Background for Selected Topic */}
@@ -290,21 +344,21 @@ export default function LandingPage() {
 
                 {/* iPhone Dynamic Island */}
                 <div className="relative z-30 mx-auto w-24 h-5 rounded-full bg-black flex items-center justify-between px-2.5 border border-white/[0.08]">
-                  <div className="h-2 w-2 rounded-full bg-amber-500/80 animate-pulse" />
+                  <div className="h-2 w-2 rounded-full bg-indigo-500/80" />
                   <div className="h-2.5 w-2.5 rounded-full bg-emerald-500/80" />
                 </div>
 
                 {/* Simulated Spoken Word Kinetic Caption Display */}
                 <div className="relative z-20 my-auto text-center px-4 space-y-3">
-                  <span className="inline-block px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-bold tracking-wider uppercase border border-amber-500/30 backdrop-blur-md">
+                  <span className="inline-block px-2.5 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-[10px] font-bold tracking-wider uppercase border border-indigo-500/30 backdrop-blur-md">
                     {activeTopic.title}
                   </span>
                   <div className="text-xl font-black text-white leading-snug drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] uppercase tracking-tight font-sans">
                     "{activeTopic.hook}"
                   </div>
                   {/* Highlighted Word Pill */}
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-amber-400 text-black font-extrabold text-xs uppercase tracking-wide shadow-lg shadow-amber-400/20 animate-bounce">
-                    <Zap className="h-3 w-3 fill-black" />
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-indigo-500 text-white font-extrabold text-xs uppercase tracking-wide shadow-md">
+                    <Zap className="h-3 w-3 fill-white" />
                     <span>{activeTopic.keyword}</span>
                   </div>
                 </div>
@@ -314,7 +368,7 @@ export default function LandingPage() {
                   {/* Bottom Creator Info & Live Waveform */}
                   <div className="space-y-1.5 text-left max-w-[210px]">
                     <div className="flex items-center gap-2">
-                      <div className="h-7 w-7 rounded-full bg-gradient-to-tr from-amber-400 to-orange-500 flex items-center justify-center text-black font-extrabold text-[11px] shadow-md">
+                      <div className="h-7 w-7 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center text-white font-extrabold text-[11px] shadow-md">
                         P
                       </div>
                       <div className="flex items-center gap-1">
@@ -328,19 +382,28 @@ export default function LandingPage() {
                       {activeTopic.hook} #Shorts #Viral #PostMatic
                     </p>
                     
-                    {/* Simulated Voice Audio Waveform */}
-                    <div className="flex items-center gap-2 p-1.5 rounded-lg bg-black/40 backdrop-blur-md border border-white/[0.08]">
-                      <div className="flex items-center gap-0.5 h-3">
-                        <div className="w-0.5 bg-amber-400 rounded-full wave-bar-1" />
-                        <div className="w-0.5 bg-amber-400 rounded-full wave-bar-2" />
-                        <div className="w-0.5 bg-amber-400 rounded-full wave-bar-3" />
-                        <div className="w-0.5 bg-amber-400 rounded-full wave-bar-4" />
-                        <div className="w-0.5 bg-amber-400 rounded-full wave-bar-5" />
+                    {/* Simulated Voice Audio Waveform (Interactive) */}
+                    <button
+                      type="button"
+                      onClick={() => toggleAudio()}
+                      className="flex items-center gap-2 p-2 rounded-lg bg-black/60 hover:bg-black/80 backdrop-blur-md border border-white/[0.12] transition-all cursor-pointer text-left w-full group"
+                    >
+                      <div className="flex items-center gap-0.5 h-3.5">
+                        <div className={`w-0.5 bg-indigo-400 rounded-full ${isPlayingAudio ? "wave-bar-1" : "h-1.5"}`} />
+                        <div className={`w-0.5 bg-indigo-400 rounded-full ${isPlayingAudio ? "wave-bar-2" : "h-2.5"}`} />
+                        <div className={`w-0.5 bg-indigo-400 rounded-full ${isPlayingAudio ? "wave-bar-3" : "h-1"}`} />
+                        <div className={`w-0.5 bg-indigo-400 rounded-full ${isPlayingAudio ? "wave-bar-4" : "h-3"}`} />
+                        <div className={`w-0.5 bg-indigo-400 rounded-full ${isPlayingAudio ? "wave-bar-5" : "h-1.5"}`} />
                       </div>
-                      <span className="text-[9px] text-zinc-300 truncate font-mono">
-                        Studio Voice • Brian (V2 HD)
+                      <span className="text-[9px] text-zinc-300 truncate font-mono flex-1">
+                        {isPlayingAudio ? "Playing Voice Sample..." : "Studio Voice • Tap to Listen"}
                       </span>
-                    </div>
+                      {isPlayingAudio ? (
+                        <Pause className="h-3 w-3 text-indigo-400 shrink-0" />
+                      ) : (
+                        <Play className="h-3 w-3 text-indigo-400 fill-indigo-400 shrink-0 group-hover:scale-110 transition-transform" />
+                      )}
+                    </button>
                   </div>
 
                   {/* Right Floating Actions */}
@@ -365,7 +428,7 @@ export default function LandingPage() {
                     </div>
                     <div className="flex flex-col items-center gap-0.5">
                       <div className="h-9 w-9 rounded-full bg-white/[0.15] backdrop-blur-md flex items-center justify-center">
-                        <Share2 className="h-4 w-4 text-amber-400" />
+                        <Share2 className="h-4 w-4 text-indigo-400" />
                       </div>
                       <span className="text-[9px] font-bold">Share</span>
                     </div>
@@ -377,15 +440,15 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Tactile Bento Workflow Section (Replaces the 3 plain cards) */}
-      <section id="how-it-works" className="py-24 px-6 sm:px-12 border-t border-white/[0.06] bg-[#0c0e15]/70 relative">
+      {/* Tactile Bento Workflow Section */}
+      <section id="how-it-works" className="py-24 px-6 sm:px-12 border-t border-white/[0.06] relative">
         <div className="max-w-6xl mx-auto space-y-16">
           <div className="text-center space-y-3 max-w-xl mx-auto">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-semibold">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold">
               <Sliders className="h-3.5 w-3.5" />
               Inside the Creation Pipeline
             </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
               Engineered for maximum watch-time.
             </h2>
             <p className="text-sm text-zinc-400">
@@ -396,10 +459,10 @@ export default function LandingPage() {
           {/* Bento Grid */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
             {/* Bento 1: Script & Hook Architecture */}
-            <div className="md:col-span-6 creator-surface p-7 rounded-3xl space-y-5">
+            <div className="md:col-span-6 pm-surface border border-white/[0.06] p-6 sm:p-7 rounded-xl space-y-5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <div className="h-8 w-8 rounded-xl bg-amber-500/15 border border-amber-500/25 flex items-center justify-center text-amber-400">
+                  <div className="h-8 w-8 rounded-lg bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center text-indigo-400">
                     <Sparkles className="h-4 w-4" />
                   </div>
                   <div>
@@ -414,9 +477,9 @@ export default function LandingPage() {
 
               {/* Simulated Script Pacing Beats */}
               <div className="space-y-2.5 pt-2 font-mono text-xs">
-                <div className="p-3 rounded-xl bg-black/40 border border-white/[0.06] flex items-start justify-between gap-3">
+                <div className="p-3.5 rounded-lg bg-[#0c0c0e] border border-white/[0.06] flex items-start justify-between gap-3">
                   <div className="space-y-1">
-                    <span className="text-[10px] text-amber-400 font-bold uppercase tracking-wider">
+                    <span className="text-[10px] text-indigo-400 font-bold uppercase tracking-wider">
                       [0:00 - 0:03] The Pattern Interrupt
                     </span>
                     <p className="text-[11px] text-zinc-300 font-sans">
@@ -426,7 +489,7 @@ export default function LandingPage() {
                   <span className="text-[10px] text-zinc-500 font-semibold shrink-0">98% Retention</span>
                 </div>
 
-                <div className="p-3 rounded-xl bg-black/40 border border-white/[0.06] flex items-start justify-between gap-3">
+                <div className="p-3.5 rounded-lg bg-[#0c0c0e] border border-white/[0.06] flex items-start justify-between gap-3">
                   <div className="space-y-1">
                     <span className="text-[10px] text-indigo-400 font-bold uppercase tracking-wider">
                       [0:03 - 0:18] Curiosity Escalation
@@ -441,10 +504,10 @@ export default function LandingPage() {
             </div>
 
             {/* Bento 2: Neural Voice & Inflection */}
-            <div className="md:col-span-6 creator-surface p-7 rounded-3xl space-y-5">
+            <div className="md:col-span-6 pm-surface border border-white/[0.06] p-6 sm:p-7 rounded-xl space-y-5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <div className="h-8 w-8 rounded-xl bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center text-indigo-400">
+                  <div className="h-8 w-8 rounded-lg bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center text-indigo-400">
                     <Mic className="h-4 w-4" />
                   </div>
                   <div>
@@ -458,30 +521,35 @@ export default function LandingPage() {
               </div>
 
               {/* Interactive Voice Player Mockup */}
-              <div className="p-4 rounded-2xl bg-black/40 border border-white/[0.06] space-y-3">
+              <div
+                onClick={() => toggleAudio(0)}
+                className="p-4 rounded-lg bg-[#0c0c0e] border border-white/[0.06] space-y-3 cursor-pointer hover:border-indigo-500/40 transition-colors group"
+              >
                 <div className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2">
-                    <div className="h-7 w-7 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center text-xs font-bold text-white">
-                      B
+                  <div className="flex items-center gap-2.5">
+                    <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center text-xs font-bold text-white shadow-sm">
+                      {isPlayingAudio ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 ml-0.5" />}
                     </div>
                     <div>
-                      <p className="font-bold text-white">Brian Multilingual (V2)</p>
-                      <p className="text-[10px] text-zinc-400">Conversational Viral Narrator</p>
+                      <p className="font-bold text-white group-hover:text-indigo-300 transition-colors">Brian Multilingual (V2)</p>
+                      <p className="text-[10px] text-zinc-400">Conversational Viral Narrator • Tap to audition</p>
                     </div>
                   </div>
-                  <Volume2 className="h-4 w-4 text-amber-400" />
+                  <div className="flex items-center gap-1.5 text-xs text-indigo-400 font-medium">
+                    <Volume2 className={`h-4 w-4 ${isPlayingAudio ? "animate-pulse" : ""}`} />
+                    <span className="text-[11px] font-mono">{isPlayingAudio ? "Playing" : "Audition"}</span>
+                  </div>
                 </div>
 
                 {/* Animated Waveform Visualizer */}
-                <div className="h-10 rounded-xl bg-white/[0.03] border border-white/[0.04] px-4 flex items-center justify-between gap-1">
+                <div className="h-10 rounded-lg bg-white/[0.03] border border-white/[0.04] px-4 flex items-center justify-between gap-1">
                   {Array.from({ length: 28 }).map((_, i) => (
                     <div
                       key={i}
-                      className="flex-1 bg-gradient-to-t from-amber-500 to-orange-400 rounded-full"
+                      className="flex-1 bg-gradient-to-t from-indigo-500 to-violet-500 rounded-full transition-all duration-150"
                       style={{
                         height: `${Math.round(Math.max(15, Math.sin(i * 0.45) * 85 + 15))}%`,
                         opacity: i % 2 === 0 ? 0.9 : 0.6,
-
                       }}
                     />
                   ))}
@@ -490,10 +558,10 @@ export default function LandingPage() {
             </div>
 
             {/* Bento 3: Multi-Track Video Timeline (Full Width) */}
-            <div id="workflow" className="md:col-span-12 creator-surface p-7 rounded-3xl space-y-5">
+            <div id="workflow" className="md:col-span-12 pm-surface border border-white/[0.06] p-6 sm:p-7 rounded-xl space-y-5">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div className="flex items-center gap-2.5">
-                  <div className="h-8 w-8 rounded-xl bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center text-emerald-400">
+                  <div className="h-8 w-8 rounded-lg bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center text-emerald-400">
                     <Layers className="h-4 w-4" />
                   </div>
                   <div>
@@ -503,13 +571,13 @@ export default function LandingPage() {
                     </p>
                   </div>
                 </div>
-                <span className="text-[10px] font-mono text-amber-400 font-semibold px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20">
+                <span className="text-[10px] font-mono text-indigo-300 font-semibold px-2.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20">
                   Render Time: ~24 seconds
                 </span>
               </div>
 
               {/* Visual Multi-Track Timeline */}
-              <div className="rounded-2xl bg-black/50 border border-white/[0.08] p-4 space-y-2.5 timeline-track overflow-x-auto text-[11px]">
+              <div className="rounded-lg bg-[#0c0c0e] border border-white/[0.06] p-4 space-y-2.5 timeline-track overflow-x-auto text-[11px]">
                 <div className="min-w-[500px] space-y-2.5">
                   {/* Track 1: 4K Video Clips */}
                   <div className="flex items-center gap-3">
@@ -536,12 +604,12 @@ export default function LandingPage() {
                   {/* Track 2: Voiceover Audio */}
                   <div className="flex items-center gap-3">
                     <span className="w-24 shrink-0 text-zinc-400 text-[10px] uppercase font-semibold flex items-center gap-1.5">
-                      <Mic className="h-3 w-3 text-amber-400" />
+                      <Mic className="h-3 w-3 text-indigo-400" />
                       Voiceover
                     </span>
-                    <div className="flex-1 p-2 rounded-lg bg-amber-950/40 border border-amber-500/30 text-amber-300 truncate flex items-center justify-between">
+                    <div className="flex-1 p-2 rounded-lg bg-indigo-950/40 border border-indigo-500/30 text-indigo-300 truncate flex items-center justify-between">
                       <span className="text-xs">Voice Track (Studio Balanced Audio)</span>
-                      <span className="text-[10px] text-amber-400 font-mono">24.6s</span>
+                      <span className="text-[10px] text-indigo-400 font-mono">24.6s</span>
                     </div>
                   </div>
 
@@ -568,8 +636,8 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto space-y-12">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
-              <div className="inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-widest text-amber-400 font-semibold mb-2">
-                <Flame className="h-4 w-4 text-orange-500" />
+              <div className="inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-widest text-indigo-400 font-semibold mb-2">
+                <Flame className="h-4 w-4 text-indigo-400" />
                 Validated Viral Formats
               </div>
               <h2 className="text-3xl font-extrabold text-white tracking-tight">
@@ -584,16 +652,16 @@ export default function LandingPage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {BENTO_NICHES.map((niche) => (
               <div
                 key={niche.title}
-                className="creator-surface-interactive p-6 rounded-2xl space-y-4 flex flex-col justify-between"
+                className="pm-surface-interactive border border-white/[0.06] p-5 rounded-xl space-y-4 flex flex-col justify-between"
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-2xl">{niche.icon}</span>
-                    <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                    <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
                       {niche.tag}
                     </span>
                   </div>
@@ -608,11 +676,11 @@ export default function LandingPage() {
                     <span className="text-emerald-400 font-semibold">{niche.views}</span>
                     <span>{niche.retention}</span>
                   </div>
-                  <Link href={user ? "/studio" : "/login"}>
+                  <Link href={user ? `/studio?topic=${encodeURIComponent(niche.hook)}` : `/login?next=${encodeURIComponent(`/studio?topic=${encodeURIComponent(niche.hook)}`)}`}>
                     <Button
                       variant="secondary"
                       size="sm"
-                      className="w-full text-xs h-8 bg-white/[0.04] hover:bg-amber-500 hover:text-black border-white/[0.08] transition-colors"
+                      className="w-full text-xs h-8 bg-white/[0.04] hover:bg-primary hover:text-primary-foreground border-white/[0.08] transition-colors rounded-lg font-medium"
                     >
                       Use This Hook
                     </Button>
@@ -625,10 +693,10 @@ export default function LandingPage() {
       </section>
 
       {/* Comparison: Traditional Editing vs PostMatic */}
-      <section className="py-20 px-6 sm:px-12 border-t border-white/[0.06] bg-[#0c0e15]/40">
+      <section className="py-20 px-6 sm:px-12 border-t border-white/[0.06]">
         <div className="max-w-4xl mx-auto space-y-8 text-center">
           <div className="space-y-2">
-            <h2 className="text-2xl sm:text-3xl font-bold text-white">
+            <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
               Why creators switch from traditional editing
             </h2>
             <p className="text-xs sm:text-sm text-zinc-400">
@@ -638,26 +706,56 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
             {/* Old Way */}
-            <div className="p-6 rounded-2xl bg-red-950/10 border border-red-500/20 space-y-3">
+            <div className="p-5 sm:p-6 rounded-xl bg-red-950/10 border border-red-500/20 space-y-3">
               <span className="text-xs font-mono font-bold text-red-400 uppercase">The Old Way (3–5 Hours)</span>
-              <ul className="space-y-2 text-xs text-zinc-400">
-                <li className="flex items-center gap-2">✕ Researching hooks on Reddit & forums</li>
-                <li className="flex items-center gap-2">✕ Recording voiceovers with retakes and background noise</li>
-                <li className="flex items-center gap-2">✕ Sourcing 15 stock clips from different websites</li>
-                <li className="flex items-center gap-2">✕ Manually syncing word-by-word subtitles in Premiere</li>
-                <li className="flex items-center gap-2">✕ 20-minute local rendering and manual export</li>
+              <ul className="space-y-2.5 text-xs text-zinc-400">
+                <li className="flex items-center gap-2">
+                  <X className="h-3.5 w-3.5 text-red-400 shrink-0" />
+                  <span>Researching hooks on Reddit & forums</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <X className="h-3.5 w-3.5 text-red-400 shrink-0" />
+                  <span>Recording voiceovers with retakes and noise</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <X className="h-3.5 w-3.5 text-red-400 shrink-0" />
+                  <span>Sourcing 15 stock clips from different websites</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <X className="h-3.5 w-3.5 text-red-400 shrink-0" />
+                  <span>Manually syncing word-by-word subtitles in Premiere</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <X className="h-3.5 w-3.5 text-red-400 shrink-0" />
+                  <span>20-minute local rendering and manual export</span>
+                </li>
               </ul>
             </div>
 
             {/* PostMatic Way */}
-            <div className="p-6 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-3">
-              <span className="text-xs font-mono font-bold text-amber-400 uppercase">With PostMatic (30 Seconds)</span>
-              <ul className="space-y-2 text-xs text-zinc-200">
-                <li className="flex items-center gap-2">✓ Enter 1 topic or pick a proven niche</li>
-                <li className="flex items-center gap-2">✓ Neural voice talent with studio pacing</li>
-                <li className="flex items-center gap-2">✓ Matched 4K B-roll stitched automatically</li>
-                <li className="flex items-center gap-2">✓ Kinetic animated subtitles burned in at 60 FPS</li>
-                <li className="flex items-center gap-2">✓ Published directly to YouTube Shorts with 1 click</li>
+            <div className="p-5 sm:p-6 rounded-xl bg-indigo-500/10 border border-indigo-500/25 space-y-3">
+              <span className="text-xs font-mono font-bold text-indigo-400 uppercase">With PostMatic (30 Seconds)</span>
+              <ul className="space-y-2.5 text-xs text-zinc-200">
+                <li className="flex items-center gap-2">
+                  <Check className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+                  <span>Enter 1 topic or pick a proven niche</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+                  <span>Neural voice talent with studio pacing</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+                  <span>Matched 4K B-roll stitched automatically</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+                  <span>Kinetic animated subtitles burned in at 60 FPS</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+                  <span>Published directly to YouTube Shorts with 1 click</span>
+                </li>
               </ul>
             </div>
           </div>
@@ -667,7 +765,7 @@ export default function LandingPage() {
       {/* Call to Action Banner */}
       <section className="py-24 px-6 sm:px-12 border-t border-white/[0.06] relative overflow-hidden">
         <div className="max-w-4xl mx-auto text-center space-y-6 relative z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 text-xs font-semibold">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 text-xs font-semibold">
             <Sparkles className="h-3.5 w-3.5" />
             Start Growing Today
           </div>
@@ -681,7 +779,7 @@ export default function LandingPage() {
             <Link href={user ? "/studio" : "/login"}>
               <Button
                 variant="primary"
-                className="h-13 px-8 text-sm font-semibold rounded-2xl shadow-xl shadow-amber-500/25 group"
+                className="h-12 px-7 text-sm font-semibold rounded-lg group"
               >
                 {user ? "Go to Your Studio Console" : "Launch Your Studio Now — It's Free"}
                 <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />

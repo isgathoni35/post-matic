@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import {
   Film,
+  Video,
   Play,
   Download,
   Share2,
@@ -96,17 +97,18 @@ export function RenderLibraryView({
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-300">
+    <div className="w-full max-w-6xl mx-auto space-y-6 animate-in fade-in duration-300">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/[0.06]">
         <div>
           <div className="flex items-center gap-2.5 mb-1">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
-              Render Library & Gallery
+            <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+              <Video className="w-5 h-5 text-indigo-400" />
+              <span>Render Library & Gallery</span>
             </h1>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <Badge variant="success" className="text-[10px] font-mono font-semibold">
               {completedJobs.length} Ready Videos
-            </span>
+            </Badge>
           </div>
           <p className="text-xs text-zinc-400">
             Browse, preview, export, and distribute your rendered 9:16 vertical video assets.
@@ -128,7 +130,7 @@ export function RenderLibraryView({
             variant="primary"
             size="sm"
             onClick={onNavigateToStudio}
-            className="text-xs h-9 font-semibold shadow-lg shadow-amber-500/20 w-full sm:w-auto shrink-0"
+            className="text-xs h-9 font-semibold w-full sm:w-auto shrink-0"
           >
             <Sparkles className="h-3.5 w-3.5 mr-1.5" />
             New Video
@@ -138,10 +140,10 @@ export function RenderLibraryView({
 
       {/* Grid or Empty State */}
       {completedJobs.length === 0 ? (
-        <div className="rounded-3xl border border-white/[0.08] bg-[#0f131a] p-8 sm:p-12 text-center space-y-5 max-w-md mx-auto my-8 sm:my-12 shadow-2xl">
-          <BrandIcon size="xl" glow={true} className="mx-auto shadow-2xl shadow-amber-500/20" />
+        <div className="rounded-xl border border-white/[0.06] pm-surface p-8 sm:p-12 text-center space-y-4 max-w-md mx-auto my-8 sm:my-12">
+          <BrandIcon size="xl" glow={false} className="mx-auto" />
           <div className="space-y-1.5">
-            <h2 className="text-lg font-bold text-white">No Videos Rendered Yet</h2>
+            <h2 className="text-base font-bold text-white">No Videos Rendered Yet</h2>
             <p className="text-xs text-zinc-400 leading-relaxed">
               Your library is currently empty. Head to the Studio Console to generate your first automated short-form video.
             </p>
@@ -150,7 +152,7 @@ export function RenderLibraryView({
             variant="primary"
             size="sm"
             onClick={onNavigateToStudio}
-            className="text-xs font-semibold h-10 px-6 shadow-xl shadow-amber-500/20"
+            className="text-xs font-semibold h-9 px-4"
           >
             <Sparkles className="h-4 w-4 mr-2" />
             Create Your First Video
@@ -161,7 +163,7 @@ export function RenderLibraryView({
           No rendered videos match your search query "{searchQuery}".
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {filteredJobs.map((job, idx) => {
             const jobId = job.job_id || (job as any).id || "";
             const displayId = jobId ? jobId.slice(0, 8) : `video-${idx}`;
@@ -175,7 +177,7 @@ export function RenderLibraryView({
             return (
               <div
                 key={jobId || `job-${idx}`}
-                className="rounded-2xl bg-[#0f131a] border border-white/[0.08] hover:border-amber-500/40 transition-all duration-300 overflow-hidden group flex flex-col justify-between shadow-xl"
+                className="rounded-xl pm-surface border border-white/[0.06] hover:border-indigo-500/30 transition-all duration-200 overflow-hidden group flex flex-col justify-between"
               >
                 {/* 9:16 Video Poster Card */}
                 <div
@@ -193,14 +195,14 @@ export function RenderLibraryView({
 
                   {/* Play hover icon */}
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                    <div className="h-12 w-12 rounded-full bg-amber-500 text-black flex items-center justify-center shadow-xl shadow-amber-500/40 transform scale-90 group-hover:scale-100 transition-transform">
-                      <Play className="h-5 w-5 fill-current ml-0.5" />
+                    <div className="h-10 w-10 rounded-full bg-indigo-600 text-white flex items-center justify-center shadow-md transform scale-90 group-hover:scale-100 transition-transform">
+                      <Play className="h-4 w-4 fill-current ml-0.5" />
                     </div>
                   </div>
 
                   {/* Badges on top */}
-                  <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-10 text-[10px] font-mono">
-                    <span className="px-2 py-0.5 rounded-md bg-black/70 backdrop-blur-md text-amber-400 font-semibold border border-white/[0.08]">
+                  <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between z-10 text-[10px] font-mono">
+                    <span className="px-2 py-0.5 rounded-md bg-black/70 backdrop-blur-md text-zinc-300 font-semibold border border-white/[0.08]">
                       9:16 Vertical
                     </span>
                     <span className="px-2 py-0.5 rounded-md bg-black/70 backdrop-blur-md text-zinc-300 font-semibold border border-white/[0.08]">
@@ -209,8 +211,8 @@ export function RenderLibraryView({
                   </div>
 
                   {/* Title overlay at bottom */}
-                  <div className="absolute bottom-3 left-3 right-3 z-10">
-                    <p className="text-xs font-bold text-white line-clamp-2 leading-snug drop-shadow-md">
+                  <div className="absolute bottom-2.5 left-2.5 right-2.5 z-10">
+                    <p className="text-xs font-bold text-white line-clamp-2 leading-snug">
                       {job.topic}
                     </p>
                   </div>
@@ -260,14 +262,14 @@ export function RenderLibraryView({
 
       {/* Video Playback Modal */}
       {selectedModalVideo && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="relative w-full max-w-2xl max-h-[92vh] overflow-y-auto rounded-3xl bg-[#0b0e14] border border-white/[0.1] shadow-2xl p-4 sm:p-8 space-y-4 sm:space-y-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative w-full max-w-2xl max-h-[92vh] overflow-y-auto rounded-2xl pm-surface-raised border border-white/[0.1] shadow-2xl p-4 sm:p-6 space-y-4 sm:space-y-6">
             <div className="flex items-start justify-between pb-3 sm:pb-4 border-b border-white/[0.08]">
               <div className="pr-2">
-                <span className="text-[10px] font-mono text-amber-400 uppercase tracking-wider font-semibold">
+                <span className="text-[10px] font-mono text-indigo-400 uppercase tracking-wider font-semibold">
                   Video Inspector
                 </span>
-                <h2 className="text-sm sm:text-lg font-bold text-white mt-0.5 line-clamp-2">
+                <h2 className="text-sm sm:text-base font-bold text-white mt-0.5 line-clamp-2">
                   {selectedModalVideo.topic}
                 </h2>
               </div>
@@ -282,7 +284,7 @@ export function RenderLibraryView({
 
             {/* Video Player */}
             <div className="flex justify-center">
-              <div className="relative w-full max-w-[220px] sm:max-w-[260px] aspect-[9/16] rounded-2xl overflow-hidden border-2 border-white/[0.12] bg-black shadow-2xl">
+              <div className="relative w-full max-w-[220px] sm:max-w-[260px] aspect-[9/16] rounded-xl overflow-hidden border border-white/[0.12] bg-black">
                 <video
                   src={
                     selectedModalVideo.video_url?.startsWith("http")
@@ -398,7 +400,7 @@ export function RenderLibraryView({
                           <Button
                             variant="primary"
                             size="sm"
-                            className="w-full text-xs h-9 font-semibold bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white"
+                            className="w-full text-xs h-9 font-semibold bg-pink-600 hover:bg-pink-700 text-white"
                           >
                             <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
                             Instagram
@@ -410,7 +412,7 @@ export function RenderLibraryView({
                           size="sm"
                           onClick={() => handlePublish(modalJobId, "instagram")}
                           isLoading={publishingPlatform === "instagram"}
-                          className="flex-1 sm:flex-none text-xs h-9 font-semibold bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white"
+                          className="flex-1 sm:flex-none text-xs h-9 font-semibold bg-pink-600 hover:bg-pink-700 text-white"
                         >
                           <Share2 className="h-3.5 w-3.5 mr-1.5" />
                           Instagram

@@ -37,15 +37,15 @@ export function BrandIcon({
       className={cn(
         "relative flex items-center justify-center transition-all duration-300",
         iconDimensions,
-        "bg-gradient-to-br from-[#1c2230] via-[#121622] to-[#0a0c12]",
-        "border border-white/[0.12] group-hover:border-amber-500/40",
-        "shadow-[0_4px_16px_-2px_rgba(245,158,11,0.25),inset_0_1px_0_0_rgba(255,255,255,0.15)]",
+        "bg-gradient-to-br from-[#1a1a24] via-[#121218] to-[#0c0c10]",
+        "border border-white/[0.1] group-hover:border-indigo-500/40",
+        "shadow-[0_2px_8px_rgba(0,0,0,0.4),inset_0_1px_0_0_rgba(255,255,255,0.1)]",
         className
       )}
     >
       {/* Ambient Underglow */}
       {glow && (
-        <div className="absolute inset-0 rounded-[inherit] bg-gradient-to-tr from-amber-500/25 via-orange-500/10 to-transparent blur-sm pointer-events-none" />
+        <div className="absolute inset-0 rounded-[inherit] bg-gradient-to-tr from-indigo-500/15 via-violet-500/10 to-transparent blur-sm pointer-events-none" />
       )}
 
       {/* Custom Interlocking Aperture Vector */}
@@ -57,13 +57,13 @@ export function BrandIcon({
       >
         <defs>
           <linearGradient id="aperture-grad-1" x1="4" y1="4" x2="28" y2="28" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#fbbf24" />
-            <stop offset="60%" stopColor="#f59e0b" />
-            <stop offset="100%" stopColor="#ea580c" />
+            <stop offset="0%" stopColor="#ffffff" />
+            <stop offset="60%" stopColor="#e4e4e7" />
+            <stop offset="100%" stopColor="#a1a1aa" />
           </linearGradient>
           <linearGradient id="aperture-grad-2" x1="28" y1="4" x2="4" y2="28" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#fef08a" />
-            <stop offset="100%" stopColor="#f59e0b" />
+            <stop offset="0%" stopColor="#ffffff" />
+            <stop offset="100%" stopColor="#6366f1" />
           </linearGradient>
         </defs>
 
@@ -110,10 +110,10 @@ export function BrandLogo({
         <div className="flex flex-col text-left leading-none">
           <div className="flex items-center gap-1.5">
             <span className={cn("font-extrabold tracking-tight text-white font-sans", textSize)}>
-              Post<span className="bg-clip-text text-transparent bg-gradient-to-r from-amber-400 to-orange-400">Matic</span>
+              Post<span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-violet-400">Matic</span>
             </span>
             {showBadge && (
-              <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 uppercase tracking-wide">
+              <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 uppercase tracking-wide">
                 {badgeText}
               </span>
             )}

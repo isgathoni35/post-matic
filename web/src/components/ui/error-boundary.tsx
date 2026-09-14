@@ -39,8 +39,8 @@ export class WorkspaceErrorBoundary extends Component<Props, State> {
   public render() {
     if (this.state.hasError) {
       return (
-        <div className="rounded-3xl border border-rose-500/20 bg-[#0f131a] p-8 sm:p-12 text-center max-w-xl mx-auto my-12 shadow-2xl space-y-5 animate-in fade-in duration-200">
-          <div className="h-14 w-14 rounded-2xl bg-rose-500/10 border border-rose-500/25 flex items-center justify-center text-rose-400 mx-auto shadow-lg shadow-rose-500/10">
+        <div className="rounded-xl border border-white/[0.08] pm-surface p-8 sm:p-12 text-center max-w-xl mx-auto my-12 space-y-5 animate-in fade-in duration-200">
+          <div className="h-14 w-14 rounded-xl bg-rose-500/10 border border-rose-500/25 flex items-center justify-center text-rose-400 mx-auto">
             <AlertTriangle className="h-7 w-7" />
           </div>
 

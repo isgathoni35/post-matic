@@ -56,17 +56,18 @@ export function JobQueueView({
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-300">
+    <div className="w-full max-w-6xl mx-auto space-y-6 animate-in fade-in duration-300">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/[0.06]">
         <div>
           <div className="flex items-center gap-2.5 mb-1">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
-              Pipeline Execution Queue
+            <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+              <Layers className="w-5 h-5 text-indigo-400" />
+              <span>Pipeline Execution Queue</span>
             </h1>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20">
+            <Badge variant="primary" pulse className="text-[10px] font-mono font-semibold">
               Live Monitor
-            </span>
+            </Badge>
           </div>
           <p className="text-xs text-zinc-400">
             Real-time status tracking for distributed video synthesis, media sourcing, and FFmpeg render jobs.
@@ -74,7 +75,7 @@ export function JobQueueView({
         </div>
 
         {/* Filter Pills */}
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-black/40 border border-white/[0.08] overflow-x-auto no-scrollbar w-full sm:w-auto shrink-0">
+        <div className="flex items-center gap-1.5 p-1 rounded-lg bg-[#0c0c0e] border border-white/[0.06] overflow-x-auto no-scrollbar w-full sm:w-auto shrink-0">
           {[
             { id: "all", label: "All", count: jobs.length },
             {
@@ -97,9 +98,9 @@ export function JobQueueView({
               key={f.id}
               type="button"
               onClick={() => setStatusFilter(f.id)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap shrink-0 ${
+              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all whitespace-nowrap shrink-0 ${
                 statusFilter === f.id
-                  ? "bg-white/[0.1] text-white font-semibold shadow-sm"
+                  ? "bg-white/[0.1] text-white font-semibold shadow-xs"
                   : "text-zinc-400 hover:text-white"
               }`}
             >
@@ -110,7 +111,7 @@ export function JobQueueView({
       </div>
 
       {/* Table Card */}
-      <div className="rounded-2xl bg-[#0f131a] border border-white/[0.08] shadow-2xl overflow-hidden">
+      <div className="rounded-xl pm-surface border border-white/[0.06] overflow-hidden">
         {filteredJobs.length === 0 ? (
           <div className="py-16 text-center space-y-4">
             <div className="h-12 w-12 rounded-full bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-zinc-500 mx-auto">
@@ -181,7 +182,7 @@ export function JobQueueView({
                         <div className="flex items-center gap-2">
                           <div className="w-16 h-1.5 rounded-full bg-white/[0.08] overflow-hidden">
                             <div
-                              className="h-full bg-gradient-to-r from-amber-500 to-amber-300 transition-all duration-300"
+                              className="h-full bg-indigo-500 transition-all duration-300"
                               style={{ width: `${job.progress_pct}%` }}
                             />
                           </div>

@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import {
   Video,
+  BookOpen,
   Layers,
   Share2,
   Settings,
@@ -42,7 +43,7 @@ export function MobileNav({
     {
       id: "series" as ActiveWorkspaceView,
       label: "Series",
-      icon: Video,
+      icon: BookOpen,
     },
     {
       id: "library" as ActiveWorkspaceView,
@@ -78,7 +79,7 @@ export function MobileNav({
             className="absolute inset-0 bg-black/75 backdrop-blur-sm"
             onClick={() => setIsMoreOpen(false)}
           />
-          <div className="absolute inset-x-0 bottom-0 bg-[#0c0f17] border-t border-white/[0.12] rounded-t-3xl p-5 space-y-4 shadow-2xl animate-in slide-in-from-bottom-5 duration-200">
+          <div className="absolute inset-x-0 bottom-0 bg-[#0c0c0e] border-t border-white/[0.12] rounded-t-2xl p-5 space-y-4 shadow-2xl animate-in slide-in-from-bottom-5 duration-200">
             {/* Sheet Header */}
             <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
               <div className="flex items-center gap-2.5">
@@ -150,7 +151,7 @@ export function MobileNav({
       )}
 
       {/* Persistent Bottom Navigation Dock (Mobile Only) */}
-      <nav className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-[#090b10]/95 backdrop-blur-xl border-t border-white/[0.08] px-2 pt-1.5 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+      <nav className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-[#0c0c0e]/95 backdrop-blur-xl border-t border-white/[0.08] px-2 pt-1.5 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         <div className="flex items-center justify-around">
           {mainTabs.map((tab) => {
             const Icon = tab.icon;
@@ -161,23 +162,23 @@ export function MobileNav({
                 key={tab.id}
                 type="button"
                 onClick={() => handleSelectView(tab.id)}
-                className={`relative flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all duration-200 ${
+                className={`relative flex flex-col items-center justify-center py-1 px-3 rounded-lg transition-all duration-200 ${
                   isActive
-                    ? "text-amber-400"
+                    ? "text-indigo-400"
                     : "text-zinc-400 hover:text-zinc-200 active:scale-95"
                 }`}
               >
                 <div className="relative">
                   <Icon
                     className={`h-5 w-5 transition-transform ${
-                      isActive ? "scale-110 text-amber-400 stroke-[2.2]" : "text-zinc-400"
+                      isActive ? "scale-110 text-indigo-400 stroke-[2.2]" : "text-zinc-400"
                     }`}
                   />
                   {tab.badge && (
                     <span
                       className={`absolute -top-1.5 -right-2 px-1.5 py-0.2 rounded-full text-[9px] font-mono font-bold leading-tight ${
                         tab.isPulse
-                          ? "bg-amber-500 text-black animate-pulse"
+                          ? "bg-indigo-500 text-white"
                           : "bg-white/[0.15] text-zinc-200 border border-white/[0.1]"
                       }`}
                     >
@@ -187,7 +188,7 @@ export function MobileNav({
                 </div>
                 <span
                   className={`text-[10px] tracking-tight mt-1 transition-all ${
-                    isActive ? "font-bold text-amber-400" : "font-medium text-zinc-400"
+                    isActive ? "font-bold text-indigo-400" : "font-medium text-zinc-400"
                   }`}
                 >
                   {tab.label}
@@ -195,7 +196,7 @@ export function MobileNav({
 
                 {/* Subtle active indicator pill */}
                 {isActive && (
-                  <span className="absolute -bottom-0.5 h-1 w-4 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.6)]" />
+                  <span className="absolute -bottom-0.5 h-1 w-4 rounded-full bg-indigo-400" />
                 )}
               </button>
             );
@@ -205,30 +206,30 @@ export function MobileNav({
           <button
             type="button"
             onClick={() => setIsMoreOpen(true)}
-            className={`relative flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all duration-200 ${
+            className={`relative flex flex-col items-center justify-center py-1 px-3 rounded-lg transition-all duration-200 ${
               isMoreOpen || activeView === "settings" || activeView === "logs"
-                ? "text-amber-400"
+                ? "text-indigo-400"
                 : "text-zinc-400 hover:text-zinc-200 active:scale-95"
             }`}
           >
             <MoreHorizontal
               className={`h-5 w-5 transition-transform ${
                 isMoreOpen || activeView === "settings" || activeView === "logs"
-                  ? "scale-110 text-amber-400 stroke-[2.2]"
+                  ? "scale-110 text-indigo-400 stroke-[2.2]"
                   : "text-zinc-400"
               }`}
             />
             <span
               className={`text-[10px] tracking-tight mt-1 transition-all ${
                 isMoreOpen || activeView === "settings" || activeView === "logs"
-                  ? "font-bold text-amber-400"
+                  ? "font-bold text-indigo-400"
                   : "font-medium text-zinc-400"
               }`}
             >
               More
             </span>
             {(activeView === "settings" || activeView === "logs") && !isMoreOpen && (
-              <span className="absolute -bottom-0.5 h-1 w-4 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.6)]" />
+              <span className="absolute -bottom-0.5 h-1 w-4 rounded-full bg-indigo-400" />
             )}
           </button>
         </div>

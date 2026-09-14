@@ -47,7 +47,7 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark overflow-x-hidden`}
     >
-      <body className="min-h-full flex flex-col bg-[#090b10] text-zinc-100 selection:bg-amber-500/30 selection:text-amber-200 overflow-x-hidden w-full max-w-full relative">
+      <body className="min-h-full flex flex-col bg-[#0c0c0e] text-zinc-100 selection:bg-indigo-500/30 selection:text-indigo-200 overflow-x-hidden w-full max-w-full relative">
         <AuthProvider>
           {children}
         </AuthProvider>
@@ -56,8 +56,8 @@ export default function RootLayout({
           theme="dark"
           toastOptions={{
             style: {
-              background: "#121622",
-              border: "1px solid rgba(255, 255, 255, 0.1)",
+              background: "#111115",
+              border: "1px solid rgba(255, 255, 255, 0.08)",
               color: "#f4f5f8",
             },
           }}

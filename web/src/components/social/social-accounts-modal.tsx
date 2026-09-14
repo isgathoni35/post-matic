@@ -140,11 +140,11 @@ export function SocialAccountsModal({ isOpen, onClose, userId }: SocialAccountsM
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto studio-card rounded-2xl p-4 sm:p-8 bg-[#0b0e14] border border-white/[0.1] shadow-2xl space-y-5 sm:space-y-6">
+      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto pm-surface-raised rounded-2xl p-4 sm:p-8 border border-white/[0.1] shadow-2xl space-y-5 sm:space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-white/[0.08]">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-black shadow-lg shadow-amber-500/20">
+            <div className="h-10 w-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white">
               <Share2 className="h-5 w-5" />
             </div>
             <div>
@@ -231,11 +231,11 @@ export function SocialAccountsModal({ isOpen, onClose, userId }: SocialAccountsM
                   <Zap className="h-4 w-4 mr-1.5" />
                   Authorize YouTube Channel
                 </Button>
-                <div className="p-2.5 rounded-lg bg-amber-500/5 border border-amber-500/10 text-[11px] text-zinc-400 space-y-1">
-                  <span className="text-amber-400 font-medium flex items-center gap-1">
+                <div className="p-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06] text-[11px] text-zinc-400 space-y-1">
+                  <span className="text-zinc-400 font-medium flex items-center gap-1">
                     <Info className="h-3 w-3" /> Callback URI:
                   </span>
-                  <code className="text-amber-300 font-mono text-[10px] bg-black/50 px-1 py-0.5 rounded select-all block">
+                  <code className="text-zinc-300 font-mono text-[10px] bg-black/50 px-1 py-0.5 rounded select-all block">
                     http://localhost:8000/api/social/youtube/callback
                   </code>
                 </div>
@@ -376,7 +376,7 @@ export function SocialAccountsModal({ isOpen, onClose, userId }: SocialAccountsM
               <div className="space-y-2">
                 <Button
                   variant="primary"
-                  className="w-full h-9 text-xs font-semibold bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white"
+                  className="w-full h-9 text-xs font-semibold bg-pink-600 hover:bg-pink-500 text-white"
                   onClick={handleConnectInstagram}
                   isLoading={connectingPlatform === "instagram"}
                 >

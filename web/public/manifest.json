@@ -4,8 +4,8 @@
   "description": "The autonomous studio for YouTube Shorts, Reels, and TikTok.",
   "start_url": "/studio",
   "display": "standalone",
-  "background_color": "#08090d",
-  "theme_color": "#08090d",
+  "background_color": "#0c0c0e",
+  "theme_color": "#0c0c0e",
   "icons": [
     {
       "src": "/icon-192.png",
