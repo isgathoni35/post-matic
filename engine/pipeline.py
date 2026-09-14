@@ -5,7 +5,7 @@ from pathlib import Path
 import shutil
 import sys
 import time
-from typing import Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 # Ensure project root is on sys.path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -31,6 +31,7 @@ from engine.video_renderer import (
 )
 from engine.image_generator import generate_story_scene_image
 from engine.sfx_manager import mix_sfx_and_bgm
+from engine.character_manager import prepare_characters
 
 logger = logging.getLogger(__name__)
 
@@ -229,6 +230,7 @@ def generate_animated_story_video(
     style: str = "anime",
     target_duration: int = 25,
     target_scenes: Optional[int] = None,
+    custom_characters: Optional[List[Any]] = None,
     output_path: Optional[Path] = None,
     gemini_api_key: Optional[str] = None,
     preferred_model: Optional[str] = None,
@@ -256,6 +258,13 @@ def generate_animated_story_video(
             except Exception as cb_err:
                 logger.warning("Progress callback failed: %s", cb_err)
 
+    # 0. Custom Character Preparation & Visual DNA Extraction
+    resolved_characters = []
+    if custom_characters:
+        report_progress("character_prep", 10)
+        resolved_characters = prepare_characters(custom_characters, api_key=gemini_api_key)
+        logger.info("Resolved %d custom characters with visual DNA.", len(resolved_characters))
+
     # 1. Screenplay Generation
     report_progress("scripting", 15)
     print(f"\n[1/5] Directing multi-character screenplay for: '{topic}' (Style: {style})...")
@@ -264,6 +273,7 @@ def generate_animated_story_video(
         style=style,
         target_duration=target_duration,
         target_scenes=target_scenes,
+        custom_characters=resolved_characters if resolved_characters else None,
         api_key=gemini_api_key,
         preferred_model=preferred_model,
     )

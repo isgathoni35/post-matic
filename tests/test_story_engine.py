@@ -164,3 +164,74 @@ def test_synthesize_story_dialogue_mock(tmp_path):
     assert "Dialogue:" in sub_content
     # Check that character colors were injected into ASS subtitle styling
     assert "\\c" in sub_content
+
+
+def test_reconcile_custom_characters():
+    """Verify user-defined custom characters override or merge into story screenplay cast."""
+    from engine.script_generator import _reconcile_characters
+
+    custom_cast = [
+        Character(
+            id="kael",
+            name="Kael",
+            voice="en-US-BrianMultilingualNeural",
+            visual_dna="Cybernetic samurai with blue katana",
+            subtitle_color="#38BDF8",
+        ),
+        Character(
+            id="lyra",
+            name="Lyra",
+            voice="en-US-AvaMultilingualNeural",
+            visual_dna="Silver haired rogue with twin daggers",
+            subtitle_color="#F59E0B",
+        ),
+    ]
+
+    # Suppose LLM generated a story with slightly different id or generic char
+    story = AnimatedStoryScript(
+        title="Rooftop Infiltration",
+        description="Two rogues infiltrate a neon fortress",
+        tags=["action", "cyber"],
+        style="anime",
+        characters=[
+            Character(
+                id="kael",
+                name="Kael",
+                voice="en-US-GuyNeural",
+                visual_dna="A man",
+                subtitle_color="#FFFFFF",
+            ),
+            Character(
+                id="guard",
+                name="Fortress Guard",
+                voice="en-US-ChristopherNeural",
+                visual_dna="Heavy cyber guard with shield",
+                subtitle_color="#EF4444",
+            ),
+        ],
+        scenes=[
+            StoryScene(
+                scene_id=1,
+                dialogue=[
+                    DialogueLine(
+                        line_id=1,
+                        speaker_id="kael",
+                        text="The shields are active.",
+                    )
+                ],
+                visual_description="Kael examining the laser barrier",
+                environment_anchor="Cyber rooftop at night",
+            )
+        ],
+    )
+
+    reconciled = _reconcile_characters(story, custom_cast)
+    # Custom characters should be preserved with user-defined voice and visual DNA
+    char_map = {c.id: c for c in reconciled.characters}
+    assert "kael" in char_map
+    assert "lyra" in char_map
+    assert "guard" in char_map
+    assert char_map["kael"].voice == "en-US-BrianMultilingualNeural"
+    assert "Cybernetic samurai" in char_map["kael"].visual_dna
+    assert char_map["kael"].subtitle_color == "#38BDF8"
+    assert char_map["lyra"].voice == "en-US-AvaMultilingualNeural"

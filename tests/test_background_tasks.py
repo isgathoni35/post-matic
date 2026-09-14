@@ -143,6 +143,7 @@ def test_api_generate_triggers_background_task():
             target_platform="youtube",
             mode="shorts",
             story_style="anime",
+            characters=None,
         )
 
 

@@ -1,6 +1,6 @@
 """Pydantic schemas for FastAPI request and response payloads."""
 from enum import Enum
-from typing import Optional
+from typing import List, Optional
 from pydantic import AliasChoices, BaseModel, Field
 
 
@@ -13,6 +13,15 @@ class VideoJobStatus(str, Enum):
     RENDERING = "rendering"
     COMPLETED = "completed"
     FAILED = "failed"
+
+
+class CustomCharacterPayload(BaseModel):
+    """Character definition submitted by the user."""
+    name: str = Field(..., min_length=1, max_length=50, description="Character display name")
+    voice: Optional[str] = Field(default=None, description="Assigned voice ID or alias")
+    image_data: Optional[str] = Field(default=None, description="Base64 data URI or image URL")
+    visual_notes: Optional[str] = Field(default=None, description="Optional extra physical styling notes")
+    subtitle_color: Optional[str] = Field(default=None, description="Subtitle hex color code")
 
 
 class VideoGenerateRequest(BaseModel):
@@ -68,6 +77,10 @@ class VideoGenerateRequest(BaseModel):
     story_style: str = Field(
         default="anime",
         description="Style for animated story ('anime', 'donghua', 'stickman', '3d_cartoon')",
+    )
+    characters: Optional[List[CustomCharacterPayload]] = Field(
+        default=None,
+        description="Optional list of custom characters with names, voices, and reference photos",
     )
 
 

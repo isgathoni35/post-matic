@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 import time
 import traceback
-from typing import Optional
+from typing import Any, List, Optional
 
 from api.db import get_social_accounts, update_video_job_record
 from api.schemas import VideoJobStatus
@@ -34,6 +34,7 @@ def execute_video_pipeline_job(
     target_platform: str = "youtube",
     mode: str = "shorts",
     story_style: str = "anime",
+    characters: Optional[List[Any]] = None,
 ) -> None:
     """Execute the end-to-end 5-stage video pipeline in a background task.
 
@@ -109,6 +110,7 @@ def execute_video_pipeline_job(
                 topic=topic,
                 style=story_style,
                 target_duration=target_duration,
+                custom_characters=characters,
                 output_path=dest_output_path,
                 progress_callback=progress_cb,
             )

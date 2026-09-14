@@ -1,5 +1,5 @@
 """Pydantic data schemas for video generation pipeline."""
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel, Field
 
 
@@ -67,6 +67,21 @@ class Character(BaseModel):
         default="#FFFFFF",
         description="Hex color code for this character's burned subtitles (e.g. '#22C55E' green for Shrek, '#F59E0B' amber for Donkey)"
     )
+    image_url: Optional[str] = Field(
+        default=None,
+        description="Optional URL or path to uploaded reference photo"
+    )
+
+
+class CustomCharacterInput(BaseModel):
+    """Input schema for a user-defined character with optional photo reference."""
+    name: str = Field(..., max_length=50, description="Character display name (e.g. 'Kael', 'Master Ken')")
+    voice: Optional[str] = Field(default=None, description="Preferred edge-tts voice ID")
+    image_data: Optional[str] = Field(default=None, description="Base64 encoded image or URL/path to reference photo")
+    visual_notes: Optional[str] = Field(default=None, description="Optional manual visual notes provided by the user")
+    subtitle_color: Optional[str] = Field(default=None, description="Optional hex color for subtitles (e.g. '#22C55E')")
+
+
 
 
 class SFXCue(BaseModel):

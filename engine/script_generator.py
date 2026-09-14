@@ -1,11 +1,11 @@
 """LLM Scripting module using Google Gemini API."""
 import logging
-from typing import Optional
+from typing import List, Optional
 from google import genai
 from google.genai import types
 
 from engine.config import GEMINI_API_KEY, GEMINI_MODELS
-from engine.schema import VideoScript, AnimatedStoryScript
+from engine.schema import VideoScript, AnimatedStoryScript, Character
 
 logger = logging.getLogger(__name__)
 
@@ -151,11 +151,35 @@ Your mission is to construct captivating, multi-character animated screenplays w
 """
 
 
+def _reconcile_characters(
+    story: AnimatedStoryScript,
+    custom_characters: Optional[List[Character]] = None,
+) -> AnimatedStoryScript:
+    """Ensure user-defined custom characters and their exact attributes are preserved."""
+    if not custom_characters:
+        return story
+
+    custom_by_id = {c.id.lower(): c for c in custom_characters}
+    custom_by_name = {c.name.lower(): c for c in custom_characters}
+
+    merged_characters: List[Character] = list(custom_characters)
+    merged_ids = {c.id.lower() for c in merged_characters}
+
+    for c in story.characters:
+        if c.id.lower() not in merged_ids and c.name.lower() not in custom_by_name:
+            merged_characters.append(c)
+            merged_ids.add(c.id.lower())
+
+    story.characters = merged_characters
+    return story
+
+
 def generate_story_script(
     topic: str,
     style: str = "anime",
     target_duration: int = 30,
     target_scenes: Optional[int] = None,
+    custom_characters: Optional[List[Character]] = None,
     api_key: Optional[str] = None,
     preferred_model: Optional[str] = None,
 ) -> AnimatedStoryScript:
@@ -166,6 +190,7 @@ def generate_story_script(
         style: Aesthetic genre ('anime', 'donghua', 'stickman', '3d_cartoon').
         target_duration: Approximate target length in seconds (default: 30).
         target_scenes: Optional number of scenes (defaults to duration // 7).
+        custom_characters: Optional user-provided custom cast with visual DNA and assigned voices.
         api_key: Optional override for Gemini API key.
         preferred_model: Optional override for preferred Gemini model.
 
@@ -176,10 +201,18 @@ def generate_story_script(
 
     num_scenes = target_scenes or max(2, target_duration // 7)
 
+    cast_clause = ""
+    if custom_characters:
+        cast_lines = [
+            f"  - Character ID: '{c.id}', Name: '{c.name}', Voice: '{c.voice}', Subtitle Color: '{c.subtitle_color}', Visual DNA: '{c.visual_dna}'"
+            for c in custom_characters
+        ]
+        cast_clause = "\nSTRICT CAST DIRECTIVE:\nThe screenplay MUST exclusively star the following user-defined cast:\n" + "\n".join(cast_lines) + "\nIn the returned 'characters' list, you MUST preserve these exact characters with their identical IDs, names, and visual DNA. All dialogue lines must be assigned to these characters using their exact 'speaker_id'.\n"
+
     prompt = f"""Topic: {topic}
 Animation Style: {style} (e.g. 'anime', 'donghua', 'stickman', or '3d_cartoon')
 Target Total Duration: approximately {target_duration} seconds.
-Target Scenes: exactly {num_scenes} scenes.
+Target Scenes: exactly {num_scenes} scenes.{cast_clause}
 
 Generate a complete, captivating multi-character animated screenplay with a full cast, multi-turn dialogue, embedded action SFX cues (such as punch_heavy, flight_whoosh, glass_clink, etc.), consistent character visual_dna anchors, and environment_anchor settings.
 Ensure the dialogue is punchy, authentic, comedic or intense according to the topic, and includes natural human contractions and expressive pauses."""
@@ -206,15 +239,17 @@ Ensure the dialogue is punchy, authentic, comedic or intense according to the to
 
             # Response parsed into Pydantic model
             if response.parsed and isinstance(response.parsed, AnimatedStoryScript):
-                return response.parsed
+                return _reconcile_characters(response.parsed, custom_characters)
 
             # Fallback if parsed is a dict
             if isinstance(response.parsed, dict):
-                return AnimatedStoryScript.model_validate(response.parsed)
+                story = AnimatedStoryScript.model_validate(response.parsed)
+                return _reconcile_characters(story, custom_characters)
 
             # Fallback: parse text as JSON into Pydantic model
             if response.text:
-                return AnimatedStoryScript.model_validate_json(response.text)
+                story = AnimatedStoryScript.model_validate_json(response.text)
+                return _reconcile_characters(story, custom_characters)
 
             raise ValueError("Empty response received from Gemini API.")
 

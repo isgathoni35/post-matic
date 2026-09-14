@@ -48,6 +48,7 @@ async def generate_video_job(
         target_platform=payload.target_platform,
         mode=payload.mode,
         story_style=payload.story_style,
+        characters=payload.characters,
     )
     return job
 

@@ -4,6 +4,14 @@
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
+export interface CustomCharacterPayload {
+  name: string;
+  voice?: string;
+  image_data?: string;
+  visual_notes?: string;
+  subtitle_color?: string;
+}
+
 export interface GenerateVideoPayload {
   topic: string;
   duration?: number;
@@ -16,6 +24,7 @@ export interface GenerateVideoPayload {
   target_platform?: "youtube" | "tiktok" | "instagram";
   mode?: "shorts" | "story";
   story_style?: "anime" | "donghua" | "stickman" | "3d_cartoon";
+  characters?: CustomCharacterPayload[];
 }
 
 export interface VideoJobResponse {

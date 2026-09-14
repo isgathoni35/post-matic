@@ -177,8 +177,8 @@ def main():
         print(f" ALL JOBS COMPLETE!")
         print(f" Video Path:   {result.video_path}")
         print(f" Duration:     {result.duration_seconds:.2f}s")
-        if youtube_url:
-            print(f" YouTube Link: {youtube_url}")
+        if social_url:
+            print(f" Social Link: {social_url}")
         if public_storage_url:
             print(f" Storage CDN:  {public_storage_url}")
         print(f"=======================================================\n")

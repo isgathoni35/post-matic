@@ -7,7 +7,7 @@ import { Sidebar, ActiveWorkspaceView } from "@/components/layout/sidebar";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { useAuth } from "@/hooks/use-auth";
 import { createClient } from "@/lib/supabase/client";
-import { generateVideoJob, getVideoJobStatus, VideoJobResponse, normalizeJob } from "@/lib/api";
+import { generateVideoJob, getVideoJobStatus, VideoJobResponse, normalizeJob, CustomCharacterPayload } from "@/lib/api";
 import { SocialAccountsModal } from "@/components/social/social-accounts-modal";
 import { StudioConsoleView, VOICES } from "@/components/views/studio-console-view";
 import { RenderLibraryView } from "@/components/views/render-library-view";
@@ -63,6 +63,7 @@ export default function StudioPage() {
   const [isSocialModalOpen, setIsSocialModalOpen] = useState(false);
   const [studioMode, setStudioMode] = useState<"shorts" | "story">("shorts");
   const [storyStyle, setStoryStyle] = useState<"anime" | "donghua" | "stickman" | "3d_cartoon">("anime");
+  const [customCharacters, setCustomCharacters] = useState<CustomCharacterPayload[]>([]);
 
   // Active Job and User Jobs List
   const [activeJob, setActiveJob] = useState<VideoJobResponse | null>(null);
@@ -227,6 +228,7 @@ export default function StudioPage() {
         target_platform: targetPlatform,
         mode: studioMode,
         story_style: storyStyle,
+        characters: studioMode === "story" && customCharacters.length > 0 ? customCharacters : undefined,
       });
 
       const normalizedResponse = normalizeJob(response);
@@ -314,6 +316,8 @@ export default function StudioPage() {
                 setStudioMode={setStudioMode}
                 storyStyle={storyStyle}
                 setStoryStyle={setStoryStyle}
+                customCharacters={customCharacters}
+                setCustomCharacters={setCustomCharacters}
               />
             )}
 

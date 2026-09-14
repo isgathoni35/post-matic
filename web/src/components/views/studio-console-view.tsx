@@ -37,11 +37,16 @@ import {
   Palette,
   Sword,
   Zap,
+  Users,
+  UserPlus,
+  Trash2,
+  ImagePlus,
+  UploadCloud,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { VideoJobResponse } from "@/lib/api";
+import { VideoJobResponse, CustomCharacterPayload } from "@/lib/api";
 
 interface SpeechRecognitionErrorEvent extends Event {
   error: string;
@@ -248,6 +253,8 @@ interface StudioConsoleViewProps {
   setStudioMode?: (m: "shorts" | "story") => void;
   storyStyle?: "anime" | "donghua" | "stickman" | "3d_cartoon";
   setStoryStyle?: (s: "anime" | "donghua" | "stickman" | "3d_cartoon") => void;
+  customCharacters?: CustomCharacterPayload[];
+  setCustomCharacters?: (chars: CustomCharacterPayload[]) => void;
 }
 
 export function StudioConsoleView({
@@ -271,6 +278,8 @@ export function StudioConsoleView({
   setStudioMode,
   storyStyle = "anime",
   setStoryStyle,
+  customCharacters = [],
+  setCustomCharacters,
 }: StudioConsoleViewProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -278,6 +287,43 @@ export function StudioConsoleView({
   const [duration, setDuration] = useState(0);
   const [showSafeZoneOverlay, setShowSafeZoneOverlay] = useState(false);
   const [auditionVoiceId, setAuditionVoiceId] = useState<string | null>(null);
+
+  const DEFAULT_COLORS = ["#38BDF8", "#F59E0B", "#22C55E", "#EC4899", "#A855F7"];
+
+  const handleAddCharacter = () => {
+    if (customCharacters.length >= 3) return;
+    const newIdx = customCharacters.length;
+    const defaultNames = ["Protagonist", "Sidekick", "Rival"];
+    const newChar: CustomCharacterPayload = {
+      name: defaultNames[newIdx] || `Hero ${newIdx + 1}`,
+      voice: VOICES[newIdx % VOICES.length].id,
+      subtitle_color: DEFAULT_COLORS[newIdx % DEFAULT_COLORS.length],
+      visual_notes: "",
+    };
+    setCustomCharacters && setCustomCharacters([...customCharacters, newChar]);
+  };
+
+  const handleRemoveCharacter = (idx: number) => {
+    const updated = customCharacters.filter((_, i) => i !== idx);
+    setCustomCharacters && setCustomCharacters(updated);
+  };
+
+  const handleUpdateCharacter = (idx: number, field: keyof CustomCharacterPayload, value: string) => {
+    const updated = [...customCharacters];
+    updated[idx] = { ...updated[idx], [field]: value };
+    setCustomCharacters && setCustomCharacters(updated);
+  };
+
+  const handleImageFileChange = (idx: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64 = event.target?.result as string;
+      handleUpdateCharacter(idx, "image_data", base64);
+    };
+    reader.readAsDataURL(file);
+  };
   const [mobileTab, setMobileTab] = useState<"controls" | "canvas">("controls");
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -687,6 +733,152 @@ export function StudioConsoleView({
                   <Zap className="h-3 w-3 text-purple-400 shrink-0" />
                   <span>Includes automatic action sound effects (punches, flight whooshes, impacts) & colored speaker captions.</span>
                 </div>
+              </div>
+            )}
+
+            {/* Custom Cast & Character Visual DNA Deck (Only shown in Story Mode) */}
+            {studioMode === "story" && (
+              <div className="space-y-3 p-3.5 rounded-xl bg-purple-950/20 border border-purple-500/20 animate-in fade-in slide-in-from-top-2">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label className="text-xs font-semibold text-purple-200 flex items-center gap-1.5">
+                      <Users className="h-3.5 w-3.5 text-purple-400" />
+                      Cast & Character DNA (Optional)
+                    </label>
+                    <p className="text-[10px] text-zinc-400 mt-0.5">
+                      Upload reference photos & assign names to keep characters consistent across every scene.
+                    </p>
+                  </div>
+                  {customCharacters.length < 3 && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={handleAddCharacter}
+                      className="h-7 text-[11px] px-2.5 bg-purple-500/10 border-purple-500/30 text-purple-300 hover:bg-purple-500/20 hover:text-white"
+                    >
+                      <UserPlus className="h-3.5 w-3.5 mr-1" />
+                      Add Character
+                    </Button>
+                  )}
+                </div>
+
+                {customCharacters.length === 0 ? (
+                  <div className="p-3 rounded-lg border border-dashed border-purple-500/20 bg-purple-950/10 text-center">
+                    <p className="text-[11px] text-zinc-400">
+                      No custom characters added. Gemini will automatically invent unique personas for your prompt.
+                    </p>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleAddCharacter}
+                      className="mt-2 text-xs text-purple-300 hover:text-purple-200 hover:bg-purple-500/10 h-7"
+                    >
+                      <UserPlus className="h-3.5 w-3.5 mr-1.5 text-purple-400" />
+                      + Add Character 1 (Upload Photo or Avatar)
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-2.5">
+                    {customCharacters.map((char, idx) => (
+                      <div
+                        key={idx}
+                        className="p-2.5 rounded-lg border border-white/[0.08] bg-black/40 space-y-2 relative"
+                      >
+                        <div className="flex items-center gap-3">
+                          {/* Photo upload avatar */}
+                          <div className="relative group shrink-0">
+                            <label className="cursor-pointer block relative">
+                              <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) => handleImageFileChange(idx, e)}
+                              />
+                              {char.image_data ? (
+                                <div
+                                  className="h-12 w-12 rounded-full overflow-hidden border-2 relative"
+                                  style={{ borderColor: char.subtitle_color || "#A855F7" }}
+                                >
+                                  <img
+                                    src={char.image_data}
+                                    alt={char.name}
+                                    className="h-full w-full object-cover"
+                                  />
+                                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                    <ImagePlus className="h-4 w-4 text-white" />
+                                  </div>
+                                </div>
+                              ) : (
+                                <div
+                                  className="h-12 w-12 rounded-full border-2 border-dashed border-purple-500/40 bg-purple-500/10 flex flex-col items-center justify-center text-purple-300 group-hover:border-purple-400 group-hover:bg-purple-500/20 transition-all"
+                                  title="Click to upload character reference photo"
+                                >
+                                  <ImagePlus className="h-4 w-4" />
+                                  <span className="text-[8px] mt-0.5 font-medium">Photo</span>
+                                </div>
+                              )}
+                            </label>
+                          </div>
+
+                          {/* Name & Voice selectors */}
+                          <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <div>
+                              <label className="text-[9px] font-semibold text-zinc-400 uppercase tracking-wider block mb-0.5">
+                                Character Name
+                              </label>
+                              <input
+                                type="text"
+                                value={char.name}
+                                onChange={(e) => handleUpdateCharacter(idx, "name", e.target.value)}
+                                placeholder="e.g. Kael, Lyra"
+                                className="w-full text-xs font-semibold px-2 py-1 rounded bg-zinc-900/80 border border-white/[0.08] text-white focus:outline-none focus:border-purple-400"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[9px] font-semibold text-zinc-400 uppercase tracking-wider block mb-0.5">
+                                Assigned Voice
+                              </label>
+                              <select
+                                value={char.voice || VOICES[0].id}
+                                onChange={(e) => handleUpdateCharacter(idx, "voice", e.target.value)}
+                                className="w-full text-xs px-2 py-1 rounded bg-zinc-900/80 border border-white/[0.08] text-zinc-200 focus:outline-none focus:border-purple-400"
+                              >
+                                {VOICES.map((v) => (
+                                  <option key={v.id} value={v.id}>
+                                    {v.name} — {v.role}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
+
+                          {/* Delete button */}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveCharacter(idx)}
+                            className="p-1.5 rounded text-zinc-500 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                            title="Remove character"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+
+                        {/* Visual Notes / Traits */}
+                        <div>
+                          <input
+                            type="text"
+                            value={char.visual_notes || ""}
+                            onChange={(e) => handleUpdateCharacter(idx, "visual_notes", e.target.value)}
+                            placeholder="Optional visual traits: (e.g. crimson spiky hair, blue tactical jacket, cybernetic katana)"
+                            className="w-full text-[11px] px-2 py-1 rounded bg-zinc-900/50 border border-white/[0.04] text-zinc-300 placeholder:text-zinc-600 focus:outline-none focus:border-purple-400"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
