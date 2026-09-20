@@ -1,5 +1,6 @@
 """LLM Scripting module using Google Gemini API."""
 import logging
+import time
 from typing import List, Optional
 from google import genai
 from google.genai import types
@@ -57,7 +58,15 @@ def generate_script(
     """
     client = get_gemini_client(api_key)
 
-    num_scenes = target_scenes or max(3, target_duration // 5)
+    # Scale scene pacing for longer videos to prevent exceeding LLM context
+    if target_duration > 180:
+        scene_len = 15
+    elif target_duration > 60:
+        scene_len = 10
+    else:
+        scene_len = 5
+        
+    num_scenes = target_scenes or max(3, target_duration // scene_len)
 
     # Calibrate word pacing: spoken English averages ~2.5 words per second
     target_words = int(target_duration * 2.5)
@@ -82,38 +91,50 @@ Ensure search_keywords are concrete visual search queries that yield great resul
             models_to_try.append(m)
 
     last_error = None
+    max_retries = 3
+
     for model_name in models_to_try:
-        try:
-            logger.info("Attempting script generation with model: %s", model_name)
-            response = client.models.generate_content(
-                model=model_name,
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    response_mime_type="application/json",
-                    response_schema=VideoScript,
-                    system_instruction=SYSTEM_INSTRUCTION,
-                    temperature=0.7,
-                ),
-            )
+        retries = 0
+        while retries <= max_retries:
+            try:
+                logger.info("Attempting script generation with model: %s (attempt %d)", model_name, retries + 1)
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        response_mime_type="application/json",
+                        response_schema=VideoScript,
+                        system_instruction=SYSTEM_INSTRUCTION,
+                        temperature=0.7,
+                    ),
+                )
 
-            # Response parsed into Pydantic model
-            if response.parsed and isinstance(response.parsed, VideoScript):
-                return response.parsed
+                # Response parsed into Pydantic model
+                if response.parsed and isinstance(response.parsed, VideoScript):
+                    return response.parsed
 
-            # Fallback if parsed is a dict
-            if isinstance(response.parsed, dict):
-                return VideoScript.model_validate(response.parsed)
+                # Fallback if parsed is a dict
+                if isinstance(response.parsed, dict):
+                    return VideoScript.model_validate(response.parsed)
 
-            # Fallback: parse text as JSON into Pydantic model
-            if response.text:
-                return VideoScript.model_validate_json(response.text)
+                # Fallback: parse text as JSON into Pydantic model
+                if response.text:
+                    return VideoScript.model_validate_json(response.text)
 
-            raise ValueError("Empty response received from Gemini API.")
+                raise ValueError("Empty response received from Gemini API.")
 
-        except Exception as e:
-            logger.warning("Generation with model '%s' failed: %s", model_name, e)
-            last_error = e
-            continue
+            except Exception as e:
+                err_msg = str(e)
+                if retries < max_retries and any(err in err_msg for err in ["503", "429", "UNAVAILABLE", "Quota"]):
+                    sleep_time = 2.0 * (2 ** retries)
+                    logger.warning("Model '%s' returned 503/429. Retrying in %.1f seconds...", model_name, sleep_time)
+                    time.sleep(sleep_time)
+                    retries += 1
+                    continue
+
+                logger.warning("Generation with model '%s' failed: %s", model_name, e)
+                last_error = e
+                break
 
     raise RuntimeError(
         f"Failed to generate script across all candidate models. Last error: {last_error}"
@@ -205,7 +226,15 @@ def generate_story_script(
     """
     client = get_gemini_client(api_key)
 
-    num_scenes = target_scenes or max(2, target_duration // 7)
+    # Scale scene pacing for longer stories to prevent exceeding LLM context
+    if target_duration > 180:
+        scene_len = 15
+    elif target_duration > 60:
+        scene_len = 10
+    else:
+        scene_len = 7
+
+    num_scenes = target_scenes or max(2, target_duration // scene_len)
 
     cast_clause = ""
     if custom_characters:
@@ -231,40 +260,52 @@ Ensure the dialogue is punchy, authentic, comedic or intense according to the to
             models_to_try.append(m)
 
     last_error = None
+    max_retries = 3
+
     for model_name in models_to_try:
-        try:
-            logger.info("Attempting story script generation with model: %s", model_name)
-            response = client.models.generate_content(
-                model=model_name,
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    response_mime_type="application/json",
-                    response_schema=AnimatedStoryScript,
-                    system_instruction=STORY_SYSTEM_INSTRUCTION,
-                    temperature=0.75,
-                ),
-            )
+        retries = 0
+        while retries <= max_retries:
+            try:
+                logger.info("Attempting story script generation with model: %s (attempt %d)", model_name, retries + 1)
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        response_mime_type="application/json",
+                        response_schema=AnimatedStoryScript,
+                        system_instruction=STORY_SYSTEM_INSTRUCTION,
+                        temperature=0.75,
+                    ),
+                )
 
-            # Response parsed into Pydantic model
-            if response.parsed and isinstance(response.parsed, AnimatedStoryScript):
-                return _reconcile_characters(response.parsed, custom_characters)
+                # Response parsed into Pydantic model
+                if response.parsed and isinstance(response.parsed, AnimatedStoryScript):
+                    return _reconcile_characters(response.parsed, custom_characters)
 
-            # Fallback if parsed is a dict
-            if isinstance(response.parsed, dict):
-                story = AnimatedStoryScript.model_validate(response.parsed)
-                return _reconcile_characters(story, custom_characters)
+                # Fallback if parsed is a dict
+                if isinstance(response.parsed, dict):
+                    story = AnimatedStoryScript.model_validate(response.parsed)
+                    return _reconcile_characters(story, custom_characters)
 
-            # Fallback: parse text as JSON into Pydantic model
-            if response.text:
-                story = AnimatedStoryScript.model_validate_json(response.text)
-                return _reconcile_characters(story, custom_characters)
+                # Fallback: parse text as JSON into Pydantic model
+                if response.text:
+                    story = AnimatedStoryScript.model_validate_json(response.text)
+                    return _reconcile_characters(story, custom_characters)
 
-            raise ValueError("Empty response received from Gemini API.")
+                raise ValueError("Empty response received from Gemini API.")
 
-        except Exception as e:
-            logger.warning("Story generation with model '%s' failed: %s", model_name, e)
-            last_error = e
-            continue
+            except Exception as e:
+                err_msg = str(e)
+                if retries < max_retries and any(err in err_msg for err in ["503", "429", "UNAVAILABLE", "Quota"]):
+                    sleep_time = 2.0 * (2 ** retries)
+                    logger.warning("Model '%s' returned 503/429. Retrying in %.1f seconds...", model_name, sleep_time)
+                    time.sleep(sleep_time)
+                    retries += 1
+                    continue
+
+                logger.warning("Story generation with model '%s' failed: %s", model_name, e)
+                last_error = e
+                break
 
     raise RuntimeError(
         f"Failed to generate story script across all candidate models. Last error: {last_error}"

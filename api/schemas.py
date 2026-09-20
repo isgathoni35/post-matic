@@ -36,7 +36,7 @@ class VideoGenerateRequest(BaseModel):
     duration: int = Field(
         default=25,
         ge=10,
-        le=120,
+        le=600,
         description="Target duration of video in seconds",
         validation_alias=AliasChoices("duration", "target_duration"),
     )

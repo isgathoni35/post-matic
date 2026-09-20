@@ -30,6 +30,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BrandLogo } from "@/components/ui/brand-logo";
 import { useAuth } from "@/hooks/use-auth";
+import { YouTubeIcon, TikTokIcon, InstagramIcon } from "@/components/social/social-icons";
 
 const PREVIEW_TOPICS = [
   {
@@ -311,7 +312,7 @@ export default function LandingPage() {
             </div>
 
             {/* Creator Metrics Bar */}
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 pt-3 text-xs text-zinc-400 font-medium">
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-5 pt-3 text-xs text-zinc-400 font-medium">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-emerald-400" />
                 <span>94.2% Avg Watch Retention</span>
@@ -321,8 +322,18 @@ export default function LandingPage() {
                 <span>1080x1920 60FPS HD</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-                <span>1-Click YouTube Publishing</span>
+                <div className="flex items-center -space-x-1">
+                  <span className="h-5 w-5 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500">
+                    <YouTubeIcon className="h-3 w-3 fill-current" />
+                  </span>
+                  <span className="h-5 w-5 rounded-full bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
+                    <TikTokIcon className="h-3 w-3 fill-current" />
+                  </span>
+                  <span className="h-5 w-5 rounded-full bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-pink-400">
+                    <InstagramIcon className="h-3 w-3 fill-current" />
+                  </span>
+                </div>
+                <span>Multi-Platform Auto-Post</span>
               </div>
             </div>
           </div>

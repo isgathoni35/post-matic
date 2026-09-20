@@ -23,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { BrandIcon } from "@/components/ui/brand-logo";
 import { VideoJobResponse, publishVideoToPlatform } from "@/lib/api";
 import { toast } from "sonner";
+import { YouTubeIcon, TikTokIcon, InstagramIcon } from "@/components/social/social-icons";
 
 interface RenderLibraryViewProps {
   jobs: VideoJobResponse[];
@@ -340,10 +341,11 @@ export function RenderLibraryView({
                           <Button
                             variant="primary"
                             size="sm"
-                            className="w-full text-xs h-9 font-semibold bg-red-600 hover:bg-red-700 text-white"
+                            className="w-full text-xs h-9 font-semibold bg-red-600 hover:bg-red-500 text-white"
                           >
-                            <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
-                            YouTube
+                            <YouTubeIcon className="h-3.5 w-3.5 mr-1.5 fill-current" />
+                            <span>View on YouTube</span>
+                            <ExternalLink className="h-3 w-3 ml-1.5 opacity-70" />
                           </Button>
                         </a>
                       ) : (
@@ -352,10 +354,10 @@ export function RenderLibraryView({
                           size="sm"
                           onClick={() => handlePublish(modalJobId, "youtube")}
                           isLoading={publishingPlatform === "youtube"}
-                          className="flex-1 sm:flex-none text-xs h-9 font-semibold bg-red-600 hover:bg-red-700 text-white"
+                          className="flex-1 sm:flex-none text-xs h-9 font-semibold bg-red-600 hover:bg-red-500 text-white"
                         >
-                          <Share2 className="h-3.5 w-3.5 mr-1.5" />
-                          YouTube
+                          <YouTubeIcon className="h-3.5 w-3.5 mr-1.5 fill-current" />
+                          Publish to YouTube
                         </Button>
                       )}
 
@@ -370,10 +372,11 @@ export function RenderLibraryView({
                           <Button
                             variant="primary"
                             size="sm"
-                            className="w-full text-xs h-9 font-semibold bg-cyan-600 hover:bg-cyan-700 text-white"
+                            className="w-full text-xs h-9 font-semibold bg-cyan-600 hover:bg-cyan-500 text-white"
                           >
-                            <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
-                            TikTok
+                            <TikTokIcon className="h-3.5 w-3.5 mr-1.5 fill-current" />
+                            <span>View on TikTok</span>
+                            <ExternalLink className="h-3 w-3 ml-1.5 opacity-70" />
                           </Button>
                         </a>
                       ) : (
@@ -382,10 +385,10 @@ export function RenderLibraryView({
                           size="sm"
                           onClick={() => handlePublish(modalJobId, "tiktok")}
                           isLoading={publishingPlatform === "tiktok"}
-                          className="flex-1 sm:flex-none text-xs h-9 font-semibold bg-cyan-600 hover:bg-cyan-700 text-white"
+                          className="flex-1 sm:flex-none text-xs h-9 font-semibold bg-cyan-600 hover:bg-cyan-500 text-white"
                         >
-                          <Share2 className="h-3.5 w-3.5 mr-1.5" />
-                          TikTok
+                          <TikTokIcon className="h-3.5 w-3.5 mr-1.5 fill-current" />
+                          Publish to TikTok
                         </Button>
                       )}
 
@@ -400,10 +403,11 @@ export function RenderLibraryView({
                           <Button
                             variant="primary"
                             size="sm"
-                            className="w-full text-xs h-9 font-semibold bg-pink-600 hover:bg-pink-700 text-white"
+                            className="w-full text-xs h-9 font-semibold bg-pink-600 hover:bg-pink-500 text-white"
                           >
-                            <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
-                            Instagram
+                            <InstagramIcon className="h-3.5 w-3.5 mr-1.5 fill-current" />
+                            <span>View on Instagram</span>
+                            <ExternalLink className="h-3 w-3 ml-1.5 opacity-70" />
                           </Button>
                         </a>
                       ) : (
@@ -412,10 +416,10 @@ export function RenderLibraryView({
                           size="sm"
                           onClick={() => handlePublish(modalJobId, "instagram")}
                           isLoading={publishingPlatform === "instagram"}
-                          className="flex-1 sm:flex-none text-xs h-9 font-semibold bg-pink-600 hover:bg-pink-700 text-white"
+                          className="flex-1 sm:flex-none text-xs h-9 font-semibold bg-pink-600 hover:bg-pink-500 text-white"
                         >
-                          <Share2 className="h-3.5 w-3.5 mr-1.5" />
-                          Instagram
+                          <InstagramIcon className="h-3.5 w-3.5 mr-1.5 fill-current" />
+                          Publish to Instagram
                         </Button>
                       )}
                     </>

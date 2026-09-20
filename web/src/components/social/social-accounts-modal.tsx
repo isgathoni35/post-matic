@@ -10,7 +10,6 @@ import {
   Trash2,
   RefreshCw,
   ShieldCheck,
-  Zap,
   Info,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -25,6 +24,7 @@ import {
   disconnectSocialAccount,
   SocialAccount,
 } from "@/lib/api";
+import { SocialPlatformIcon, YouTubeIcon, TikTokIcon, InstagramIcon } from "@/components/social/social-icons";
 
 interface SocialAccountsModalProps {
   isOpen: boolean;
@@ -171,9 +171,7 @@ export function SocialAccountsModal({ isOpen, onClose, userId }: SocialAccountsM
           <div className="rounded-xl p-4 bg-white/[0.02] border border-white/[0.06] space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 font-bold text-xs">
-                  YT
-                </div>
+                <SocialPlatformIcon platform="youtube" size="lg" withBadge />
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="font-semibold text-sm text-white">YouTube Shorts</span>
@@ -224,11 +222,11 @@ export function SocialAccountsModal({ isOpen, onClose, userId }: SocialAccountsM
               <div className="space-y-2">
                 <Button
                   variant="primary"
-                  className="w-full h-9 text-xs font-semibold"
+                  className="w-full h-9 text-xs font-semibold bg-red-600 hover:bg-red-500 text-white"
                   onClick={handleConnectYouTube}
                   isLoading={connectingPlatform === "youtube"}
                 >
-                  <Zap className="h-4 w-4 mr-1.5" />
+                  <YouTubeIcon className="h-3.5 w-3.5 mr-1.5 fill-current" />
                   Authorize YouTube Channel
                 </Button>
                 <div className="p-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06] text-[11px] text-zinc-400 space-y-1">
@@ -247,9 +245,7 @@ export function SocialAccountsModal({ isOpen, onClose, userId }: SocialAccountsM
           <div className="rounded-xl p-4 bg-white/[0.02] border border-white/[0.06] space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 font-bold text-xs">
-                  TT
-                </div>
+                <SocialPlatformIcon platform="tiktok" size="lg" withBadge />
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="font-semibold text-sm text-white">TikTok Direct Post</span>
@@ -304,7 +300,7 @@ export function SocialAccountsModal({ isOpen, onClose, userId }: SocialAccountsM
                   onClick={handleConnectTikTok}
                   isLoading={connectingPlatform === "tiktok"}
                 >
-                  <Zap className="h-4 w-4 mr-1.5" />
+                  <TikTokIcon className="h-3.5 w-3.5 mr-1.5 fill-current" />
                   Authorize TikTok Account
                 </Button>
                 <div className="p-2.5 rounded-lg bg-cyan-500/5 border border-cyan-500/10 text-[11px] text-zinc-400 space-y-1">
@@ -323,9 +319,7 @@ export function SocialAccountsModal({ isOpen, onClose, userId }: SocialAccountsM
           <div className="rounded-xl p-4 bg-white/[0.02] border border-white/[0.06] space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-pink-400 font-bold text-xs">
-                  IG
-                </div>
+                <SocialPlatformIcon platform="instagram" size="lg" withBadge />
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="font-semibold text-sm text-white">Instagram Reels</span>
@@ -380,7 +374,7 @@ export function SocialAccountsModal({ isOpen, onClose, userId }: SocialAccountsM
                   onClick={handleConnectInstagram}
                   isLoading={connectingPlatform === "instagram"}
                 >
-                  <Zap className="h-4 w-4 mr-1.5" />
+                  <InstagramIcon className="h-3.5 w-3.5 mr-1.5 fill-current" />
                   Authorize Instagram Reels
                 </Button>
                 <div className="p-2.5 rounded-lg bg-pink-500/5 border border-pink-500/10 text-[11px] text-zinc-400 space-y-1">

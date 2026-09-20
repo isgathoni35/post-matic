@@ -33,6 +33,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { VideoJobResponse, CustomCharacterPayload } from "@/lib/api";
+import { YouTubeIcon, TikTokIcon, InstagramIcon } from "@/components/social/social-icons";
 
 export const VOICES = [
   {
@@ -749,23 +750,28 @@ export function StudioConsoleView({
               <label className="text-xs font-medium text-zinc-300 block">Primary Destination</label>
               <div className="grid grid-cols-3 gap-2">
                 {[
-                  { id: "youtube", label: "YouTube" },
-                  { id: "tiktok", label: "TikTok" },
-                  { id: "instagram", label: "Instagram" },
-                ].map((p) => (
-                  <button
-                    key={p.id}
-                    type="button"
-                    onClick={() => setTargetPlatform(p.id as any)}
-                    className={`py-2 text-xs font-medium rounded-lg transition-all ${
-                      targetPlatform === p.id
-                        ? "bg-indigo-600 text-white"
-                        : "bg-[#0c0c0e] text-zinc-400 hover:text-white border border-white/[0.06]"
-                    }`}
-                  >
-                    {p.label}
-                  </button>
-                ))}
+                  { id: "youtube", label: "YouTube", icon: YouTubeIcon, activeColor: "bg-red-600/20 border-red-500/40 text-white", iconClass: "text-red-500" },
+                  { id: "tiktok", label: "TikTok", icon: TikTokIcon, activeColor: "bg-cyan-600/20 border-cyan-500/40 text-white", iconClass: "text-cyan-400" },
+                  { id: "instagram", label: "Instagram", icon: InstagramIcon, activeColor: "bg-pink-600/20 border-pink-500/40 text-white", iconClass: "text-pink-400" },
+                ].map((p) => {
+                  const Icon = p.icon;
+                  const isSelected = targetPlatform === p.id;
+                  return (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => setTargetPlatform(p.id as "youtube" | "tiktok" | "instagram")}
+                      className={`py-2 px-3 text-xs font-semibold rounded-lg border transition-all flex items-center justify-center gap-1.5 ${
+                        isSelected
+                          ? p.activeColor
+                          : "bg-[#0c0c0e] text-zinc-400 hover:text-white border-white/[0.06] hover:bg-white/[0.03]"
+                      }`}
+                    >
+                      <Icon className={`h-3.5 w-3.5 ${isSelected ? p.iconClass : "text-zinc-500"} fill-current`} />
+                      <span>{p.label}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -909,10 +915,11 @@ export function StudioConsoleView({
                 type="checkbox"
                 checked={autoPublishYouTube}
                 onChange={(e) => setAutoPublishYouTube(e.target.checked)}
-                className="w-4 h-4 rounded border-zinc-700 bg-zinc-900 text-indigo-600 focus:ring-indigo-500"
+                className="w-4 h-4 rounded border-zinc-700 bg-zinc-900 text-red-600 focus:ring-red-500 cursor-pointer"
               />
-              <label htmlFor="auto-pub" className="text-xs text-zinc-300 font-medium cursor-pointer">
-                Automatically publish to YouTube once rendered
+              <label htmlFor="auto-pub" className="text-xs text-zinc-300 font-medium cursor-pointer flex items-center gap-1.5">
+                <YouTubeIcon className="h-3.5 w-3.5 text-red-500 fill-current" />
+                <span>Automatically publish to YouTube once rendered</span>
               </label>
             </div>
             <span className="text-[11px] text-zinc-500">Requires connected YouTube channel</span>
