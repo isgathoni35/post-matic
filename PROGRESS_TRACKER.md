@@ -51,12 +51,25 @@
 ---
 
 ### Phase 7: FacelessReels-Style Clean SaaS UI Redesign
-- [ ] **Step 7.1:** Foundation — Global Theme Switch to Light Mode (Redefine CSS variables in `globals.css` for white backgrounds, dark text, purple `#6c5ce7` accent. Update `layout.tsx` body classes. Ensure login page also adopts the light theme.)
-- [ ] **Step 7.2:** Navigation Header Redesign (White background, simplified 3-link nav centered, "Sign in with Google" outline button + solid purple "Get started" CTA on right. Remove neon glow from logo. Update `brand-logo.tsx`.)
-- [ ] **Step 7.3:** Hero Section — Centered Single-Column Layout (Replace 2-column grid+phone mockup with centered layout: avatar social proof row, bold centered headline, muted subtitle, "Perfect for" platform icons, single purple CTA button, subtext. Add subtle grid-pattern background with radial mask.)
-- [ ] **Step 7.4:** Video Showcase Marquee Cleanup (Clean white 9:16 thumbnail cards with rounded-xl, poster image + bottom niche label overlay. Remove view count badges and neon glow. Add doodle arrow annotation "Creates videos for any niche". Left/right gradient fade masks on white.)
-- [ ] **Step 7.5:** Social Proof — "We Actually Get Views" + Stat Counters (Centered heading + subtitle on white. Channel showcase carousel with TikTok-style analytics screenshots. Two large stat counters in purple text below — "X channels automated" / "Y videos autoposted".)
-- [ ] **Step 7.6:** Comparison Section — "Why Creators Choose Us" (3 clean white cards: "Hiring video editors" ❌, "Creating videos yourself" ❌, "PostMatic" ✅ with highlighted border. Subtle grey borders, no dark surfaces or neon glow.)
-- [ ] **Step 7.7:** Testimonials Marquee (NEW section — two-row opposite-direction scrolling testimonial cards. Each card: avatar/initial, name, 5 gold stars, short review text. Clean white cards with light border.)
-- [ ] **Step 7.8:** "How It Works" — Alternating Step Layout (3 steps with alternating text+screenshot layout on white. Colored step badges, green checkmark bullet points, app UI screenshots on alternating sides.)
-- [ ] **Step 7.9:** FAQ Accordion + Final CTA + Footer (Clean white accordion with light borders. Final CTA section with purple button. Simple footer with copyright and links.)
+- [x] **Step 7.1:** Foundation — Global Theme Switch to Light Mode (Redefine CSS variables in `globals.css` for white backgrounds, dark text, purple `#6c5ce7` accent. Update `layout.tsx` body classes. Ensure login page also adopts the light theme.)
+- [x] **Step 7.2:** Navigation Header Redesign (White background, simplified 3-link nav centered, "Sign in with Google" outline button + solid purple "Get started" CTA on right. Remove neon glow from logo. Update `brand-logo.tsx`.)
+- [x] **Step 7.3:** Hero Section — Centered Single-Column Layout (Replace 2-column grid+phone mockup with centered layout: avatar social proof row, bold centered headline, muted subtitle, "Perfect for" platform icons, single purple CTA button, subtext. Add subtle grid-pattern background with radial mask.)
+- [x] **Step 7.4:** Video Showcase Marquee Cleanup (Clean white 9:16 thumbnail cards with rounded-xl, poster image + bottom niche label overlay. Remove view count badges and neon glow. Add doodle arrow annotation "Creates videos for any niche". Left/right gradient fade masks on white.)
+- [x] **Step 7.5:** Social Proof — "We Actually Get Views" + Stat Counters (Centered heading + subtitle on white. Channel showcase carousel with TikTok-style analytics screenshots. Two large stat counters in purple text below — "X channels automated" / "Y videos autoposted".)
+- [x] **Step 7.6:** Comparison Section — "Why Creators Choose Us" (3 clean white cards: "Hiring video editors" ❌, "Creating videos yourself" ❌, "PostMatic" ✅ with highlighted border. Subtle grey borders, no dark surfaces or neon glow.)
+- [x] **Step 7.7:** Testimonials Marquee (NEW section — two-row opposite-direction scrolling testimonial cards. Each card: avatar/initial, name, 5 gold stars, short review text. Clean white cards with light border.)
+- [x] **Step 7.8:** "How It Works" — Alternating Step Layout (3 steps with alternating text+screenshot layout on white. Colored step badges, green checkmark bullet points, app UI screenshots on alternating sides.)
+- [x] **Step 7.9:** FAQ Accordion + Final CTA + Footer (Clean white accordion with light borders. Final CTA section with purple button. Simple footer with copyright and links.)
+
+---
+
+### Phase 8: Studio & Internal SaaS Views Clean UI Transformation
+- [x] **Step 8.1:** UI Primitives & Studio Shell Theme Unification (Update `card.tsx`, `badge.tsx`, `textarea.tsx`, `error-boundary.tsx` to clean light theme tokens. Remove hardcoded `.dark` class from `studio/page.tsx` and modernize loading skeleton to clean white canvas with purple spinner).
+- [x] **Step 8.2:** Studio Shell Layout Chrome (Sidebar, Header, Mobile Nav) (Transform `sidebar.tsx`, `header.tsx`, and `mobile-nav.tsx` to frosted white backgrounds, subtle slate borders, dark slate typography, and purple `#6c5ce7` active nav indicator pills).
+- [x] **Step 8.3:** 3-Step "Create Series" Wizard Modal (Transform `create-series-wizard.tsx` modal backdrop to soft slate blur, clean white dialog, 8 viral niche cards with subtle slate borders and purple active state, light voice/style cards, and clean autopilot scheduler).
+- [x] **Step 8.4:** Studio Console Creation Dashboard (Transform `studio-console-view.tsx` into a clean white 3-step wizard with purple step badges, light topic textarea, voice audition grid with purple active state, and clean real-time render monitor).
+- [x] **Step 8.5:** Series Ecosystem & Show Bible Detail Views (Transform `series-view.tsx` and `series-detail-view.tsx` with clean white series cards, emerald `AUTOPILOT: ACTIVE` pill, social health strip, and clean editable Show Bible universe lore textareas).
+- [ ] **Step 8.6:** Render Library & Video Player Modal (Transform `render-library-view.tsx` with clean search bar, white 9:16 video thumbnail cards with duration badges, and a clean white video inspector modal with dark player).
+- [ ] **Step 8.7:** Social Multi-Channel Hub & OAuth Modal (Transform `social-channels-view.tsx` and `social-accounts-modal.tsx` to clean white cards, official platform brand accents, slate status boxes, and clean connection actions).
+- [ ] **Step 8.8:** Job Queue, Settings & Engine Telemetry (Transform `job-queue-view.tsx` table, `settings-view.tsx` preference cards, and `engine-logs-view.tsx` to clean white layout with embedded developer terminal).
+

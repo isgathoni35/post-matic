@@ -100,18 +100,18 @@ export function RenderLibraryView({
   return (
     <div className="w-full max-w-6xl mx-auto space-y-6 animate-in fade-in duration-300">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/[0.06]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200/80">
         <div>
           <div className="flex items-center gap-2.5 mb-1">
-            <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
-              <Video className="w-5 h-5 text-indigo-400" />
+            <h1 className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+              <Video className="w-5 h-5 text-[#6c5ce7]" />
               <span>Render Library & Gallery</span>
             </h1>
-            <Badge variant="success" className="text-[10px] font-mono font-semibold">
+            <Badge variant="outline" className="text-[10px] font-mono font-semibold bg-emerald-50 text-emerald-700 border-emerald-300">
               {completedJobs.length} Ready Videos
             </Badge>
           </div>
-          <p className="text-xs text-zinc-400">
+          <p className="text-xs text-slate-500">
             Browse, preview, export, and distribute your rendered 9:16 vertical video assets.
           </p>
         </div>
@@ -123,15 +123,15 @@ export function RenderLibraryView({
               placeholder="Search library..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              icon={<Search className="h-3.5 w-3.5" />}
-              className="h-9 text-xs bg-white/[0.03] border-white/[0.08] w-full"
+              icon={<Search className="h-3.5 w-3.5 text-slate-400" />}
+              className="h-9 text-xs bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 w-full focus-visible:border-[#6c5ce7]"
             />
           </div>
           <Button
             variant="primary"
             size="sm"
             onClick={onNavigateToStudio}
-            className="text-xs h-9 font-semibold w-full sm:w-auto shrink-0"
+            className="text-xs h-9 font-semibold w-full sm:w-auto shrink-0 bg-[#6c5ce7] hover:bg-[#5b4bc4] text-white shadow-xs"
           >
             <Sparkles className="h-3.5 w-3.5 mr-1.5" />
             New Video
@@ -141,11 +141,11 @@ export function RenderLibraryView({
 
       {/* Grid or Empty State */}
       {completedJobs.length === 0 ? (
-        <div className="rounded-xl border border-white/[0.06] pm-surface p-8 sm:p-12 text-center space-y-4 max-w-md mx-auto my-8 sm:my-12">
+        <div className="rounded-2xl border border-slate-200/80 bg-white shadow-xs p-8 sm:p-12 text-center space-y-4 max-w-md mx-auto my-8 sm:my-12">
           <BrandIcon size="xl" glow={false} className="mx-auto" />
           <div className="space-y-1.5">
-            <h2 className="text-base font-bold text-white">No Videos Rendered Yet</h2>
-            <p className="text-xs text-zinc-400 leading-relaxed">
+            <h2 className="text-base font-bold text-slate-900">No Videos Rendered Yet</h2>
+            <p className="text-xs text-slate-500 leading-relaxed">
               Your library is currently empty. Head to the Studio Console to generate your first automated short-form video.
             </p>
           </div>
@@ -153,14 +153,14 @@ export function RenderLibraryView({
             variant="primary"
             size="sm"
             onClick={onNavigateToStudio}
-            className="text-xs font-semibold h-9 px-4"
+            className="text-xs font-semibold h-9 px-4 bg-[#6c5ce7] hover:bg-[#5b4bc4] text-white shadow-xs"
           >
             <Sparkles className="h-4 w-4 mr-2" />
             Create Your First Video
           </Button>
         </div>
       ) : filteredJobs.length === 0 ? (
-        <div className="text-center py-12 text-zinc-500 text-xs font-mono">
+        <div className="text-center py-12 text-slate-400 text-xs font-mono">
           No rendered videos match your search query "{searchQuery}".
         </div>
       ) : (
@@ -178,11 +178,11 @@ export function RenderLibraryView({
             return (
               <div
                 key={jobId || `job-${idx}`}
-                className="rounded-xl pm-surface border border-white/[0.06] hover:border-indigo-500/30 transition-all duration-200 overflow-hidden group flex flex-col justify-between"
+                className="rounded-2xl bg-white border border-slate-200/80 hover:border-slate-300 hover:shadow-md transition-all duration-200 overflow-hidden group flex flex-col justify-between shadow-2xs"
               >
                 {/* 9:16 Video Poster Card */}
                 <div
-                  className="relative aspect-[9/16] bg-black/80 overflow-hidden cursor-pointer flex items-center justify-center"
+                  className="relative aspect-[9/16] bg-slate-950 overflow-hidden cursor-pointer flex items-center justify-center"
                   onClick={() => setSelectedModalVideo(job)}
                 >
                   <video
@@ -196,17 +196,17 @@ export function RenderLibraryView({
 
                   {/* Play hover icon */}
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                    <div className="h-10 w-10 rounded-full bg-indigo-600 text-white flex items-center justify-center shadow-md transform scale-90 group-hover:scale-100 transition-transform">
+                    <div className="h-10 w-10 rounded-full bg-[#6c5ce7] text-white flex items-center justify-center shadow-md transform scale-90 group-hover:scale-100 transition-transform">
                       <Play className="h-4 w-4 fill-current ml-0.5" />
                     </div>
                   </div>
 
                   {/* Badges on top */}
                   <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between z-10 text-[10px] font-mono">
-                    <span className="px-2 py-0.5 rounded-md bg-black/70 backdrop-blur-md text-zinc-300 font-semibold border border-white/[0.08]">
+                    <span className="px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-white font-semibold border border-white/10">
                       9:16 Vertical
                     </span>
-                    <span className="px-2 py-0.5 rounded-md bg-black/70 backdrop-blur-md text-zinc-300 font-semibold border border-white/[0.08]">
+                    <span className="px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-white font-semibold border border-white/10">
                       {job.duration_seconds ? `${job.duration_seconds.toFixed(0)}s` : "25s"}
                     </span>
                   </div>
@@ -220,8 +220,8 @@ export function RenderLibraryView({
                 </div>
 
                 {/* Footer Action Bar */}
-                <div className="p-3 bg-white/[0.01] border-t border-white/[0.06] flex items-center justify-between gap-2 text-xs">
-                  <span className="text-[10px] font-mono text-zinc-500 truncate">
+                <div className="p-3 bg-white border-t border-slate-100 flex items-center justify-between gap-2 text-xs">
+                  <span className="text-[10px] font-mono text-slate-400 truncate">
                     #{displayId}
                   </span>
 
@@ -232,7 +232,7 @@ export function RenderLibraryView({
                       target="_blank"
                       rel="noreferrer"
                       title="Download MP4"
-                      className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.08] transition-colors"
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
                     >
                       <Download className="h-3.5 w-3.5" />
                     </a>
@@ -240,7 +240,7 @@ export function RenderLibraryView({
                       type="button"
                       onClick={() => copyShareLink(videoSrc)}
                       title="Copy Link"
-                      className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.08] transition-colors"
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
                     >
                       <Share2 className="h-3.5 w-3.5" />
                     </button>
@@ -248,7 +248,7 @@ export function RenderLibraryView({
                       variant="primary"
                       size="sm"
                       onClick={() => setSelectedModalVideo(job)}
-                      className="h-7 px-2.5 text-[11px] font-semibold"
+                      className="h-7 px-2.5 text-[11px] font-semibold bg-[#6c5ce7] hover:bg-[#5b4bc4] text-white shadow-2xs rounded-lg"
                     >
                       Play
                     </Button>
@@ -258,26 +258,25 @@ export function RenderLibraryView({
             );
           })}
         </div>
-
       )}
 
       {/* Video Playback Modal */}
       {selectedModalVideo && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="relative w-full max-w-2xl max-h-[92vh] overflow-y-auto rounded-2xl pm-surface-raised border border-white/[0.1] shadow-2xl p-4 sm:p-6 space-y-4 sm:space-y-6">
-            <div className="flex items-start justify-between pb-3 sm:pb-4 border-b border-white/[0.08]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative w-full max-w-2xl max-h-[92vh] overflow-y-auto rounded-2xl bg-white border border-slate-200 shadow-2xl p-4 sm:p-6 space-y-4 sm:space-y-6">
+            <div className="flex items-start justify-between pb-3 sm:pb-4 border-b border-slate-100">
               <div className="pr-2">
-                <span className="text-[10px] font-mono text-indigo-400 uppercase tracking-wider font-semibold">
+                <span className="text-[10px] font-mono text-[#6c5ce7] uppercase tracking-wider font-semibold">
                   Video Inspector
                 </span>
-                <h2 className="text-sm sm:text-base font-bold text-white mt-0.5 line-clamp-2">
+                <h2 className="text-sm sm:text-base font-bold text-slate-900 mt-0.5 line-clamp-2">
                   {selectedModalVideo.topic}
                 </h2>
               </div>
               <button
                 type="button"
                 onClick={() => setSelectedModalVideo(null)}
-                className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.08] transition-colors shrink-0"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors shrink-0"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -285,7 +284,7 @@ export function RenderLibraryView({
 
             {/* Video Player */}
             <div className="flex justify-center">
-              <div className="relative w-full max-w-[220px] sm:max-w-[260px] aspect-[9/16] rounded-xl overflow-hidden border border-white/[0.12] bg-black">
+              <div className="relative w-full max-w-[220px] sm:max-w-[260px] aspect-[9/16] rounded-xl overflow-hidden border border-slate-200 bg-black shadow-md">
                 <video
                   src={
                     selectedModalVideo.video_url?.startsWith("http")
@@ -300,8 +299,8 @@ export function RenderLibraryView({
             </div>
 
             {/* Actions Bar */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-white/[0.08]">
-              <span className="text-xs font-mono text-zinc-400">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-slate-100">
+              <span className="text-xs font-mono text-slate-500">
                 Duration: {selectedModalVideo.duration_seconds?.toFixed(1)}s • 1080x1920
               </span>
 
@@ -325,7 +324,7 @@ export function RenderLibraryView({
                         rel="noreferrer"
                         className="flex-1 sm:flex-none"
                       >
-                        <Button variant="secondary" size="sm" className="w-full text-xs h-9 bg-white/[0.04] border-white/[0.08]">
+                        <Button variant="secondary" size="sm" className="w-full text-xs h-9 bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-200">
                           <Download className="h-3.5 w-3.5 mr-1.5" />
                           Download MP4
                         </Button>
@@ -341,7 +340,7 @@ export function RenderLibraryView({
                           <Button
                             variant="primary"
                             size="sm"
-                            className="w-full text-xs h-9 font-semibold bg-red-600 hover:bg-red-500 text-white"
+                            className="w-full text-xs h-9 font-semibold bg-red-600 hover:bg-red-700 text-white shadow-xs"
                           >
                             <YouTubeIcon className="h-3.5 w-3.5 mr-1.5 fill-current" />
                             <span>View on YouTube</span>
@@ -354,7 +353,7 @@ export function RenderLibraryView({
                           size="sm"
                           onClick={() => handlePublish(modalJobId, "youtube")}
                           isLoading={publishingPlatform === "youtube"}
-                          className="flex-1 sm:flex-none text-xs h-9 font-semibold bg-red-600 hover:bg-red-500 text-white"
+                          className="flex-1 sm:flex-none text-xs h-9 font-semibold bg-red-600 hover:bg-red-700 text-white shadow-xs"
                         >
                           <YouTubeIcon className="h-3.5 w-3.5 mr-1.5 fill-current" />
                           Publish to YouTube
@@ -372,7 +371,7 @@ export function RenderLibraryView({
                           <Button
                             variant="primary"
                             size="sm"
-                            className="w-full text-xs h-9 font-semibold bg-cyan-600 hover:bg-cyan-500 text-white"
+                            className="w-full text-xs h-9 font-semibold bg-cyan-600 hover:bg-cyan-700 text-white shadow-xs"
                           >
                             <TikTokIcon className="h-3.5 w-3.5 mr-1.5 fill-current" />
                             <span>View on TikTok</span>
@@ -385,7 +384,7 @@ export function RenderLibraryView({
                           size="sm"
                           onClick={() => handlePublish(modalJobId, "tiktok")}
                           isLoading={publishingPlatform === "tiktok"}
-                          className="flex-1 sm:flex-none text-xs h-9 font-semibold bg-cyan-600 hover:bg-cyan-500 text-white"
+                          className="flex-1 sm:flex-none text-xs h-9 font-semibold bg-cyan-600 hover:bg-cyan-700 text-white shadow-xs"
                         >
                           <TikTokIcon className="h-3.5 w-3.5 mr-1.5 fill-current" />
                           Publish to TikTok
@@ -403,7 +402,7 @@ export function RenderLibraryView({
                           <Button
                             variant="primary"
                             size="sm"
-                            className="w-full text-xs h-9 font-semibold bg-pink-600 hover:bg-pink-500 text-white"
+                            className="w-full text-xs h-9 font-semibold bg-pink-600 hover:bg-pink-700 text-white shadow-xs"
                           >
                             <InstagramIcon className="h-3.5 w-3.5 mr-1.5 fill-current" />
                             <span>View on Instagram</span>
@@ -416,7 +415,7 @@ export function RenderLibraryView({
                           size="sm"
                           onClick={() => handlePublish(modalJobId, "instagram")}
                           isLoading={publishingPlatform === "instagram"}
-                          className="flex-1 sm:flex-none text-xs h-9 font-semibold bg-pink-600 hover:bg-pink-500 text-white"
+                          className="flex-1 sm:flex-none text-xs h-9 font-semibold bg-pink-600 hover:bg-pink-700 text-white shadow-xs"
                         >
                           <InstagramIcon className="h-3.5 w-3.5 mr-1.5 fill-current" />
                           Publish to Instagram

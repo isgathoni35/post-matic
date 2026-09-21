@@ -539,22 +539,22 @@ export function CreateSeriesWizard({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-4xl max-h-[92vh] flex flex-col bg-[#09090b] border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
-        {/* Top Glow Accent */}
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-500 to-indigo-500 opacity-80" />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="relative w-full max-w-4xl max-h-[92vh] flex flex-col bg-white border border-slate-200 rounded-2xl shadow-2xl overflow-hidden text-slate-900">
+        {/* Top Purple Accent */}
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#6c5ce7] to-transparent" />
 
         {/* Header */}
-        <div className="shrink-0 px-6 py-4 border-b border-white/[0.08] flex items-center justify-between">
+        <div className="shrink-0 px-6 py-4 border-b border-slate-200/80 flex items-center justify-between bg-white">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-mono uppercase tracking-widest text-cyan-400 font-semibold">
+              <span className="text-xs font-mono uppercase tracking-widest text-[#6c5ce7] font-semibold">
                 Autonomous Studio
               </span>
-              <span className="text-zinc-600">•</span>
-              <span className="text-xs text-zinc-400">Step {currentStep} of 3</span>
+              <span className="text-slate-300">•</span>
+              <span className="text-xs text-slate-500">Step {currentStep} of 3</span>
             </div>
-            <h2 className="text-lg font-bold text-white tracking-tight">
+            <h2 className="text-lg font-bold text-slate-900 tracking-tight">
               {currentStep === 1 && "Create a Viral Series • Choose Niche"}
               {currentStep === 2 && "Customize Visual Style & Neural Voice"}
               {currentStep === 3 && "Autopilot Posting & Channel Distribution"}
@@ -563,14 +563,14 @@ export function CreateSeriesWizard({
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-colors"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Stepper Progress Bar */}
-        <div className="shrink-0 grid grid-cols-3 bg-white/[0.02] border-b border-white/[0.06]">
+        <div className="shrink-0 grid grid-cols-3 bg-slate-50 border-b border-slate-200">
           {[
             { step: 1, label: "1. Viral Niche" },
             { step: 2, label: "2. Style & Voice" },
@@ -578,12 +578,12 @@ export function CreateSeriesWizard({
           ].map((item) => (
             <div
               key={item.step}
-              className={`py-2 text-center text-xs font-semibold transition-all border-b-2 ${
+              className={`py-2.5 text-center text-xs font-semibold transition-all border-b-2 ${
                 currentStep === item.step
-                  ? "border-cyan-400 text-white bg-cyan-500/[0.05]"
+                  ? "border-[#6c5ce7] text-[#6c5ce7] bg-purple-50/50 font-bold"
                   : currentStep > item.step
-                  ? "border-emerald-500/60 text-emerald-400"
-                  : "border-transparent text-zinc-500"
+                  ? "border-emerald-500 text-emerald-700 bg-emerald-50/30"
+                  : "border-transparent text-slate-400"
               }`}
             >
               {item.label}
@@ -598,12 +598,12 @@ export function CreateSeriesWizard({
             <div className="space-y-5 animate-in fade-in-50 duration-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-semibold text-white">Select a Pre-Engineered Niche Engine</h3>
-                  <p className="text-xs text-zinc-400">
+                  <h3 className="text-sm font-semibold text-slate-900">Select a Pre-Engineered Niche Engine</h3>
+                  <p className="text-xs text-slate-500">
                     Each niche includes fine-tuned retention formulas, 0–3s hook schemas, and proven soundscapes.
                   </p>
                 </div>
-                <Badge variant="outline" className="border-cyan-500/30 text-cyan-400 text-[11px] py-0.5">
+                <Badge variant="primary" className="text-[11px] py-0.5">
                   8 Engines Available
                 </Badge>
               </div>
@@ -618,34 +618,34 @@ export function CreateSeriesWizard({
                       onClick={() => handleSelectNiche(niche)}
                       className={`group relative p-3.5 rounded-xl border transition-all cursor-pointer flex flex-col justify-between ${
                         isSelected
-                          ? "bg-cyan-950/20 border-cyan-400/80 shadow-[0_0_20px_rgba(6,182,212,0.15)] ring-1 ring-cyan-400/50"
-                          : "bg-white/[0.02] hover:bg-white/[0.05] border-white/[0.08] hover:border-white/20"
+                          ? "bg-purple-50/80 border-[#6c5ce7] shadow-xs ring-1 ring-[#6c5ce7]"
+                          : "bg-slate-50/70 hover:bg-white border-slate-200 hover:border-slate-300 hover:shadow-xs"
                       }`}
                     >
                       <div className="space-y-2">
                         <div className="flex items-start justify-between">
                           <span className="text-2xl">{niche.emoji}</span>
-                          <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-white/[0.05] text-zinc-300 border border-white/[0.06]">
+                          <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-white text-slate-700 border border-slate-200 shadow-2xs">
                             {niche.avgViews}
                           </span>
                         </div>
 
                         <div>
                           <div className="flex items-center gap-1.5">
-                            <h4 className="text-xs font-bold text-white group-hover:text-cyan-300 transition-colors">
+                            <h4 className="text-xs font-bold text-slate-900 group-hover:text-[#6c5ce7] transition-colors">
                               {niche.name}
                             </h4>
                           </div>
-                          <p className="text-[11px] text-zinc-400 line-clamp-2 mt-0.5 leading-snug">
+                          <p className="text-[11px] text-slate-500 line-clamp-2 mt-0.5 leading-snug">
                             {niche.tagline}
                           </p>
                         </div>
                       </div>
 
-                      <div className="mt-3 pt-2 border-t border-white/[0.06] flex items-center justify-between text-[10px]">
-                        <span className="text-cyan-400 font-mono font-medium">{niche.retentionMetric}</span>
+                      <div className="mt-3 pt-2 border-t border-slate-200/70 flex items-center justify-between text-[10px]">
+                        <span className="text-[#6c5ce7] font-mono font-semibold">{niche.retentionMetric}</span>
                         {isSelected && (
-                          <span className="w-4 h-4 rounded-full bg-cyan-400 text-black flex items-center justify-center">
+                          <span className="w-4 h-4 rounded-full bg-[#6c5ce7] text-white flex items-center justify-center">
                             <Check className="w-2.5 h-2.5 stroke-[3]" />
                           </span>
                         )}
@@ -656,18 +656,18 @@ export function CreateSeriesWizard({
               </div>
 
               {/* Title & Suggested Hooks */}
-              <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.08] space-y-3">
+              <div className="p-4 rounded-xl bg-slate-50/80 border border-slate-200 space-y-3">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-semibold text-white flex items-center gap-2">
+                  <label className="text-xs font-semibold text-slate-900 flex items-center gap-2">
                     <span>Series Title</span>
-                    <span className="text-[11px] font-normal text-zinc-400">
+                    <span className="text-[11px] font-normal text-slate-500">
                       (Episodes will follow this narrative arc)
                     </span>
                   </label>
                   <button
                     type="button"
                     onClick={handleRandomizeTitle}
-                    className="text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1 transition-colors"
+                    className="text-xs text-[#6c5ce7] hover:text-[#5b4bc4] font-medium flex items-center gap-1 transition-colors"
                   >
                     <Shuffle className="w-3 h-3" />
                     <span>Suggest Another</span>
@@ -680,13 +680,13 @@ export function CreateSeriesWizard({
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="e.g. Chronicles of the Lost Island"
-                    className="w-full bg-black/60 border border-white/10 rounded-lg px-3.5 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
+                    className="w-full bg-white border border-slate-200 rounded-lg px-3.5 py-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#6c5ce7] focus:ring-1 focus:ring-[#6c5ce7]"
                   />
                 </div>
 
                 {/* Quick Title Presets */}
                 <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                  <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-semibold">
+                  <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">
                     Viral Presets:
                   </span>
                   {activeNiche.suggestedTitles.map((st, idx) => (
@@ -696,8 +696,8 @@ export function CreateSeriesWizard({
                       onClick={() => setTitle(st)}
                       className={`text-[11px] px-2.5 py-1 rounded-md transition-all border ${
                         title === st
-                          ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/40"
-                          : "bg-white/[0.03] text-zinc-400 border-white/[0.06] hover:text-white hover:bg-white/[0.06]"
+                          ? "bg-purple-50 text-[#6c5ce7] border-purple-200 font-medium"
+                          : "bg-white text-slate-600 border-slate-200 hover:text-slate-900 hover:bg-slate-50 hover:border-slate-300"
                       }`}
                     >
                       {st}
@@ -707,23 +707,23 @@ export function CreateSeriesWizard({
               </div>
 
               {/* Advanced Show Bible Drawer (Optional) */}
-              <div className="border border-white/[0.06] rounded-xl overflow-hidden">
+              <div className="border border-slate-200 rounded-xl overflow-hidden">
                 <button
                   type="button"
                   onClick={() => setShowAdvancedBible(!showAdvancedBible)}
-                  className="w-full px-4 py-2.5 flex items-center justify-between text-xs text-zinc-400 hover:text-white bg-white/[0.02] transition-colors"
+                  className="w-full px-4 py-2.5 flex items-center justify-between text-xs text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 transition-colors"
                 >
                   <span className="flex items-center gap-2">
-                    <Settings2 className="w-3.5 h-3.5 text-zinc-500" />
-                    <span>Advanced Universe Lore & Canon Rules (Optional)</span>
+                    <Settings2 className="w-3.5 h-3.5 text-slate-400" />
+                    <span className="font-medium">Advanced Universe Lore & Canon Rules (Optional)</span>
                   </span>
-                  <span className="text-[11px] text-zinc-500">{showAdvancedBible ? "Hide" : "Customize"}</span>
+                  <span className="text-[11px] text-slate-500 font-semibold">{showAdvancedBible ? "Hide" : "Customize"}</span>
                 </button>
 
                 {showAdvancedBible && (
-                  <div className="p-4 space-y-3 bg-black/40 border-t border-white/[0.06] animate-in fade-in duration-150">
+                  <div className="p-4 space-y-3 bg-white border-t border-slate-200 animate-in fade-in duration-150">
                     <div>
-                      <label className="text-[11px] font-medium text-zinc-300 block mb-1">
+                      <label className="text-[11px] font-medium text-slate-700 block mb-1">
                         Overarching Universe Premise
                       </label>
                       <textarea
@@ -731,11 +731,11 @@ export function CreateSeriesWizard({
                         value={customPremise}
                         onChange={(e) => setCustomPremise(e.target.value)}
                         placeholder={activeNiche.description}
-                        className="w-full bg-[#0c0c0e] border border-white/[0.08] rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-cyan-400 resize-none"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-[#6c5ce7] resize-none"
                       />
                     </div>
                     <div>
-                      <label className="text-[11px] font-medium text-zinc-300 block mb-1">
+                      <label className="text-[11px] font-medium text-slate-700 block mb-1">
                         Canon World Rules (One rule per line)
                       </label>
                       <textarea
@@ -743,7 +743,7 @@ export function CreateSeriesWizard({
                         value={customWorldRules}
                         onChange={(e) => setCustomWorldRules(e.target.value)}
                         placeholder="e.g. Always conclude with an unresolved cliffhanger.&#10;Use first-person narration only."
-                        className="w-full bg-[#0c0c0e] border border-white/[0.08] rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-cyan-400 resize-none"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-[#6c5ce7] resize-none"
                       />
                     </div>
                   </div>
@@ -758,8 +758,8 @@ export function CreateSeriesWizard({
               {/* Visual Art Style */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-semibold text-white">Visual Art Style</label>
-                  <span className="text-[11px] text-zinc-500">Enforced via strict SDXL prompt anchors</span>
+                  <label className="text-xs font-semibold text-slate-900">Visual Art Style</label>
+                  <span className="text-[11px] text-slate-500">Enforced via strict SDXL prompt anchors</span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
@@ -771,17 +771,17 @@ export function CreateSeriesWizard({
                         onClick={() => setArtStyle(style.id)}
                         className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col justify-between ${
                           isSelected
-                            ? "bg-cyan-950/20 border-cyan-400 ring-1 ring-cyan-400/40"
-                            : "bg-white/[0.02] border-white/[0.08] hover:border-white/20 hover:bg-white/[0.04]"
+                            ? "bg-purple-50/80 border-[#6c5ce7] ring-1 ring-[#6c5ce7]"
+                            : "bg-slate-50/70 border-slate-200 hover:border-slate-300 hover:bg-white"
                         }`}
                       >
                         <div className="flex items-start justify-between">
-                          <h4 className="text-xs font-semibold text-white">{style.name}</h4>
-                          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-white/[0.06] text-zinc-300">
+                          <h4 className="text-xs font-semibold text-slate-900">{style.name}</h4>
+                          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-white text-slate-600 border border-slate-200 shadow-2xs font-semibold">
                             {style.badge}
                           </span>
                         </div>
-                        <p className="text-[11px] text-zinc-400 mt-1 line-clamp-2 leading-tight">
+                        <p className="text-[11px] text-slate-500 mt-1 line-clamp-2 leading-tight">
                           {style.description}
                         </p>
                       </div>
@@ -791,10 +791,10 @@ export function CreateSeriesWizard({
               </div>
 
               {/* Neural Voice & Audio Preview */}
-              <div className="space-y-3 pt-2 border-t border-white/[0.06]">
+              <div className="space-y-3 pt-2 border-t border-slate-200">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-semibold text-white">Neural Voice Narrator</label>
-                  <span className="text-[11px] text-zinc-500">Natural Edge-TTS Voices</span>
+                  <label className="text-xs font-semibold text-slate-900">Neural Voice Narrator</label>
+                  <span className="text-[11px] text-slate-500">Natural Edge-TTS Voices</span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
@@ -806,14 +806,14 @@ export function CreateSeriesWizard({
                         onClick={() => setSelectedVoice(v.id)}
                         className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col justify-between ${
                           isSelected
-                            ? "bg-cyan-950/20 border-cyan-400 ring-1 ring-cyan-400/40"
-                            : "bg-white/[0.02] border-white/[0.08] hover:border-white/20 hover:bg-white/[0.04]"
+                            ? "bg-purple-50/80 border-[#6c5ce7] ring-1 ring-[#6c5ce7]"
+                            : "bg-slate-50/70 border-slate-200 hover:border-slate-300 hover:bg-white"
                         }`}
                       >
                         <div className="flex items-start justify-between">
                           <div>
-                            <h4 className="text-xs font-semibold text-white">{v.name}</h4>
-                            <p className="text-[10px] text-cyan-400">{v.role}</p>
+                            <h4 className="text-xs font-semibold text-slate-900">{v.name}</h4>
+                            <p className="text-[10px] text-[#6c5ce7] font-medium">{v.role}</p>
                           </div>
                           <button
                             type="button"
@@ -823,8 +823,8 @@ export function CreateSeriesWizard({
                             }}
                             className={`p-1.5 rounded-lg border transition-all ${
                               isPlayingAudioSample && selectedVoice === v.id
-                                ? "bg-cyan-400 text-black border-cyan-400 animate-pulse"
-                                : "bg-white/[0.06] text-zinc-300 border-white/10 hover:text-white hover:bg-white/10"
+                                ? "bg-[#6c5ce7] text-white border-[#6c5ce7] animate-pulse"
+                                : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:text-slate-900 shadow-2xs"
                             }`}
                             title="Audition voice"
                           >
@@ -835,7 +835,7 @@ export function CreateSeriesWizard({
                             )}
                           </button>
                         </div>
-                        <p className="text-[11px] text-zinc-400 mt-2 italic line-clamp-1">
+                        <p className="text-[11px] text-slate-500 mt-2 italic line-clamp-1">
                           "{v.sampleText}"
                         </p>
                       </div>
@@ -845,10 +845,10 @@ export function CreateSeriesWizard({
               </div>
 
               {/* Subtitle Style & Live Highlight Preview */}
-              <div className="space-y-3 pt-2 border-t border-white/[0.06]">
+              <div className="space-y-3 pt-2 border-t border-slate-200">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-semibold text-white">Subtitle Animation Engine</label>
-                  <span className="text-[11px] text-zinc-500">Live Render Preview</span>
+                  <label className="text-xs font-semibold text-slate-900">Subtitle Animation Engine</label>
+                  <span className="text-[11px] text-slate-500">Live Render Preview</span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -862,27 +862,27 @@ export function CreateSeriesWizard({
                           onClick={() => setSubtitleStyle(sub.id)}
                           className={`p-2.5 rounded-lg border cursor-pointer transition-all flex items-center justify-between ${
                             isSelected
-                              ? "bg-cyan-950/30 border-cyan-400"
-                              : "bg-white/[0.02] border-white/[0.06] hover:bg-white/[0.04]"
+                              ? "bg-purple-50 border-[#6c5ce7]"
+                              : "bg-slate-50 border-slate-200 hover:bg-white"
                           }`}
                         >
                           <div className="flex items-center gap-2.5">
                             <span
-                              className="w-3 h-3 rounded-full border border-black/40"
+                              className="w-3 h-3 rounded-full border border-slate-300"
                               style={{ backgroundColor: sub.highlightColor }}
                             />
-                            <span className="text-xs font-medium text-white">{sub.name}</span>
+                            <span className="text-xs font-medium text-slate-900">{sub.name}</span>
                           </div>
-                          {isSelected && <Check className="w-3.5 h-3.5 text-cyan-400" />}
+                          {isSelected && <Check className="w-3.5 h-3.5 text-[#6c5ce7]" />}
                         </div>
                       );
                     })}
                   </div>
 
                   {/* Live Animated Subtitle Preview Box */}
-                  <div className="p-4 rounded-xl bg-black border border-white/10 flex flex-col items-center justify-center text-center space-y-2 relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-zinc-950/80 to-transparent pointer-events-none" />
-                    <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest relative z-10">
+                  <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 flex flex-col items-center justify-center text-center space-y-2 relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/80 to-transparent pointer-events-none" />
+                    <span className="text-[10px] font-mono text-slate-400 uppercase tracking-widest relative z-10">
                       Simulated 9:16 Video Caption
                     </span>
                     <div className="relative z-10 px-4 py-2 rounded-lg bg-black/70 backdrop-blur-xs border border-white/10">
@@ -906,10 +906,10 @@ export function CreateSeriesWizard({
               </div>
 
               {/* Background Music Preset */}
-              <div className="space-y-3 pt-2 border-t border-white/[0.06]">
+              <div className="space-y-3 pt-2 border-t border-slate-200">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-semibold text-white">Background Music Preset</label>
-                  <span className="text-[11px] text-zinc-500">Auto-ducked underneath speech</span>
+                  <label className="text-xs font-semibold text-slate-900">Background Music Preset</label>
+                  <span className="text-[11px] text-slate-500">Auto-ducked underneath speech</span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
@@ -921,15 +921,15 @@ export function CreateSeriesWizard({
                         onClick={() => setMusicTrack(track.id)}
                         className={`p-2.5 rounded-lg border cursor-pointer transition-all flex items-center justify-between ${
                           isSelected
-                            ? "bg-cyan-950/30 border-cyan-400"
-                            : "bg-white/[0.02] border-white/[0.06] hover:bg-white/[0.04]"
+                            ? "bg-purple-50 border-[#6c5ce7]"
+                            : "bg-slate-50 border-slate-200 hover:bg-white"
                         }`}
                       >
                         <div className="space-y-0.5">
-                          <p className="text-xs font-medium text-white">{track.name}</p>
-                          <p className="text-[10px] text-zinc-400">{track.mood}</p>
+                          <p className="text-xs font-medium text-slate-900">{track.name}</p>
+                          <p className="text-[10px] text-slate-500">{track.mood}</p>
                         </div>
-                        {isSelected && <Check className="w-3.5 h-3.5 text-cyan-400 shrink-0 ml-2" />}
+                        {isSelected && <Check className="w-3.5 h-3.5 text-[#6c5ce7] shrink-0 ml-2" />}
                       </div>
                     );
                   })}
@@ -938,12 +938,12 @@ export function CreateSeriesWizard({
                 {/* Custom Trending Audio Link (TikTok / YouTube) */}
                 <div className="pt-2">
                   <div className="flex items-center justify-between mb-1.5">
-                    <label className="text-[11px] font-medium text-zinc-400">
+                    <label className="text-[11px] font-medium text-slate-600">
                       Or Trending Audio Link (TikTok / YouTube / Sound URL)
                     </label>
                     {musicTrack && musicTrack.startsWith("http") && (
-                      <span className="text-[10px] text-cyan-400 font-mono flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                      <span className="text-[10px] text-[#6c5ce7] font-mono flex items-center gap-1 font-semibold">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#6c5ce7] animate-pulse" />
                         Custom Sound Active
                       </span>
                     )}
@@ -953,9 +953,9 @@ export function CreateSeriesWizard({
                     value={musicTrack.startsWith("http") ? musicTrack : ""}
                     onChange={(e) => setMusicTrack(e.target.value.trim() || "cinematic_mystery")}
                     placeholder="https://www.tiktok.com/@... or https://youtube.com/shorts/..."
-                    className="w-full px-3 py-2 text-xs rounded-lg bg-black/50 border border-white/10 text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-400 transition-colors"
+                    className="w-full px-3 py-2 text-xs rounded-lg bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#6c5ce7] transition-colors"
                   />
-                  <p className="text-[10px] text-zinc-500 mt-1">
+                  <p className="text-[10px] text-slate-500 mt-1">
                     Directly downloads and extracts background music from TikTok or YouTube, mixed with voice ducking.
                   </p>
                 </div>
@@ -970,10 +970,10 @@ export function CreateSeriesWizard({
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-xs font-semibold text-white">Destination Social Channels</h3>
-                    <p className="text-[11px] text-zinc-400">Where should autonomous daily episodes publish?</p>
+                    <h3 className="text-xs font-semibold text-slate-900">Destination Social Channels</h3>
+                    <p className="text-[11px] text-slate-500">Where should autonomous daily episodes publish?</p>
                   </div>
-                  <Badge variant="outline" className="border-emerald-500/30 text-emerald-400 text-[10px]">
+                  <Badge variant="success" className="text-[10px]">
                     Direct API Integration
                   </Badge>
                 </div>
@@ -983,19 +983,19 @@ export function CreateSeriesWizard({
                     {
                       id: "youtube",
                       name: "YouTube Shorts",
-                      icon: <YouTubeIcon className="w-5 h-5" />,
+                      icon: <YouTubeIcon className="w-5 h-5 text-red-500" />,
                       subtitle: "Direct video upload",
                     },
                     {
                       id: "tiktok",
                       name: "TikTok",
-                      icon: <TikTokIcon className="w-5 h-5 text-cyan-400" />,
+                      icon: <TikTokIcon className="w-5 h-5 text-cyan-600" />,
                       subtitle: "Direct Content API",
                     },
                     {
                       id: "instagram",
                       name: "Instagram Reels",
-                      icon: <InstagramIcon className="w-5 h-5 text-pink-400" />,
+                      icon: <InstagramIcon className="w-5 h-5 text-pink-600" />,
                       subtitle: "Graph API Reels",
                     },
                   ].map((p) => {
@@ -1006,22 +1006,22 @@ export function CreateSeriesWizard({
                         onClick={() => togglePlatform(p.id)}
                         className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-center justify-between ${
                           isSelected
-                            ? "bg-cyan-950/20 border-cyan-400 ring-1 ring-cyan-400/40"
-                            : "bg-white/[0.02] border-white/[0.08] hover:border-white/20 opacity-60"
+                            ? "bg-purple-50/80 border-[#6c5ce7] ring-1 ring-[#6c5ce7]"
+                            : "bg-slate-50/70 border-slate-200 hover:border-slate-300 opacity-75"
                         }`}
                       >
                         <div className="flex items-center gap-3">
-                          <div className="p-2 rounded-lg bg-black/40 border border-white/10">{p.icon}</div>
+                          <div className="p-2 rounded-lg bg-white border border-slate-200 shadow-2xs">{p.icon}</div>
                           <div>
-                            <h4 className="text-xs font-bold text-white">{p.name}</h4>
-                            <p className="text-[10px] text-zinc-400">{p.subtitle}</p>
+                            <h4 className="text-xs font-bold text-slate-900">{p.name}</h4>
+                            <p className="text-[10px] text-slate-500">{p.subtitle}</p>
                           </div>
                         </div>
                         <div
                           className={`w-4 h-4 rounded flex items-center justify-center border ${
                             isSelected
-                              ? "bg-cyan-400 border-cyan-400 text-black"
-                              : "border-white/20 bg-transparent"
+                              ? "bg-[#6c5ce7] border-[#6c5ce7] text-white"
+                              : "border-slate-300 bg-white"
                           }`}
                         >
                           {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
@@ -1033,9 +1033,9 @@ export function CreateSeriesWizard({
               </div>
 
               {/* Autopilot Frequency & Preferred Time */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-white/[0.06]">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-200">
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-white block">Posting Cadence</label>
+                  <label className="text-xs font-semibold text-slate-900 block">Posting Cadence</label>
                   <div className="grid grid-cols-3 gap-2">
                     {[
                       { val: 1, label: "1 / Day", badge: "Recommended" },
@@ -1048,23 +1048,23 @@ export function CreateSeriesWizard({
                         onClick={() => setFrequency(f.val)}
                         className={`p-2.5 rounded-xl border text-center transition-all ${
                           frequency === f.val
-                            ? "bg-cyan-950/30 border-cyan-400 text-white"
-                            : "bg-white/[0.02] border-white/[0.08] text-zinc-400 hover:text-white"
+                            ? "bg-purple-50 border-[#6c5ce7] text-[#6c5ce7]"
+                            : "bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-white"
                         }`}
                       >
                         <div className="text-xs font-bold">{f.label}</div>
-                        <div className="text-[9px] text-cyan-400 font-mono mt-0.5">{f.badge}</div>
+                        <div className="text-[9px] text-[#6c5ce7] font-mono font-semibold mt-0.5">{f.badge}</div>
                       </button>
                     ))}
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-white block">Preferred Posting Time (UTC)</label>
+                  <label className="text-xs font-semibold text-slate-900 block">Preferred Posting Time (UTC)</label>
                   <select
                     value={preferredTime}
                     onChange={(e) => setPreferredTime(e.target.value)}
-                    className="w-full bg-[#0c0c0e] border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-[#6c5ce7] focus:ring-1 focus:ring-[#6c5ce7]"
                   >
                     <option value="18:00">18:00 UTC (1:00 PM EST • Peak Views)</option>
                     <option value="12:00">12:00 UTC (7:00 AM EST • Morning Commute)</option>
@@ -1075,14 +1075,14 @@ export function CreateSeriesWizard({
               </div>
 
               {/* Autopilot Safety & Approval Switch */}
-              <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.08] space-y-3">
+              <div className="p-4 rounded-xl bg-slate-50/80 border border-slate-200 space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
-                      <Zap className="w-3.5 h-3.5 text-cyan-400" />
+                    <h4 className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                      <Zap className="w-3.5 h-3.5 text-[#6c5ce7] fill-[#6c5ce7]" />
                       <span>Zero-OpEx Daily Autopilot Engine</span>
                     </h4>
-                    <p className="text-[11px] text-zinc-400 mt-0.5">
+                    <p className="text-[11px] text-slate-500 mt-0.5">
                       Renders in distributed cloud compute and posts automatically while you sleep.
                     </p>
                   </div>
@@ -1090,15 +1090,15 @@ export function CreateSeriesWizard({
                     type="checkbox"
                     checked={autopilotEnabled}
                     onChange={(e) => setAutopilotEnabled(e.target.checked)}
-                    className="w-4 h-4 rounded accent-cyan-400 cursor-pointer"
+                    className="w-4 h-4 rounded accent-[#6c5ce7] cursor-pointer"
                   />
                 </div>
 
                 {autopilotEnabled && (
-                  <div className="pt-2 border-t border-white/[0.06] flex items-center justify-between">
+                  <div className="pt-2 border-t border-slate-200 flex items-center justify-between">
                     <div>
-                      <p className="text-[11px] font-medium text-zinc-300">Approval Queue Guard</p>
-                      <p className="text-[10px] text-zinc-500">
+                      <p className="text-[11px] font-medium text-slate-700">Approval Queue Guard</p>
+                      <p className="text-[10px] text-slate-500">
                         {requireApproval
                           ? "Episodes will pause in queue for 1-click review before going live."
                           : "100% Autonomous — video will post directly to social APIs upon rendering."}
@@ -1109,7 +1109,7 @@ export function CreateSeriesWizard({
                       size="sm"
                       variant="outline"
                       onClick={() => setRequireApproval(!requireApproval)}
-                      className="text-[11px] h-7 px-2.5 border-white/10"
+                      className="text-[11px] h-7 px-2.5 border-slate-200 text-slate-700 bg-white hover:bg-slate-50"
                     >
                       {requireApproval ? "Manual Review On" : "Direct Auto-Post"}
                     </Button>
@@ -1118,20 +1118,20 @@ export function CreateSeriesWizard({
               </div>
 
               {/* Ready Summary Card */}
-              <div className="p-3.5 rounded-xl bg-gradient-to-r from-cyan-950/20 to-indigo-950/20 border border-cyan-500/20 flex items-center justify-between">
+              <div className="p-3.5 rounded-xl bg-purple-50/60 border border-purple-200 flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <span className="text-[10px] font-mono text-cyan-400 uppercase tracking-wider">
+                  <span className="text-[10px] font-mono text-[#6c5ce7] uppercase tracking-wider font-semibold">
                     Ready to Launch
                   </span>
-                  <p className="text-xs font-semibold text-white">
+                  <p className="text-xs font-semibold text-slate-900">
                     {title} • {activeNiche.name}
                   </p>
-                  <p className="text-[11px] text-zinc-400">
+                  <p className="text-[11px] text-slate-600">
                     {frequency} episode/day via {targetPlatforms.join(", ").toUpperCase()}
                   </p>
                 </div>
                 <div className="text-right">
-                  <Badge variant="primary" className="text-[10px] bg-cyan-500 text-black font-semibold">
+                  <Badge variant="primary" className="text-[10px] bg-[#6c5ce7] text-white font-semibold">
                     {autopilotEnabled ? "AUTOPILOT ARMED" : "MANUAL TRIGGER"}
                   </Badge>
                 </div>
@@ -1141,7 +1141,7 @@ export function CreateSeriesWizard({
         </div>
 
         {/* Modal Footer Controls */}
-        <div className="shrink-0 px-6 py-4 border-t border-white/[0.08] flex items-center justify-between bg-black/40">
+        <div className="shrink-0 px-6 py-4 border-t border-slate-200 flex items-center justify-between bg-slate-50">
           <div>
             {currentStep > 1 && (
               <Button
@@ -1149,7 +1149,7 @@ export function CreateSeriesWizard({
                 variant="outline"
                 size="sm"
                 onClick={() => setCurrentStep((prev) => (prev - 1) as 1 | 2)}
-                className="text-xs h-9 px-3.5 border-white/10 text-zinc-300 hover:text-white"
+                className="text-xs h-9 px-3.5 border-slate-200 text-slate-700 bg-white hover:bg-slate-50"
               >
                 <ArrowLeft className="w-3.5 h-3.5 mr-1.5" />
                 <span>Back</span>
@@ -1163,7 +1163,7 @@ export function CreateSeriesWizard({
               variant="outline"
               size="sm"
               onClick={onClose}
-              className="text-xs h-9 px-3.5 border-white/10 text-zinc-400 hover:text-white"
+              className="text-xs h-9 px-3.5 border-slate-200 text-slate-600 bg-white hover:bg-slate-50 hover:text-slate-900"
             >
               Cancel
             </Button>
@@ -1174,7 +1174,7 @@ export function CreateSeriesWizard({
                 variant="primary"
                 size="sm"
                 onClick={() => setCurrentStep((prev) => (prev + 1) as 2 | 3)}
-                className="text-xs h-9 px-4 font-semibold bg-gradient-to-r from-cyan-500 to-indigo-500 text-black hover:opacity-95"
+                className="text-xs h-9 px-4 font-semibold bg-[#6c5ce7] hover:bg-[#5b4bc4] text-white shadow-xs"
               >
                 <span>Continue</span>
                 <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
@@ -1186,7 +1186,7 @@ export function CreateSeriesWizard({
                 size="sm"
                 disabled={isSubmitting || !title.trim()}
                 onClick={handleCreateSeriesSubmit}
-                className="text-xs h-9 px-5 font-semibold bg-gradient-to-r from-cyan-400 via-indigo-500 to-purple-500 text-black hover:opacity-95 shadow-[0_0_20px_rgba(6,182,212,0.3)]"
+                className="text-xs h-9 px-5 font-semibold bg-[#6c5ce7] hover:bg-[#5b4bc4] text-white shadow-sm"
               >
                 {isSubmitting ? (
                   <>

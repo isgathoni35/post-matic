@@ -76,30 +76,30 @@ export function Sidebar({
         type="button"
         onClick={() => onViewChange(item.id)}
         className={cn(
-          "w-full flex items-center justify-between px-3 py-2 rounded-md text-sm transition-colors duration-150",
+          "w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors duration-150",
           isActive
-            ? "bg-white/[0.06] text-white font-medium"
-            : "text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.03]"
+            ? "bg-purple-50 text-[#6c5ce7] font-semibold"
+            : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
         )}
       >
         <div className="flex items-center gap-2.5">
           {/* Active indicator bar */}
           <span
             className={cn(
-              "w-0.5 h-4 rounded-full transition-all duration-200",
-              isActive ? "bg-indigo-500" : "bg-transparent"
+              "w-1 h-4 rounded-full transition-all duration-200",
+              isActive ? "bg-[#6c5ce7]" : "bg-transparent"
             )}
           />
-          <Icon className={cn("h-4 w-4 shrink-0", isActive ? "text-white" : "text-zinc-500")} />
+          <Icon className={cn("h-4 w-4 shrink-0", isActive ? "text-[#6c5ce7]" : "text-slate-400")} />
           <span>{item.label}</span>
         </div>
         {item.badge && (
           <span
             className={cn(
-              "text-[11px] font-mono tabular-nums px-1.5 py-0.5 rounded",
+              "text-[11px] font-mono tabular-nums px-2 py-0.5 rounded-full font-semibold",
               item.badgeType === "live"
-                ? "bg-amber-500/15 text-amber-400"
-                : "bg-white/[0.06] text-zinc-400"
+                ? "bg-amber-50 text-amber-700 border border-amber-200"
+                : "bg-slate-100 text-slate-600 border border-slate-200"
             )}
           >
             {item.badge}
@@ -110,11 +110,11 @@ export function Sidebar({
   };
 
   return (
-    <aside className="w-52 shrink-0 border-r border-white/[0.05] bg-[#0c0c0e] flex flex-col hidden md:flex min-h-[calc(100vh-3.5rem)]">
+    <aside className="w-56 shrink-0 border-r border-slate-200/80 bg-white flex flex-col hidden md:flex min-h-[calc(100vh-3.5rem)]">
       <div className="flex-1 py-4 px-3 space-y-6 overflow-y-auto">
         {/* Primary: Create */}
         <div>
-          <p className="px-3 mb-1 text-[11px] font-medium text-zinc-600 uppercase tracking-wider">
+          <p className="px-3 mb-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
             Create
           </p>
           <nav className="space-y-0.5">
@@ -123,11 +123,11 @@ export function Sidebar({
         </div>
 
         {/* Divider */}
-        <div className="border-t border-white/[0.05]" />
+        <div className="border-t border-slate-200/60" />
 
         {/* Secondary: Manage */}
         <div>
-          <p className="px-3 mb-1 text-[11px] font-medium text-zinc-600 uppercase tracking-wider">
+          <p className="px-3 mb-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
             Manage
           </p>
           <nav className="space-y-0.5">
@@ -137,24 +137,24 @@ export function Sidebar({
       </div>
 
       {/* Bottom: Settings */}
-      <div className="p-3 border-t border-white/[0.05]">
+      <div className="p-3 border-t border-slate-200/60">
         <button
           type="button"
           onClick={() => onViewChange("settings")}
           className={cn(
-            "w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors duration-150",
+            "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors duration-150",
             activeView === "settings"
-              ? "bg-white/[0.06] text-white font-medium"
-              : "text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.03]"
+              ? "bg-purple-50 text-[#6c5ce7] font-semibold"
+              : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
           )}
         >
           <span
             className={cn(
-              "w-0.5 h-4 rounded-full transition-all duration-200",
-              activeView === "settings" ? "bg-indigo-500" : "bg-transparent"
+              "w-1 h-4 rounded-full transition-all duration-200",
+              activeView === "settings" ? "bg-[#6c5ce7]" : "bg-transparent"
             )}
           />
-          <Settings className="h-4 w-4 shrink-0" />
+          <Settings className={cn("h-4 w-4 shrink-0", activeView === "settings" ? "text-[#6c5ce7]" : "text-slate-400")} />
           <span>Settings</span>
         </button>
       </div>

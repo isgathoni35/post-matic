@@ -45,20 +45,20 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark overflow-x-hidden`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased overflow-x-hidden`}
     >
-      <body className="min-h-full flex flex-col bg-[#0c0c0e] text-zinc-100 selection:bg-indigo-500/30 selection:text-indigo-200 overflow-x-hidden w-full max-w-full relative">
+      <body className="min-h-full flex flex-col bg-white text-slate-900 selection:bg-[#6c5ce7]/20 selection:text-[#6c5ce7] overflow-x-hidden w-full max-w-full relative">
         <AuthProvider>
           {children}
         </AuthProvider>
         <Toaster
           position="bottom-right"
-          theme="dark"
+          theme="light"
           toastOptions={{
             style: {
-              background: "#111115",
-              border: "1px solid rgba(255, 255, 255, 0.08)",
-              color: "#f4f5f8",
+              background: "#ffffff",
+              border: "1px solid #e2e8f0",
+              color: "#0f172a",
             },
           }}
         />

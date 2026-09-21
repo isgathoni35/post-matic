@@ -39,20 +39,20 @@ export class WorkspaceErrorBoundary extends Component<Props, State> {
   public render() {
     if (this.state.hasError) {
       return (
-        <div className="rounded-xl border border-white/[0.08] pm-surface p-8 sm:p-12 text-center max-w-xl mx-auto my-12 space-y-5 animate-in fade-in duration-200">
-          <div className="h-14 w-14 rounded-xl bg-rose-500/10 border border-rose-500/25 flex items-center justify-center text-rose-400 mx-auto">
+        <div className="rounded-xl border border-slate-200 bg-white shadow-sm p-8 sm:p-12 text-center max-w-xl mx-auto my-12 space-y-5 animate-in fade-in duration-200">
+          <div className="h-14 w-14 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-600 mx-auto">
             <AlertTriangle className="h-7 w-7" />
           </div>
 
           <div className="space-y-2">
-            <h2 className="text-lg font-bold text-white">
+            <h2 className="text-lg font-bold text-slate-900">
               {this.props.fallbackTitle || "Workspace Error Encountered"}
             </h2>
-            <p className="text-xs text-zinc-400 leading-relaxed max-w-md mx-auto">
+            <p className="text-xs text-slate-600 leading-relaxed max-w-md mx-auto">
               This workspace view encountered an unexpected issue. Your session and generated videos are safe.
             </p>
             {this.state.error?.message && (
-              <p className="font-mono text-[11px] text-rose-400/90 bg-rose-950/30 px-3 py-1.5 rounded-lg border border-rose-900/40 inline-block max-w-md truncate">
+              <p className="font-mono text-[11px] text-rose-700 bg-rose-50 px-3 py-1.5 rounded-lg border border-rose-200 inline-block max-w-md truncate">
                 {this.state.error.message}
               </p>
             )}
@@ -63,7 +63,7 @@ export class WorkspaceErrorBoundary extends Component<Props, State> {
               variant="secondary"
               size="sm"
               onClick={this.handleReset}
-              className="text-xs h-9 bg-white/[0.04] border-white/[0.08]"
+              className="text-xs h-9 border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700"
             >
               <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
               Try Again
@@ -82,7 +82,7 @@ export class WorkspaceErrorBoundary extends Component<Props, State> {
                   window.location.href = "/studio";
                 }
               }}
-              className="text-xs h-9 font-semibold"
+              className="text-xs h-9 font-semibold bg-[#6c5ce7] hover:bg-[#5b4bc4] text-white"
             >
               <Home className="h-3.5 w-3.5 mr-1.5" />
               Return to Studio Console

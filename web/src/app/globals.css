@@ -2,48 +2,86 @@
 
 @layer base {
   :root {
-    /* Core Backgrounds - depth through tone, not borders */
+    /* Core Backgrounds - clean light SaaS palette */
+    --background: #ffffff;
+    --background-subtle: #f8fafc;
+    --background-raised: #ffffff;
+
+    /* Cards */
+    --card: #ffffff;
+    --card-foreground: #0f172a;
+    --popover: #ffffff;
+    --popover-foreground: #0f172a;
+
+    /* Primary brand accent — FacelessReels purple #6c5ce7 */
+    --primary: #6c5ce7;
+    --primary-hover: #5b4bc4;
+    --primary-foreground: #ffffff;
+
+    /* Secondary surfaces */
+    --secondary: #f1f5f9;
+    --secondary-hover: #e2e8f0;
+    --secondary-foreground: #1e293b;
+
+    /* Muted text and surfaces */
+    --muted: #f8fafc;
+    --muted-foreground: #64748b;
+
+    /* Accent matches primary */
+    --accent: #6c5ce7;
+    --accent-foreground: #ffffff;
+
+    /* Status colors */
+    --destructive: #ef4444;
+    --destructive-foreground: #ffffff;
+    --success: #10b981;
+    --warning: #f59e0b;
+
+    /* Borders: clean, subtle slate borders */
+    --border: #e2e8f0;
+    --border-strong: #cbd5e1;
+    --input: #ffffff;
+    --ring: rgba(108, 92, 231, 0.35);
+
+    /* Rounded corners */
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    /* Scoped Dark Theme for Studio / dark subtrees */
     --background: #0c0c0e;
     --background-subtle: #111115;
     --background-raised: #16161a;
 
-    /* Cards */
     --card: #111115;
     --card-foreground: #f0f0f2;
     --popover: #1a1a1f;
     --popover-foreground: #f0f0f2;
 
-    /* Single accent — indigo. Used sparingly for the ONE primary action. */
-    --primary: #6366f1;
-    --primary-hover: #5254cc;
+    --primary: #6c5ce7;
+    --primary-hover: #5b4bc4;
     --primary-foreground: #ffffff;
 
-    /* Secondary surfaces */
     --secondary: #1a1a1f;
     --secondary-hover: #202027;
     --secondary-foreground: #d4d4d8;
 
-    /* Muted text and surfaces */
     --muted: #18181c;
     --muted-foreground: #71717a;
 
-    /* Accent matches primary */
-    --accent: #6366f1;
+    --accent: #6c5ce7;
     --accent-foreground: #ffffff;
 
-    /* Status colors — used only for meaning, never decoration */
     --destructive: #ef4444;
     --destructive-foreground: #ffffff;
     --success: #22c55e;
     --warning: #f59e0b;
 
-    /* Borders: subtle and consistent */
-    --border: rgba(255, 255, 255, 0.06);
-    --border-strong: rgba(255, 255, 255, 0.12);
+    --border: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.15);
     --input: rgba(255, 255, 255, 0.05);
-    --ring: rgba(99, 102, 241, 0.4);
+    --ring: rgba(108, 92, 231, 0.4);
 
-    /* Tighter radius — more purposeful, less bubbly */
     --radius: 0.5rem;
   }
 }
@@ -99,20 +137,23 @@ body {
 /* ─────────────────────────────────────────────
    Scrollbar
 ───────────────────────────────────────────── */
-::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #2a2a30; border-radius: 9999px; }
-::-webkit-scrollbar-thumb:hover { background: #3a3a44; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+.dark ::-webkit-scrollbar-thumb { background: #2a2a30; }
+.dark ::-webkit-scrollbar-thumb:hover { background: #3a3a44; }
 
 /* ─────────────────────────────────────────────
    Surface Utilities
-   Philosophy: background color difference for depth,
-   not borders or box-shadows.
+   Clean SaaS borders & elevation
 ───────────────────────────────────────────── */
 
 /* Base raised surface — cards, panels */
 .pm-surface {
   background-color: var(--card);
+  border: 1px solid var(--border);
   border-radius: var(--radius);
 }
 
@@ -121,18 +162,24 @@ body {
   background-color: var(--popover);
   border: 1px solid var(--border);
   border-radius: var(--radius);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+.dark .pm-surface-raised {
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
 }
 
-/* Interactive surface — hover only, no glow */
+/* Interactive surface — hover transitions */
 .pm-surface-interactive {
   background-color: var(--card);
+  border: 1px solid var(--border);
   border-radius: var(--radius);
-  transition: background-color 0.15s ease;
+  transition: all 0.15s ease;
   cursor: pointer;
 }
 .pm-surface-interactive:hover {
-  background-color: var(--background-raised);
+  background-color: var(--background-subtle);
+  border-color: var(--border-strong);
 }
 
 /* Step panel — inside the Studio wizard */
@@ -254,6 +301,11 @@ body {
   100% { transform: translateX(-50%); }
 }
 
+@keyframes marquee-scroll-reverse {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0%); }
+}
+
 .animate-marquee {
   display: flex;
   width: max-content;
@@ -263,4 +315,15 @@ body {
 .animate-marquee:hover {
   animation-play-state: paused;
 }
+
+.animate-marquee-reverse {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll-reverse 45s linear infinite;
+}
+
+.animate-marquee-reverse:hover {
+  animation-play-state: paused;
+}
+
 

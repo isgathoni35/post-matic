@@ -76,22 +76,22 @@ export function MobileNav({
       {isMoreOpen && (
         <div className="fixed inset-0 z-50 md:hidden animate-in fade-in duration-200">
           <div
-            className="absolute inset-0 bg-black/75 backdrop-blur-sm"
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
             onClick={() => setIsMoreOpen(false)}
           />
-          <div className="absolute inset-x-0 bottom-0 bg-[#0c0c0e] border-t border-white/[0.12] rounded-t-2xl p-5 space-y-4 shadow-2xl animate-in slide-in-from-bottom-5 duration-200">
+          <div className="absolute inset-x-0 bottom-0 bg-white border-t border-slate-200 rounded-t-2xl p-5 space-y-4 shadow-2xl animate-in slide-in-from-bottom-5 duration-200">
             {/* Sheet Header */}
-            <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div className="flex items-center gap-2.5">
                 <BrandIcon size="xs" glow={false} />
-                <span className="text-sm font-bold text-white tracking-tight">
+                <span className="text-sm font-bold text-slate-900 tracking-tight">
                   Workspace Navigation
                 </span>
               </div>
               <button
                 type="button"
                 onClick={() => setIsMoreOpen(false)}
-                className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.08]"
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -102,10 +102,10 @@ export function MobileNav({
               <button
                 type="button"
                 onClick={() => handleSelectView("settings")}
-                className={`flex items-center gap-3 p-3 rounded-lg text-left text-sm transition-all ${
+                className={`flex items-center gap-3 p-3 rounded-xl text-left text-sm transition-all border ${
                   activeView === "settings"
-                    ? "bg-white/[0.08] text-white"
-                    : "text-zinc-400 hover:text-white"
+                    ? "bg-purple-50 text-[#6c5ce7] font-semibold border-purple-200"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-50 border-slate-200/80"
                 }`}
               >
                 <Settings className="h-4 w-4" />
@@ -115,10 +115,10 @@ export function MobileNav({
               <button
                 type="button"
                 onClick={() => handleSelectView("logs")}
-                className={`flex items-center gap-3 p-3 rounded-lg text-left text-sm transition-all ${
+                className={`flex items-center gap-3 p-3 rounded-xl text-left text-sm transition-all border ${
                   activeView === "logs"
-                    ? "bg-white/[0.08] text-white"
-                    : "text-zinc-400 hover:text-white"
+                    ? "bg-purple-50 text-[#6c5ce7] font-semibold border-purple-200"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-50 border-slate-200/80"
                 }`}
               >
                 <Terminal className="h-4 w-4" />
@@ -128,10 +128,10 @@ export function MobileNav({
 
             {/* User Account Info & Sign Out */}
             {user && (
-              <div className="pt-2 border-t border-white/[0.06] flex items-center justify-between text-xs">
+              <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
                 <div className="truncate max-w-[200px]">
-                  <p className="text-white font-medium truncate">{user.email}</p>
-                  <p className="text-[10px] text-zinc-500 font-mono">Creator Account</p>
+                  <p className="text-slate-900 font-semibold truncate">{user.email}</p>
+                  <p className="text-[10px] text-slate-500 font-mono">Creator Account</p>
                 </div>
                 <button
                   type="button"
@@ -139,7 +139,7 @@ export function MobileNav({
                     await signOut();
                     window.location.href = "/";
                   }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20 text-xs font-semibold"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 text-xs font-semibold"
                 >
                   <LogOut className="h-3.5 w-3.5" />
                   <span>Sign Out</span>
@@ -151,7 +151,7 @@ export function MobileNav({
       )}
 
       {/* Persistent Bottom Navigation Dock (Mobile Only) */}
-      <nav className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-[#0c0c0e]/95 backdrop-blur-xl border-t border-white/[0.08] px-2 pt-1.5 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+      <nav className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-white/95 backdrop-blur-xl border-t border-slate-200/80 px-2 pt-1.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-lg">
         <div className="flex items-center justify-around">
           {mainTabs.map((tab) => {
             const Icon = tab.icon;
@@ -164,22 +164,22 @@ export function MobileNav({
                 onClick={() => handleSelectView(tab.id)}
                 className={`relative flex flex-col items-center justify-center py-1 px-3 rounded-lg transition-all duration-200 ${
                   isActive
-                    ? "text-indigo-400"
-                    : "text-zinc-400 hover:text-zinc-200 active:scale-95"
+                    ? "text-[#6c5ce7]"
+                    : "text-slate-400 hover:text-slate-600 active:scale-95"
                 }`}
               >
                 <div className="relative">
                   <Icon
                     className={`h-5 w-5 transition-transform ${
-                      isActive ? "scale-110 text-indigo-400 stroke-[2.2]" : "text-zinc-400"
+                      isActive ? "scale-110 text-[#6c5ce7] stroke-[2.2]" : "text-slate-400"
                     }`}
                   />
                   {tab.badge && (
                     <span
                       className={`absolute -top-1.5 -right-2 px-1.5 py-0.2 rounded-full text-[9px] font-mono font-bold leading-tight ${
                         tab.isPulse
-                          ? "bg-indigo-500 text-white"
-                          : "bg-white/[0.15] text-zinc-200 border border-white/[0.1]"
+                          ? "bg-[#6c5ce7] text-white"
+                          : "bg-slate-100 text-slate-700 border border-slate-200"
                       }`}
                     >
                       {tab.badge}
@@ -188,7 +188,7 @@ export function MobileNav({
                 </div>
                 <span
                   className={`text-[10px] tracking-tight mt-1 transition-all ${
-                    isActive ? "font-bold text-indigo-400" : "font-medium text-zinc-400"
+                    isActive ? "font-bold text-[#6c5ce7]" : "font-medium text-slate-500"
                   }`}
                 >
                   {tab.label}
@@ -196,7 +196,7 @@ export function MobileNav({
 
                 {/* Subtle active indicator pill */}
                 {isActive && (
-                  <span className="absolute -bottom-0.5 h-1 w-4 rounded-full bg-indigo-400" />
+                  <span className="absolute -bottom-0.5 h-1 w-4 rounded-full bg-[#6c5ce7]" />
                 )}
               </button>
             );
@@ -208,28 +208,28 @@ export function MobileNav({
             onClick={() => setIsMoreOpen(true)}
             className={`relative flex flex-col items-center justify-center py-1 px-3 rounded-lg transition-all duration-200 ${
               isMoreOpen || activeView === "settings" || activeView === "logs"
-                ? "text-indigo-400"
-                : "text-zinc-400 hover:text-zinc-200 active:scale-95"
+                ? "text-[#6c5ce7]"
+                : "text-slate-400 hover:text-slate-600 active:scale-95"
             }`}
           >
             <MoreHorizontal
               className={`h-5 w-5 transition-transform ${
                 isMoreOpen || activeView === "settings" || activeView === "logs"
-                  ? "scale-110 text-indigo-400 stroke-[2.2]"
-                  : "text-zinc-400"
+                  ? "scale-110 text-[#6c5ce7] stroke-[2.2]"
+                  : "text-slate-400"
               }`}
             />
             <span
               className={`text-[10px] tracking-tight mt-1 transition-all ${
                 isMoreOpen || activeView === "settings" || activeView === "logs"
-                  ? "font-bold text-indigo-400"
-                  : "font-medium text-zinc-400"
+                  ? "font-bold text-[#6c5ce7]"
+                  : "font-medium text-slate-500"
               }`}
             >
               More
             </span>
             {(activeView === "settings" || activeView === "logs") && !isMoreOpen && (
-              <span className="absolute -bottom-0.5 h-1 w-4 rounded-full bg-indigo-400" />
+              <span className="absolute -bottom-0.5 h-1 w-4 rounded-full bg-[#6c5ce7]" />
             )}
           </button>
         </div>

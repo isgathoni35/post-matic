@@ -293,11 +293,11 @@ export default function StudioPage() {
   // Loading / Auth Guard State
   if (isLoading || !user) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#0c0c0e] text-zinc-300">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 text-slate-600">
         <div className="flex flex-col items-center gap-4 animate-in fade-in duration-300">
           <BrandIcon size="lg" glow={false} />
-          <div className="flex items-center gap-2 text-sm font-medium text-zinc-400">
-            <Loader2 className="h-4 w-4 animate-spin text-indigo-500" />
+          <div className="flex items-center gap-2 text-sm font-medium text-slate-500">
+            <Loader2 className="h-4 w-4 animate-spin text-[#6c5ce7]" />
             <span>Loading PostMatic Studio...</span>
           </div>
         </div>
@@ -312,7 +312,7 @@ export default function StudioPage() {
   const completedJobsCount = jobs.filter((j) => j.status === "completed").length;
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#0c0c0e] text-zinc-100 overflow-x-hidden w-full max-w-full">
+    <div className="min-h-screen flex flex-col bg-slate-50/50 text-slate-900 overflow-x-hidden w-full max-w-full selection:bg-purple-100 selection:text-purple-900">
       {/* Top Navigation Bar */}
       <Header onOpenSocialModal={() => setIsSocialModalOpen(true)} />
 

@@ -36,11 +36,11 @@ export default function LoginPage() {
 
   if (user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0c0c0e] p-4 text-center">
+      <div className="min-h-screen flex items-center justify-center bg-white p-4 text-center">
         <div className="flex flex-col items-center gap-3 animate-in fade-in duration-300">
           <BrandIcon size="lg" glow={false} />
-          <div className="flex items-center gap-2 text-sm font-medium text-zinc-400">
-            <Loader2 className="h-4 w-4 animate-spin text-indigo-500" />
+          <div className="flex items-center gap-2 text-sm font-medium text-slate-600">
+            <Loader2 className="h-4 w-4 animate-spin text-[#6c5ce7]" />
             <span>Taking you to your studio...</span>
           </div>
         </div>
@@ -75,12 +75,12 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-[#0c0c0e] text-zinc-100 selection:bg-indigo-500/30 selection:text-indigo-200">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-white text-slate-900 selection:bg-[#6c5ce7]/20 selection:text-[#6c5ce7]">
       {/* Left Feature & Story Panel (Visible on lg+) */}
-      <div className="hidden lg:flex flex-col justify-between w-1/2 p-12 xl:p-16 border-r border-white/[0.08] bg-[#111115] relative overflow-hidden">
+      <div className="hidden lg:flex flex-col justify-between w-1/2 p-12 xl:p-16 border-r border-slate-200/80 bg-[#fafbfe] relative overflow-hidden">
         {/* Background Ambient Glows */}
-        <div className="absolute -top-24 -left-24 w-96 h-96 bg-indigo-500/[0.06] rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-violet-500/[0.04] rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -top-24 -left-24 w-96 h-96 bg-[#6c5ce7]/[0.07] rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-violet-400/[0.05] rounded-full blur-3xl pointer-events-none" />
 
         {/* Brand */}
         <div className="z-10">
@@ -90,51 +90,51 @@ export default function LoginPage() {
         {/* Middle Value Proposition Callout */}
         <div className="space-y-8 z-10 my-auto max-w-lg">
           <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#6c5ce7]/10 border border-[#6c5ce7]/20 text-[#6c5ce7] text-xs font-semibold">
               <Sparkles className="h-3.5 w-3.5" />
               Creator Autopilot
             </div>
-            <h1 className="text-3xl xl:text-4xl font-bold tracking-tight text-white leading-tight">
+            <h1 className="text-3xl xl:text-4xl font-extrabold tracking-tight text-slate-900 leading-tight">
               Create viral faceless videos in seconds, not hours.
             </h1>
-            <p className="text-sm text-zinc-400 leading-relaxed">
+            <p className="text-sm text-slate-600 leading-relaxed">
               Generate high-retention 9:16 Shorts with realistic human narration, matched HD footage, and animated subtitles — ready to publish to YouTube.
             </p>
           </div>
 
           {/* Feature Highlights List */}
           <div className="space-y-3.5">
-            <div className="flex items-start gap-3 p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-              <div className="h-6 w-6 rounded-lg bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center text-emerald-400 shrink-0 mt-0.5">
-                <CheckCircle2 className="h-3.5 w-3.5" />
+            <div className="flex items-start gap-3.5 p-4 rounded-xl bg-white border border-slate-200/80 shadow-xs">
+              <div className="h-7 w-7 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 shrink-0 mt-0.5">
+                <CheckCircle2 className="h-4 w-4" />
               </div>
               <div>
-                <p className="text-xs font-semibold text-white">One-Prompt Creation</p>
-                <p className="text-[11px] text-zinc-400 mt-0.5">
+                <p className="text-xs font-bold text-slate-900">One-Prompt Creation</p>
+                <p className="text-[11px] text-slate-500 mt-0.5 leading-normal">
                   Type a topic or pick a viral niche. The engine writes scenes and synchronizes visuals automatically.
                 </p>
               </div>
             </div>
 
-            <div className="flex items-start gap-3 p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-              <div className="h-6 w-6 rounded-lg bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center text-indigo-400 shrink-0 mt-0.5">
-                <CheckCircle2 className="h-3.5 w-3.5" />
+            <div className="flex items-start gap-3.5 p-4 rounded-xl bg-white border border-slate-200/80 shadow-xs">
+              <div className="h-7 w-7 rounded-lg bg-[#6c5ce7]/10 border border-[#6c5ce7]/20 flex items-center justify-center text-[#6c5ce7] shrink-0 mt-0.5">
+                <CheckCircle2 className="h-4 w-4" />
               </div>
               <div>
-                <p className="text-xs font-semibold text-white">Hyper-Realistic Voices & Captions</p>
-                <p className="text-[11px] text-zinc-400 mt-0.5">
+                <p className="text-xs font-bold text-slate-900">Hyper-Realistic Voices & Captions</p>
+                <p className="text-[11px] text-slate-500 mt-0.5 leading-normal">
                   Engaging neural voices paired with kinetic word-by-word subtitles styled for maximum watch-time.
                 </p>
               </div>
             </div>
 
-            <div className="flex items-start gap-3 p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-              <div className="h-6 w-6 rounded-lg bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center text-indigo-400 shrink-0 mt-0.5">
-                <CheckCircle2 className="h-3.5 w-3.5" />
+            <div className="flex items-start gap-3.5 p-4 rounded-xl bg-white border border-slate-200/80 shadow-xs">
+              <div className="h-7 w-7 rounded-lg bg-[#6c5ce7]/10 border border-[#6c5ce7]/20 flex items-center justify-center text-[#6c5ce7] shrink-0 mt-0.5">
+                <CheckCircle2 className="h-4 w-4" />
               </div>
               <div>
-                <p className="text-xs font-semibold text-white">1-Click Direct to YouTube Shorts</p>
-                <p className="text-[11px] text-zinc-400 mt-0.5">
+                <p className="text-xs font-bold text-slate-900">1-Click Direct to YouTube Shorts</p>
+                <p className="text-[11px] text-slate-500 mt-0.5 leading-normal">
                   Connect your YouTube channel once. Publish videos with custom titles and hashtags instantly.
                 </p>
               </div>
@@ -143,25 +143,25 @@ export default function LoginPage() {
         </div>
 
         {/* Footer info */}
-        <div className="flex items-center justify-between text-xs text-zinc-500 border-t border-white/[0.06] pt-6 z-10 font-mono">
+        <div className="flex items-center justify-between text-xs text-slate-400 border-t border-slate-200/80 pt-6 z-10 font-mono">
           <span>Production-grade H.264 1080x1920</span>
           <span>Zero-OpEx Architecture</span>
         </div>
       </div>
 
       {/* Right Form Console */}
-      <div className="flex-1 flex flex-col justify-center items-center p-6 sm:p-12 lg:p-16 relative">
+      <div className="flex-1 flex flex-col justify-center items-center p-6 sm:p-12 lg:p-16 relative bg-white">
         <div className="max-w-md w-full space-y-6">
           {/* Prominent Back to Home Link */}
           <div className="flex items-center justify-between pb-2">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-xs font-medium text-zinc-300 hover:text-white transition-all group shadow-sm"
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-xs font-medium text-slate-700 hover:text-slate-900 transition-all group shadow-2xs"
             >
-              <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform text-indigo-400" />
+              <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform text-[#6c5ce7]" />
               <span>Back to Home</span>
             </Link>
-            <span className="text-[11px] font-mono text-zinc-500">POST-MATIC</span>
+            <span className="text-[11px] font-mono text-slate-400 font-semibold tracking-wider">POST-MATIC</span>
           </div>
 
           {/* Header Mobile Brand (lg:hidden) */}
@@ -169,11 +169,11 @@ export default function LoginPage() {
             <BrandLogo size="md" badgeText="Studio" />
           </div>
 
-          <div className="space-y-2 text-center lg:text-left">
-            <h2 className="text-2xl font-bold tracking-tight text-white">
+          <div className="space-y-1.5 text-center lg:text-left">
+            <h2 className="text-2xl font-bold tracking-tight text-slate-900">
               {mode === "signin" ? "Sign in to Studio" : "Create Your Account"}
             </h2>
-            <p className="text-xs text-zinc-400">
+            <p className="text-xs text-slate-500">
               {mode === "signin"
                 ? "Enter your credentials to access your studio workspace and video library."
                 : "Create a free account to start creating vertical video content on autopilot."}
@@ -181,14 +181,14 @@ export default function LoginPage() {
           </div>
 
           {/* Tab Switcher */}
-          <div className="grid grid-cols-2 p-1 rounded-lg bg-white/[0.04] border border-white/[0.08]">
+          <div className="grid grid-cols-2 p-1 rounded-xl bg-slate-100 border border-slate-200">
             <button
               type="button"
               onClick={() => setMode("signin")}
               className={`py-2 text-xs font-semibold rounded-lg transition-all ${
                 mode === "signin"
-                  ? "bg-white/[0.1] text-white shadow-sm"
-                  : "text-zinc-400 hover:text-white"
+                  ? "bg-white text-slate-900 shadow-xs"
+                  : "text-slate-500 hover:text-slate-900"
               }`}
             >
               Sign In
@@ -198,8 +198,8 @@ export default function LoginPage() {
               onClick={() => setMode("signup")}
               className={`py-2 text-xs font-semibold rounded-lg transition-all ${
                 mode === "signup"
-                  ? "bg-white/[0.1] text-white shadow-sm"
-                  : "text-zinc-400 hover:text-white"
+                  ? "bg-white text-slate-900 shadow-xs"
+                  : "text-slate-500 hover:text-slate-900"
               }`}
             >
               Create Account
@@ -210,8 +210,8 @@ export default function LoginPage() {
           <div className="space-y-3">
             <Button
               type="button"
-              variant="secondary"
-              className="w-full h-11 text-xs font-medium border border-white/[0.12] hover:bg-white/[0.08]"
+              variant="outline"
+              className="w-full h-11 text-xs font-semibold border-slate-300 bg-white hover:bg-slate-50 text-slate-700 shadow-xs rounded-xl"
               onClick={() => signInWithOAuth("google")}
             >
               <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24">
@@ -238,8 +238,8 @@ export default function LoginPage() {
 
           {/* Divider */}
           <div className="relative flex items-center justify-center">
-            <div className="w-full border-t border-white/[0.08]" />
-            <span className="absolute px-3 bg-[#0c0c0e] text-[11px] text-zinc-500 uppercase font-mono tracking-wider">
+            <div className="w-full border-t border-slate-200" />
+            <span className="absolute px-3 bg-white text-[11px] text-slate-400 uppercase font-mono tracking-wider">
               or email
             </span>
           </div>
@@ -248,7 +248,7 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === "signup" && (
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-zinc-300">Full Name</label>
+                <label className="text-xs font-semibold text-slate-700">Full Name</label>
                 <Input
                   type="text"
                   placeholder="Elias Vance"
@@ -260,7 +260,7 @@ export default function LoginPage() {
             )}
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-zinc-300">Email Address</label>
+              <label className="text-xs font-semibold text-slate-700">Email Address</label>
               <Input
                 type="email"
                 placeholder="creator@studio.com"
@@ -273,12 +273,12 @@ export default function LoginPage() {
 
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-zinc-300">Password</label>
+                <label className="text-xs font-semibold text-slate-700">Password</label>
                 {mode === "signin" && (
                   <button
                     type="button"
                     onClick={() => toast.info("Check your email for reset instructions.")}
-                    className="text-[11px] text-indigo-400 hover:underline"
+                    className="text-[11px] text-[#6c5ce7] font-medium hover:underline"
                   >
                     Forgot?
                   </button>
@@ -298,7 +298,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 text-zinc-500 hover:text-white transition-colors"
+                  className="absolute right-3 text-slate-400 hover:text-slate-700 transition-colors"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -308,7 +308,7 @@ export default function LoginPage() {
             <Button
               type="submit"
               variant="primary"
-              className="w-full h-11 text-xs font-semibold mt-2"
+              className="w-full h-11 text-xs font-semibold mt-2 rounded-xl"
               isLoading={isLoading}
             >
               {mode === "signin" ? "Sign In to Studio" : "Create Free Account"}
@@ -320,7 +320,7 @@ export default function LoginPage() {
           <div className="text-center pt-2">
             <Link
               href="/"
-              className="text-xs text-zinc-500 hover:text-white transition-colors"
+              className="text-xs text-slate-500 hover:text-slate-800 transition-colors"
             >
               ← Back to PostMatic Home
             </Link>

@@ -199,16 +199,16 @@ export function SeriesView({
   return (
     <div className="w-full max-w-6xl mx-auto space-y-6">
       {/* Top Header & Mission Control Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.06] pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/80 pb-4">
         <div>
           <div className="flex items-center gap-2.5 mb-1">
-            <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
-              <BookOpen className="w-5 h-5 text-cyan-400" />
+            <h1 className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+              <BookOpen className="w-5 h-5 text-[#6c5ce7]" />
               <span>Series Ecosystem & Autopilot Hub</span>
             </h1>
             <Badge
               variant="outline"
-              className="text-[10px] font-mono font-semibold bg-cyan-500/10 text-cyan-300 border-cyan-500/30"
+              className="text-[10px] font-mono font-semibold bg-purple-50 text-[#6c5ce7] border-purple-200"
             >
               {seriesList.length} {seriesList.length === 1 ? "Universe" : "Universes"}
             </Badge>
@@ -216,7 +216,7 @@ export function SeriesView({
             {activeAutopilotCount > 0 && (
               <Badge
                 variant="outline"
-                className="text-[10px] font-mono font-semibold bg-emerald-500/10 text-emerald-400 border-emerald-500/30 flex items-center gap-1.5"
+                className="text-[10px] font-mono font-semibold bg-emerald-50 text-emerald-700 border-emerald-300 flex items-center gap-1.5"
               >
                 <span className="relative flex h-1.5 w-1.5">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -226,7 +226,7 @@ export function SeriesView({
               </Badge>
             )}
           </div>
-          <p className="text-xs text-zinc-400">
+          <p className="text-xs text-slate-500">
             Autonomous multi-episode content universes with Show Bibles, viral niche pacing, and automated daily publishing while you sleep.
           </p>
         </div>
@@ -238,10 +238,10 @@ export function SeriesView({
             size="sm"
             onClick={handleGlobalDispatch}
             disabled={isDispatchingGlobal || seriesList.length === 0}
-            className="h-9 text-xs font-semibold border-white/10 bg-white/[0.03] hover:bg-cyan-500/10 hover:border-cyan-500/40 text-zinc-200 transition-all flex items-center gap-1.5"
+            className="h-9 text-xs font-semibold border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 transition-all flex items-center gap-1.5 shadow-2xs"
             title="Runs the hourly autopilot scheduler immediately to evaluate due series"
           >
-            <RefreshCw className={`w-3.5 h-3.5 text-cyan-400 ${isDispatchingGlobal ? "animate-spin" : ""}`} />
+            <RefreshCw className={`w-3.5 h-3.5 text-[#6c5ce7] ${isDispatchingGlobal ? "animate-spin" : ""}`} />
             <span>{isDispatchingGlobal ? "Evaluating..." : "Run Scheduler"}</span>
           </Button>
 
@@ -249,7 +249,7 @@ export function SeriesView({
             variant="primary"
             size="sm"
             onClick={() => setShowCreateWizard(true)}
-            className="h-9 text-xs font-semibold bg-gradient-to-r from-cyan-400 via-indigo-500 to-purple-500 text-black shadow-[0_0_15px_rgba(6,182,212,0.25)] hover:opacity-95 flex items-center gap-1.5"
+            className="h-9 text-xs font-semibold bg-[#6c5ce7] hover:bg-[#5b4bc4] text-white shadow-xs flex items-center gap-1.5"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>New Series Wizard</span>
@@ -258,18 +258,18 @@ export function SeriesView({
       </div>
 
       {/* Multi-Channel Social Health Monitor Strip */}
-      <div className="rounded-2xl pm-surface border border-white/[0.08] p-4 bg-gradient-to-r from-zinc-950 via-zinc-900/60 to-zinc-950">
+      <div className="rounded-2xl bg-white border border-slate-200/80 p-4 shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
-              <Radio className="w-4 h-4 text-cyan-400 animate-pulse" />
+            <div className="w-7 h-7 rounded-lg bg-purple-50 border border-purple-200 flex items-center justify-center text-[#6c5ce7]">
+              <Radio className="w-4 h-4 text-[#6c5ce7] animate-pulse" />
             </div>
             <div>
-              <h2 className="text-xs font-bold text-white flex items-center gap-1.5">
+              <h2 className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
                 <span>Multi-Channel Social Health Monitor</span>
-                <span className="text-[10px] font-normal text-zinc-500">• Auto-Publishing Channels</span>
+                <span className="text-[10px] font-normal text-slate-400">• Auto-Publishing Channels</span>
               </h2>
-              <p className="text-[11px] text-zinc-400">
+              <p className="text-[11px] text-slate-500">
                 Connected accounts automatically receive freshly rendered episodes on your autopilot schedule.
               </p>
             </div>
@@ -278,17 +278,17 @@ export function SeriesView({
           {/* Social Channel Health Badges */}
           <div className="flex flex-wrap items-center gap-2">
             {/* YouTube */}
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/40 border border-white/[0.06] text-xs">
-              <YouTubeIcon className="w-4 h-4 text-red-500" />
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-200 text-xs">
+              <YouTubeIcon className="w-4 h-4 text-red-600" />
               <div className="flex flex-col">
-                <span className="text-[10px] font-semibold text-zinc-300">YouTube Shorts</span>
+                <span className="text-[10px] font-semibold text-slate-700">YouTube Shorts</span>
                 <div className="flex items-center gap-1">
                   <span
                     className={`w-1.5 h-1.5 rounded-full ${
-                      ytAccount ? "bg-emerald-400 animate-pulse" : "bg-amber-400"
+                      ytAccount ? "bg-emerald-500 animate-pulse" : "bg-amber-400"
                     }`}
                   />
-                  <span className="text-[9px] text-zinc-400 font-mono">
+                  <span className="text-[9px] text-slate-500 font-mono">
                     {ytAccount ? ytAccount.account_name || "Connected" : "Disconnected"}
                   </span>
                 </div>
@@ -296,17 +296,17 @@ export function SeriesView({
             </div>
 
             {/* TikTok */}
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/40 border border-white/[0.06] text-xs">
-              <TikTokIcon className="w-4 h-4 text-cyan-400" />
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-200 text-xs">
+              <TikTokIcon className="w-4 h-4 text-cyan-600" />
               <div className="flex flex-col">
-                <span className="text-[10px] font-semibold text-zinc-300">TikTok</span>
+                <span className="text-[10px] font-semibold text-slate-700">TikTok</span>
                 <div className="flex items-center gap-1">
                   <span
                     className={`w-1.5 h-1.5 rounded-full ${
-                      tiktokAccount ? "bg-emerald-400 animate-pulse" : "bg-zinc-600"
+                      tiktokAccount ? "bg-emerald-500 animate-pulse" : "bg-slate-300"
                     }`}
                   />
-                  <span className="text-[9px] text-zinc-400 font-mono">
+                  <span className="text-[9px] text-slate-500 font-mono">
                     {tiktokAccount ? tiktokAccount.account_name || "Connected" : "Not Linked"}
                   </span>
                 </div>
@@ -314,17 +314,17 @@ export function SeriesView({
             </div>
 
             {/* Instagram */}
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/40 border border-white/[0.06] text-xs">
-              <InstagramIcon className="w-4 h-4 text-pink-400" />
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-200 text-xs">
+              <InstagramIcon className="w-4 h-4 text-pink-600" />
               <div className="flex flex-col">
-                <span className="text-[10px] font-semibold text-zinc-300">Instagram Reels</span>
+                <span className="text-[10px] font-semibold text-slate-700">Instagram Reels</span>
                 <div className="flex items-center gap-1">
                   <span
                     className={`w-1.5 h-1.5 rounded-full ${
-                      instagramAccount ? "bg-emerald-400 animate-pulse" : "bg-zinc-600"
+                      instagramAccount ? "bg-emerald-500 animate-pulse" : "bg-slate-300"
                     }`}
                   />
-                  <span className="text-[9px] text-zinc-400 font-mono">
+                  <span className="text-[9px] text-slate-500 font-mono">
                     {instagramAccount ? instagramAccount.account_name || "Connected" : "Not Linked"}
                   </span>
                 </div>
@@ -336,7 +336,7 @@ export function SeriesView({
                 variant="outline"
                 size="sm"
                 onClick={onOpenSocialModal}
-                className="h-8 text-[11px] font-medium border-white/10 hover:border-cyan-500/30 text-zinc-300 hover:text-white bg-white/[0.02]"
+                className="h-8 text-[11px] font-medium border-slate-200 hover:bg-slate-100 text-slate-700 hover:text-slate-900 bg-white shadow-2xs"
               >
                 <span>Manage Accounts</span>
                 <ChevronRight className="w-3 h-3 ml-1" />
@@ -349,18 +349,18 @@ export function SeriesView({
       {/* Series Grid */}
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-20 space-y-3">
-          <Loader2 className="w-6 h-6 text-cyan-400 animate-spin" />
-          <p className="text-xs text-zinc-400">Loading your series universes & schedules...</p>
+          <Loader2 className="w-6 h-6 text-[#6c5ce7] animate-spin" />
+          <p className="text-xs text-slate-500">Loading your series universes & schedules...</p>
         </div>
       ) : seriesList.length === 0 ? (
         /* Empty State */
-        <div className="flex flex-col items-center justify-center py-16 px-4 text-center rounded-2xl pm-surface border border-white/[0.08] space-y-4">
-          <div className="w-14 h-14 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
+        <div className="flex flex-col items-center justify-center py-16 px-4 text-center rounded-2xl bg-white border border-slate-200/80 shadow-xs space-y-4">
+          <div className="w-14 h-14 rounded-2xl bg-purple-50 border border-purple-200 flex items-center justify-center text-[#6c5ce7]">
             <Clapperboard className="w-7 h-7" />
           </div>
           <div className="space-y-1.5 max-w-md mx-auto">
-            <h3 className="text-base font-bold text-white">No Content Series Universes Yet</h3>
-            <p className="text-xs text-zinc-400 leading-relaxed">
+            <h3 className="text-base font-bold text-slate-900">No Content Series Universes Yet</h3>
+            <p className="text-xs text-slate-500 leading-relaxed">
               Launch your first automated universe using our 8 pre-engineered viral niche engines. Set it to autopilot, and PostMatic will write, render, and publish episodes while you sleep.
             </p>
           </div>
@@ -368,7 +368,7 @@ export function SeriesView({
             variant="primary"
             size="sm"
             onClick={() => setShowCreateWizard(true)}
-            className="h-9 text-xs font-semibold px-5 bg-gradient-to-r from-cyan-400 to-indigo-500 text-black shadow-lg"
+            className="h-9 text-xs font-semibold px-5 bg-[#6c5ce7] hover:bg-[#5b4bc4] text-white shadow-xs"
           >
             <Sparkles className="w-3.5 h-3.5 mr-1.5" />
             <span>Launch Your First Series</span>
@@ -395,10 +395,10 @@ export function SeriesView({
               <div
                 key={series.id}
                 onClick={() => onSelectSeriesDetail(series.id)}
-                className={`group relative pm-surface border rounded-2xl p-5 transition-all cursor-pointer flex flex-col justify-between space-y-4 hover:shadow-[0_0_30px_rgba(6,182,212,0.12)] ${
+                className={`group relative bg-white border rounded-2xl p-5 transition-all cursor-pointer flex flex-col justify-between space-y-4 hover:shadow-md ${
                   isAutopilot
-                    ? "border-emerald-500/30 hover:border-emerald-400/50 bg-gradient-to-b from-emerald-950/[0.08] to-transparent"
-                    : "border-white/[0.08] hover:border-cyan-500/40"
+                    ? "border-emerald-300 ring-1 ring-emerald-400/20 shadow-2xs"
+                    : "border-slate-200/80 hover:border-slate-300 shadow-2xs"
                 }`}
               >
                 <div className="space-y-3">
@@ -408,12 +408,12 @@ export function SeriesView({
                       {nicheObj ? (
                         <Badge
                           variant="outline"
-                          className="border-cyan-500/30 bg-cyan-950/20 text-cyan-300 text-[10px] py-0.5 px-2 font-medium"
+                          className="border-purple-200 bg-purple-50 text-[#6c5ce7] text-[10px] py-0.5 px-2 font-medium"
                         >
                           {nicheObj.emoji} {nicheObj.name}
                         </Badge>
                       ) : (
-                        <Badge variant="outline" className="border-white/10 text-zinc-400 text-[10px] py-0.5 px-2">
+                        <Badge variant="outline" className="border-slate-200 bg-slate-50 text-slate-600 text-[10px] py-0.5 px-2 font-medium">
                           {series.genre || "Series"}
                         </Badge>
                       )}
@@ -422,7 +422,7 @@ export function SeriesView({
                       {isAutopilot ? (
                         <Badge
                           variant="outline"
-                          className="border-emerald-500/40 bg-emerald-950/40 text-emerald-300 text-[10px] py-0.5 px-2 flex items-center gap-1.5 shadow-[0_0_10px_rgba(16,185,129,0.2)]"
+                          className="border-emerald-300 bg-emerald-50 text-emerald-700 text-[10px] py-0.5 px-2 flex items-center gap-1.5 font-semibold"
                         >
                           <span className="relative flex h-1.5 w-1.5">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -431,7 +431,7 @@ export function SeriesView({
                           <span className="font-semibold tracking-wide">AUTOPILOT: ACTIVE</span>
                         </Badge>
                       ) : (
-                        <Badge variant="outline" className="border-white/[0.06] bg-zinc-900/60 text-zinc-500 text-[10px] py-0.5 px-2">
+                        <Badge variant="outline" className="border-slate-200 bg-slate-100 text-slate-500 text-[10px] py-0.5 px-2 font-medium">
                           Manual Mode
                         </Badge>
                       )}
@@ -444,8 +444,8 @@ export function SeriesView({
                         disabled={isTogglingThis}
                         className={`p-1.5 rounded-lg border transition-all text-xs flex items-center ${
                           isAutopilot
-                            ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20"
-                            : "bg-white/[0.03] border-white/10 text-zinc-400 hover:text-white hover:border-white/20"
+                            ? "bg-emerald-50 border-emerald-300 text-emerald-700 hover:bg-emerald-100"
+                            : "bg-slate-50 border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-100"
                         }`}
                         title={isAutopilot ? "Pause Autopilot" : "Activate Autopilot"}
                       >
@@ -458,7 +458,7 @@ export function SeriesView({
 
                       <button
                         onClick={(e) => handleDeleteSeries(series.id, e)}
-                        className="text-zinc-600 hover:text-red-400 p-1.5 rounded-lg hover:bg-white/[0.04] transition-colors"
+                        className="text-slate-400 hover:text-rose-500 p-1.5 rounded-lg hover:bg-slate-100 transition-colors"
                         title="Delete series"
                       >
                         <Trash2 className="w-3 h-3" />
@@ -468,31 +468,31 @@ export function SeriesView({
 
                   {/* Title & Premise */}
                   <div className="space-y-1">
-                    <h3 className="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors truncate">
+                    <h3 className="text-sm font-bold text-slate-900 group-hover:text-[#6c5ce7] transition-colors truncate">
                       {series.title}
                     </h3>
-                    <p className="text-xs text-zinc-400 line-clamp-2 leading-relaxed">
+                    <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
                       {premise}
                     </p>
                   </div>
 
                   {/* Autopilot Scheduling & Next Post Card */}
-                  <div className="rounded-xl bg-black/40 border border-white/[0.06] p-2.5 space-y-1.5">
+                  <div className="rounded-xl bg-slate-50 border border-slate-200/80 p-2.5 space-y-1.5">
                     <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-zinc-500 flex items-center gap-1">
-                        <Clock className="w-3 h-3 text-cyan-400" />
+                      <span className="text-slate-500 flex items-center gap-1 font-medium">
+                        <Clock className="w-3 h-3 text-[#6c5ce7]" />
                         <span>Next Scheduled Post:</span>
                       </span>
-                      <span className={`font-mono font-medium ${isAutopilot ? "text-cyan-300" : "text-zinc-500"}`}>
+                      <span className={`font-mono font-medium ${isAutopilot ? "text-emerald-700" : "text-slate-500"}`}>
                         {nextPostFormatted}
                       </span>
                     </div>
 
-                    <div className="flex items-center justify-between text-[10px] text-zinc-500 pt-1 border-t border-white/[0.04]">
+                    <div className="flex items-center justify-between text-[10px] text-slate-500 pt-1 border-t border-slate-200/60">
                       <span>
-                        Cadence: <strong className="text-zinc-300 font-semibold">{frequency}x daily</strong> ({preferredTime} UTC)
+                        Cadence: <strong className="text-slate-800 font-semibold">{frequency}x daily</strong> ({preferredTime} UTC)
                       </span>
-                      <span className="capitalize text-zinc-400 font-mono">
+                      <span className="capitalize text-slate-600 font-mono">
                         {series.art_style || bible.art_style || "Cinematic"}
                       </span>
                     </div>
@@ -500,25 +500,25 @@ export function SeriesView({
 
                   {/* Target Social Channels with Health status */}
                   <div className="flex items-center justify-between pt-0.5">
-                    <span className="text-[11px] text-zinc-500">Publishing Targets:</span>
+                    <span className="text-[11px] text-slate-400 font-medium">Publishing Targets:</span>
 
-                    <div className="flex items-center gap-1.5 bg-black/50 px-2 py-1 rounded-md border border-white/[0.06]">
+                    <div className="flex items-center gap-1.5 bg-white px-2 py-1 rounded-md border border-slate-200">
                       {platforms.includes("youtube") && (
                         <div className="flex items-center gap-0.5" title={ytAccount ? "YouTube Shorts (Connected)" : "YouTube Shorts (Needs Authorization)"}>
-                          <YouTubeIcon className="w-3.5 h-3.5 text-red-500" />
-                          <span className={`w-1 h-1 rounded-full ${ytAccount ? "bg-emerald-400" : "bg-amber-400"}`} />
+                          <YouTubeIcon className="w-3.5 h-3.5 text-red-600" />
+                          <span className={`w-1 h-1 rounded-full ${ytAccount ? "bg-emerald-500" : "bg-amber-400"}`} />
                         </div>
                       )}
                       {platforms.includes("tiktok") && (
                         <div className="flex items-center gap-0.5" title={tiktokAccount ? "TikTok (Connected)" : "TikTok (Needs Authorization)"}>
-                          <TikTokIcon className="w-3.5 h-3.5 text-cyan-400" />
-                          <span className={`w-1 h-1 rounded-full ${tiktokAccount ? "bg-emerald-400" : "bg-amber-400"}`} />
+                          <TikTokIcon className="w-3.5 h-3.5 text-cyan-600" />
+                          <span className={`w-1 h-1 rounded-full ${tiktokAccount ? "bg-emerald-500" : "bg-amber-400"}`} />
                         </div>
                       )}
                       {platforms.includes("instagram") && (
                         <div className="flex items-center gap-0.5" title={instagramAccount ? "Instagram Reels (Connected)" : "Instagram Reels (Needs Authorization)"}>
-                          <InstagramIcon className="w-3.5 h-3.5 text-pink-400" />
-                          <span className={`w-1 h-1 rounded-full ${instagramAccount ? "bg-emerald-400" : "bg-amber-400"}`} />
+                          <InstagramIcon className="w-3.5 h-3.5 text-pink-600" />
+                          <span className={`w-1 h-1 rounded-full ${instagramAccount ? "bg-emerald-500" : "bg-amber-400"}`} />
                         </div>
                       )}
                     </div>
@@ -526,9 +526,9 @@ export function SeriesView({
                 </div>
 
                 {/* Footer: Episode Count & 1-Click Manual Trigger Override */}
-                <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between gap-2" onClick={(e) => e.stopPropagation()}>
-                  <div className="flex items-center gap-1.5 text-xs text-zinc-400 font-mono">
-                    <Layers className="w-3.5 h-3.5 text-cyan-400" />
+                <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2" onClick={(e) => e.stopPropagation()}>
+                  <div className="flex items-center gap-1.5 text-xs text-slate-500 font-mono">
+                    <Layers className="w-3.5 h-3.5 text-[#6c5ce7]" />
                     <span>{series.episode_count} {series.episode_count === 1 ? "Episode" : "Episodes"}</span>
                   </div>
 
@@ -539,13 +539,13 @@ export function SeriesView({
                       variant="primary"
                       disabled={isTriggeringThis}
                       onClick={(e) => handleTriggerSeriesNow(series.id, series.title, e)}
-                      className="h-7 text-[11px] font-bold px-2.5 bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black border-none shadow-[0_0_12px_rgba(245,158,11,0.25)] flex items-center gap-1 transition-all"
+                      className="h-7 text-[11px] font-semibold px-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg shadow-xs flex items-center gap-1 transition-all"
                       title="1-Click Override: Generate and dispatch the next episode immediately"
                     >
                       {isTriggeringThis ? (
-                        <Loader2 className="w-3 h-3 animate-spin text-black" />
+                        <Loader2 className="w-3 h-3 animate-spin text-white" />
                       ) : (
-                        <Zap className="w-3 h-3 text-black fill-black" />
+                        <Zap className="w-3 h-3 text-white fill-white" />
                       )}
                       <span>{isTriggeringThis ? "Generating..." : `Trigger Ep #${nextEp}`}</span>
                     </Button>
@@ -561,10 +561,10 @@ export function SeriesView({
                           nextEpisode: nextEp,
                         })
                       }
-                      className="h-7 text-[11px] font-semibold bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 border border-white/10 px-2"
+                      className="h-7 text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 px-2 rounded-lg"
                       title="Open in Studio to manually craft episode prompt"
                     >
-                      <Sparkles className="w-3 h-3 text-cyan-400" />
+                      <Sparkles className="w-3 h-3 text-[#6c5ce7]" />
                     </Button>
                   </div>
                 </div>

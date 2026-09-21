@@ -147,8 +147,8 @@ export function SeriesDetailView({
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 space-y-3">
-        <Loader2 className="w-6 h-6 text-indigo-500 animate-spin" />
-        <p className="text-xs text-zinc-400">Loading series universe & Show Bible...</p>
+        <Loader2 className="w-6 h-6 text-[#6c5ce7] animate-spin" />
+        <p className="text-xs text-slate-500">Loading series universe & Show Bible...</p>
       </div>
     );
   }
@@ -156,8 +156,8 @@ export function SeriesDetailView({
   if (!series) {
     return (
       <div className="text-center py-16 space-y-4">
-        <p className="text-sm text-zinc-400">Series not found.</p>
-        <Button onClick={onBack} variant="outline" className="text-xs">
+        <p className="text-sm text-slate-500">Series not found.</p>
+        <Button onClick={onBack} variant="outline" className="text-xs border-slate-200 text-slate-700 hover:bg-slate-50">
           Return to Series Hub
         </Button>
       </div>
@@ -174,26 +174,26 @@ export function SeriesDetailView({
   return (
     <div className="w-full max-w-6xl mx-auto space-y-6">
       {/* Navigation & Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.06] pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/80 pb-4">
         <div className="flex items-center gap-3">
           <Button
             variant="outline"
             size="sm"
             onClick={onBack}
-            className="border-white/[0.08] text-zinc-400 hover:text-white h-9 w-9 p-0 rounded-lg"
+            className="border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100 h-9 w-9 p-0 rounded-lg shadow-2xs"
           >
             <ArrowLeft className="w-4 h-4" />
           </Button>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold tracking-tight text-white">{series.title}</h1>
+              <h1 className="text-xl font-bold tracking-tight text-slate-900">{series.title}</h1>
               {series.genre && (
-                <Badge variant="outline" className="border-indigo-500/30 text-indigo-300 text-[10px] py-0 px-2">
+                <Badge variant="outline" className="border-purple-200 bg-purple-50 text-[#6c5ce7] text-[10px] py-0.5 px-2 font-medium">
                   {series.genre}
                 </Badge>
               )}
             </div>
-            <p className="text-xs text-zinc-400 mt-0.5">
+            <p className="text-xs text-slate-500 mt-0.5">
               {series.episode_count} canon {series.episode_count === 1 ? "episode" : "episodes"} produced
             </p>
           </div>
@@ -206,13 +206,13 @@ export function SeriesDetailView({
             size="sm"
             disabled={isTriggeringNow}
             onClick={handleTriggerNow}
-            className="h-9 text-xs font-bold px-3 bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black border-none shadow-[0_0_15px_rgba(245,158,11,0.25)] flex items-center gap-1.5"
+            className="h-9 text-xs font-semibold px-3 bg-amber-500 hover:bg-amber-600 text-white shadow-xs rounded-lg flex items-center gap-1.5 transition-all"
             title="1-Click Override: Generate and dispatch the next episode immediately"
           >
             {isTriggeringNow ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin text-black" />
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
             ) : (
-              <Zap className="w-3.5 h-3.5 text-black fill-black" />
+              <Zap className="w-3.5 h-3.5 text-white fill-white" />
             )}
             <span>{isTriggeringNow ? "Dispatching..." : `Trigger Ep #${nextEpNum} Now`}</span>
           </Button>
@@ -227,9 +227,9 @@ export function SeriesDetailView({
                 nextEpisode: nextEpNum,
               })
             }
-            className="h-9 text-xs font-semibold bg-white/[0.05] border-white/10"
+            className="h-9 text-xs font-semibold bg-[#6c5ce7] hover:bg-[#5b4bc4] text-white shadow-xs rounded-lg"
           >
-            <Sparkles className="w-3.5 h-3.5 mr-1.5 text-cyan-400" />
+            <Sparkles className="w-3.5 h-3.5 mr-1.5 text-white" />
             <span>Open Studio</span>
           </Button>
         </div>
@@ -239,8 +239,8 @@ export function SeriesDetailView({
       <div
         className={`p-4 rounded-2xl border transition-all ${
           isAutopilot
-            ? "border-emerald-500/30 bg-gradient-to-r from-emerald-950/30 via-zinc-950 to-zinc-950"
-            : "border-white/[0.08] pm-surface"
+            ? "border-emerald-300 bg-emerald-50/40 shadow-xs"
+            : "border-slate-200/80 bg-white shadow-xs"
         }`}
       >
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -249,7 +249,7 @@ export function SeriesDetailView({
               {isAutopilot ? (
                 <Badge
                   variant="outline"
-                  className="border-emerald-500/40 bg-emerald-950/50 text-emerald-300 text-xs py-0.5 px-2.5 flex items-center gap-1.5 shadow-[0_0_12px_rgba(16,185,129,0.25)] font-semibold"
+                  className="border-emerald-300 bg-emerald-50 text-emerald-700 text-xs py-0.5 px-2.5 flex items-center gap-1.5 font-semibold"
                 >
                   <span className="relative flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -258,20 +258,20 @@ export function SeriesDetailView({
                   <span>AUTOPILOT: ACTIVE</span>
                 </Badge>
               ) : (
-                <Badge variant="outline" className="border-white/10 text-zinc-500 text-xs py-0.5 px-2.5">
+                <Badge variant="outline" className="border-slate-200 bg-slate-100 text-slate-500 text-xs py-0.5 px-2.5 font-medium">
                   Manual Creation Mode
                 </Badge>
               )}
 
-              <span className="text-xs text-zinc-400 font-mono">
+              <span className="text-xs text-slate-600 font-mono">
                 {frequency}x daily at {preferredTime} UTC
               </span>
             </div>
 
-            <p className="text-xs text-zinc-400 flex items-center gap-1.5 pt-0.5">
-              <Clock className="w-3.5 h-3.5 text-cyan-400" />
+            <p className="text-xs text-slate-500 flex items-center gap-1.5 pt-0.5">
+              <Clock className="w-3.5 h-3.5 text-[#6c5ce7]" />
               <span>Next Scheduled Post:</span>
-              <strong className="text-zinc-200 font-mono">
+              <strong className="text-slate-800 font-mono">
                 {series.next_post_at ? new Date(series.next_post_at).toLocaleString() : "Due Now (Next Hourly Cron)"}
               </strong>
             </p>
@@ -279,16 +279,16 @@ export function SeriesDetailView({
 
           <div className="flex items-center gap-3">
             {/* Publishing Channels */}
-            <div className="flex items-center gap-2 bg-black/40 px-3 py-1.5 rounded-lg border border-white/[0.06]">
-              <span className="text-[11px] text-zinc-400">Targets:</span>
+            <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
+              <span className="text-[11px] text-slate-500 font-medium">Targets:</span>
               {platforms.includes("youtube") && (
-                <YouTubeIcon className="w-4 h-4 text-red-500" title="YouTube Shorts" />
+                <YouTubeIcon className="w-4 h-4 text-red-600" title="YouTube Shorts" />
               )}
               {platforms.includes("tiktok") && (
-                <TikTokIcon className="w-4 h-4 text-cyan-400" title="TikTok" />
+                <TikTokIcon className="w-4 h-4 text-cyan-600" title="TikTok" />
               )}
               {platforms.includes("instagram") && (
-                <InstagramIcon className="w-4 h-4 text-pink-400" title="Instagram Reels" />
+                <InstagramIcon className="w-4 h-4 text-pink-600" title="Instagram Reels" />
               )}
             </div>
 
@@ -300,8 +300,8 @@ export function SeriesDetailView({
               onClick={handleToggleAutopilot}
               className={`h-8 text-xs font-medium border ${
                 isAutopilot
-                  ? "border-emerald-500/30 text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20"
-                  : "border-white/10 text-zinc-300 bg-white/[0.03] hover:border-white/20"
+                  ? "border-emerald-300 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 shadow-2xs"
+                  : "border-slate-200 text-slate-700 bg-white hover:bg-slate-50 shadow-2xs"
               }`}
             >
               <Power className="w-3.5 h-3.5 mr-1.5" />
@@ -312,11 +312,11 @@ export function SeriesDetailView({
       </div>
 
       {/* Show Bible Section */}
-      <div className="p-5 rounded-xl pm-surface border border-white/[0.06] space-y-4">
+      <div className="p-5 rounded-xl bg-white border border-slate-200/80 shadow-xs space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <BookOpen className="w-4 h-4 text-indigo-400" />
-            <h3 className="text-sm font-semibold text-white">Show Bible & Continuity Memory</h3>
+            <BookOpen className="w-4 h-4 text-[#6c5ce7]" />
+            <h3 className="text-sm font-semibold text-slate-900">Show Bible & Continuity Memory</h3>
           </div>
 
           <Button
@@ -326,7 +326,7 @@ export function SeriesDetailView({
               if (isEditingBible) handleSaveBible();
               else setIsEditingBible(true);
             }}
-            className="text-xs text-indigo-400 hover:text-indigo-300 h-8 px-2.5 rounded-lg"
+            className="text-xs text-[#6c5ce7] hover:underline h-8 px-2.5 rounded-lg font-medium"
           >
             {isEditingBible ? (
               <>
@@ -345,47 +345,47 @@ export function SeriesDetailView({
         {isEditingBible ? (
           <div className="space-y-3 pt-2">
             <div>
-              <label className="text-[11px] text-zinc-400 block mb-1">Overarching Premise</label>
+              <label className="text-[11px] text-slate-600 font-medium block mb-1">Overarching Premise</label>
               <textarea
                 rows={3}
                 value={editablePremise}
                 onChange={(e) => setEditablePremise(e.target.value)}
-                className="w-full bg-[#0c0c0e] border border-white/[0.08] rounded-lg p-3 text-xs text-white focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/30 resize-none"
+                className="w-full bg-white border border-slate-200 rounded-lg p-3 text-xs text-slate-900 focus:outline-none focus:border-[#6c5ce7] focus:ring-1 focus:ring-[#6c5ce7] resize-none"
               />
             </div>
 
             <div>
-              <label className="text-[11px] text-zinc-400 block mb-1">World Rules & Canon (one per line)</label>
+              <label className="text-[11px] text-slate-600 font-medium block mb-1">World Rules & Canon (one per line)</label>
               <textarea
                 rows={3}
                 value={editableRules}
                 onChange={(e) => setEditableRules(e.target.value)}
-                className="w-full bg-[#0c0c0e] border border-white/[0.08] rounded-lg p-3 text-xs text-white focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/30 resize-none"
+                className="w-full bg-white border border-slate-200 rounded-lg p-3 text-xs text-slate-900 focus:outline-none focus:border-[#6c5ce7] focus:ring-1 focus:ring-[#6c5ce7] resize-none"
               />
             </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-            <div className="space-y-1.5 bg-[#0c0c0e] p-4 rounded-lg border border-white/[0.04]">
-              <span className="text-[10px] uppercase tracking-wider font-semibold text-zinc-500">Overarching Premise</span>
-              <p className="text-zinc-300 leading-relaxed">
+            <div className="space-y-1.5 bg-slate-50 p-4 rounded-lg border border-slate-200">
+              <span className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">Overarching Premise</span>
+              <p className="text-slate-800 leading-relaxed">
                 {bible.premise || "No master premise specified."}
               </p>
             </div>
 
-            <div className="space-y-1.5 bg-[#0c0c0e] p-4 rounded-lg border border-white/[0.04]">
-              <span className="text-[10px] uppercase tracking-wider font-semibold text-zinc-500">Canon Rules & Lore</span>
+            <div className="space-y-1.5 bg-slate-50 p-4 rounded-lg border border-slate-200">
+              <span className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">Canon Rules & Lore</span>
               {bible.world_rules && bible.world_rules.length > 0 ? (
-                <ul className="space-y-1 text-zinc-300">
+                <ul className="space-y-1 text-slate-800">
                   {bible.world_rules.map((rule: string, idx: number) => (
                     <li key={idx} className="flex items-start gap-1.5">
-                      <span className="text-indigo-500">•</span>
+                      <span className="text-[#6c5ce7] font-bold">•</span>
                       <span>{rule}</span>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p className="text-zinc-500 italic">No specific world rules defined.</p>
+                <p className="text-slate-400 italic">No specific world rules defined.</p>
               )}
             </div>
           </div>
@@ -396,18 +396,18 @@ export function SeriesDetailView({
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Layers className="w-4 h-4 text-zinc-400" />
-            <h3 className="text-sm font-semibold text-white">Episode Canon Timeline</h3>
+            <Layers className="w-4 h-4 text-slate-400" />
+            <h3 className="text-sm font-semibold text-slate-900">Episode Canon Timeline</h3>
           </div>
-          <span className="text-xs text-zinc-500">
+          <span className="text-xs text-slate-500">
             {episodes.length} of {series.episode_count} rendered
           </span>
         </div>
 
         {episodes.length === 0 ? (
-          <div className="text-center py-12 rounded-xl pm-surface border border-white/[0.06] space-y-3">
-            <Film className="w-8 h-8 text-zinc-600 mx-auto" />
-            <p className="text-xs text-zinc-400">No episodes rendered yet for this series.</p>
+          <div className="text-center py-12 rounded-xl bg-white border border-slate-200/80 shadow-xs space-y-3">
+            <Film className="w-8 h-8 text-slate-300 mx-auto" />
+            <p className="text-xs text-slate-500">No episodes rendered yet for this series.</p>
             <Button
               variant="primary"
               size="sm"
@@ -418,7 +418,7 @@ export function SeriesDetailView({
                   nextEpisode: 1,
                 })
               }
-              className="h-9 text-xs font-semibold px-4"
+              className="h-9 text-xs font-semibold px-4 bg-[#6c5ce7] hover:bg-[#5b4bc4] text-white shadow-xs"
             >
               Produce Episode #1
             </Button>
@@ -437,30 +437,30 @@ export function SeriesDetailView({
               return (
                 <div
                   key={ep.id}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl pm-surface border border-white/[0.06] hover:border-white/[0.12] transition-all gap-3"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-white border border-slate-200/80 hover:border-slate-300 transition-all gap-3 shadow-xs"
                 >
                   <div className="flex items-start gap-3 min-w-0">
-                    <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 flex items-center justify-center font-bold text-xs shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-purple-50 border border-purple-200 text-[#6c5ce7] flex items-center justify-center font-bold text-xs shrink-0">
                       {epNum}
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <h4 className="text-xs font-semibold text-white truncate">{ep.topic}</h4>
+                        <h4 className="text-xs font-semibold text-slate-900 truncate">{ep.topic}</h4>
                         <Badge
                           variant="outline"
-                          className={`text-[9px] py-0 px-1.5 ${
+                          className={`text-[9px] py-0 px-1.5 font-medium ${
                             isDone
-                              ? "border-emerald-500/30 text-emerald-400"
-                              : "border-zinc-700 text-zinc-400"
+                              ? "border-emerald-300 text-emerald-700 bg-emerald-50"
+                              : "border-slate-200 text-slate-500 bg-slate-100"
                           }`}
                         >
                           {ep.status}
                         </Badge>
                       </div>
-                      <div className="flex items-center gap-3 text-[11px] text-zinc-500 mt-1">
+                      <div className="flex items-center gap-3 text-[11px] text-slate-400 mt-1">
                         {ep.duration_seconds && (
                           <span className="flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
+                            <Clock className="w-3 h-3 text-slate-400" />
                             {Math.round(ep.duration_seconds)}s
                           </span>
                         )}
@@ -485,7 +485,7 @@ export function SeriesDetailView({
                         <Button
                           size="sm"
                           variant="outline"
-                          className="text-xs h-8 px-3"
+                          className="text-xs h-8 px-3 border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-2xs"
                         >
                           <Download className="w-3 h-3 mr-1.5" />
                           <span>Download</span>
@@ -498,7 +498,7 @@ export function SeriesDetailView({
                         size="sm"
                         variant="secondary"
                         onClick={() => onSelectVideoJob(ep.id)}
-                        className="text-xs h-8 px-3"
+                        className="text-xs h-8 px-3 bg-[#6c5ce7] hover:bg-[#5b4bc4] text-white shadow-2xs"
                       >
                         <Play className="w-3 h-3 mr-1.5" />
                         <span>View</span>
