@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 export interface SocialIconProps extends React.SVGProps<SVGSVGElement> {
   className?: string;
   variant?: "color" | "mono";
+  title?: string;
 }
 
 /**

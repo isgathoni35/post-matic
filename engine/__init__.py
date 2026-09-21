@@ -11,12 +11,14 @@ from engine.tts_engine import (
     generate_ass_subtitles,
     AVAILABLE_VOICES,
     DEFAULT_VOICE,
+    SUBTITLE_STYLE_CONFIGS,
 )
 from engine.media_downloader import (
     DownloadedVideo,
     fetch_scene_media,
     fetch_script_media,
     search_pexels_video,
+    download_background_music,
 )
 from engine.video_renderer import (
     burn_audio_and_subtitles,
@@ -43,10 +45,12 @@ __all__ = [
     "generate_ass_subtitles",
     "AVAILABLE_VOICES",
     "DEFAULT_VOICE",
+    "SUBTITLE_STYLE_CONFIGS",
     "DownloadedVideo",
     "fetch_scene_media",
     "fetch_script_media",
     "search_pexels_video",
+    "download_background_music",
     "burn_audio_and_subtitles",
     "concatenate_clips",
     "get_ffmpeg_binary",

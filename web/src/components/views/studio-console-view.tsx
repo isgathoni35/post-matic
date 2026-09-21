@@ -34,6 +34,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { VideoJobResponse, CustomCharacterPayload } from "@/lib/api";
 import { YouTubeIcon, TikTokIcon, InstagramIcon } from "@/components/social/social-icons";
+import { SUBTITLE_STYLES, MUSIC_TRACKS } from "./create-series-wizard";
 
 export const VOICES = [
   {
@@ -136,6 +137,10 @@ export interface StudioConsoleViewProps {
   seriesTitle?: string;
   seriesEpisode?: number;
   onClearSeries?: () => void;
+  musicTrack?: string;
+  setMusicTrack?: (track: string) => void;
+  subtitleStyle?: string;
+  setSubtitleStyle?: (style: string) => void;
 }
 
 export function StudioConsoleView({
@@ -164,6 +169,10 @@ export function StudioConsoleView({
   seriesTitle,
   seriesEpisode,
   onClearSeries,
+  musicTrack = "lofi_chill",
+  setMusicTrack,
+  subtitleStyle = "hormozi_yellow",
+  setSubtitleStyle,
 }: StudioConsoleViewProps) {
   // Wizard Step: 1 = Prompt & Concept, 2 = Voice & Settings, 3 = Generation & Preview
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(() => {
@@ -906,6 +915,103 @@ export function StudioConsoleView({
               </div>
             </div>
           )}
+
+          {/* Trending Audio & Subtitle Engine (Step 6.3) */}
+          <div className="pm-surface p-5 rounded-xl border border-white/[0.06] space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+                  <span>Audio & Caption Engine</span>
+                  <Badge variant="outline" className="border-amber-500/30 text-amber-400 text-[10px] py-0">
+                    Hormozi Kinetic Pop
+                  </Badge>
+                </h3>
+                <p className="text-xs text-zinc-400">
+                  Dynamic word-level highlight animation and ducked background audio.
+                </p>
+              </div>
+            </div>
+
+            {/* Subtitle Style Selector */}
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-zinc-300 block">Subtitle Animation Preset</label>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {SUBTITLE_STYLES.map((sub) => {
+                  const isSelected = subtitleStyle === sub.id;
+                  return (
+                    <button
+                      key={sub.id}
+                      type="button"
+                      onClick={() => setSubtitleStyle?.(sub.id)}
+                      className={`p-2.5 rounded-lg border text-left transition-all flex items-center justify-between ${
+                        isSelected
+                          ? "bg-amber-950/30 border-amber-400 text-white"
+                          : "bg-[#0c0c0e] border-white/[0.06] text-zinc-400 hover:text-white"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span
+                          className="w-2.5 h-2.5 rounded-full"
+                          style={{ backgroundColor: sub.highlightColor }}
+                        />
+                        <span className="text-xs font-medium line-clamp-1">{sub.name}</span>
+                      </div>
+                      {isSelected && <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Background Music Presets & Trending Audio Link */}
+            <div className="space-y-2 pt-2 border-t border-white/[0.04]">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-medium text-zinc-300">Background Music Track</label>
+                <span className="text-[11px] text-zinc-500">Auto-ducked (-22dB) under narration</span>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {MUSIC_TRACKS.map((track) => {
+                  const isSelected = musicTrack === track.id;
+                  return (
+                    <button
+                      key={track.id}
+                      type="button"
+                      onClick={() => setMusicTrack?.(track.id)}
+                      className={`p-2 rounded-lg border text-left transition-all ${
+                        isSelected
+                          ? "bg-indigo-950/40 border-indigo-400 text-white"
+                          : "bg-[#0c0c0e] border-white/[0.06] text-zinc-400 hover:text-white"
+                      }`}
+                    >
+                      <p className="text-xs font-medium truncate">{track.name}</p>
+                      <p className="text-[10px] text-zinc-500 truncate">{track.mood}</p>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Direct TikTok / YouTube sound link input */}
+              <div className="pt-2">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[11px] text-zinc-400">Or Paste TikTok / YouTube Trending Sound Link:</span>
+                  {musicTrack && musicTrack.startsWith("http") && (
+                    <span className="text-[10px] text-cyan-400 font-mono flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                      Custom Audio URL Active
+                    </span>
+                  )}
+                </div>
+                <input
+                  type="url"
+                  value={musicTrack?.startsWith("http") ? musicTrack : ""}
+                  onChange={(e) => setMusicTrack?.(e.target.value.trim() || "lofi_chill")}
+                  placeholder="https://www.tiktok.com/@... or https://youtube.com/..."
+                  className="w-full bg-[#0c0c0e] border border-white/[0.08] rounded-lg px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-indigo-500 transition-colors"
+                />
+              </div>
+            </div>
+          </div>
 
           {/* Auto-publish checkbox */}
           <div className="flex items-center justify-between p-3.5 rounded-xl pm-surface border border-white/[0.06]">

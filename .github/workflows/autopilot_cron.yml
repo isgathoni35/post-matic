@@ -1,0 +1,73 @@
+name: PostMatic Autopilot Hourly Dispatcher
+
+on:
+  schedule:
+    # Runs at the top of every hour UTC (Zero-OpEx autonomous scheduler)
+    - cron: '0 * * * *'
+  workflow_dispatch: # Enables on-demand trigger and testing from the Actions UI
+
+jobs:
+  dispatch-autopilot:
+    name: Evaluate & Dispatch Due Series Episodes
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Ping Backend Health to Ensure Worker is Active
+        run: |
+          TARGET_URL="${{ secrets.RENDER_BACKEND_URL || 'https://post-matic.onrender.com' }}"
+          if [[ ! "$TARGET_URL" =~ ^https?:// ]]; then
+            TARGET_URL="https://$TARGET_URL"
+          fi
+          TARGET_URL="${TARGET_URL%/}"
+          HEALTH_URL="$TARGET_URL/health"
+
+          echo "Target Health Check: $HEALTH_URL"
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$HEALTH_URL" || echo "000")
+          echo "Health status response: $HTTP_CODE"
+
+          if [ "$HTTP_CODE" -ne 200 ]; then
+            echo "Backend cold-booting, waiting 10s before dispatch..."
+            sleep 10
+            curl -s -o /dev/null --max-time 30 "$HEALTH_URL" || true
+          fi
+
+      - name: Trigger Autopilot Dispatch Endpoint
+        run: |
+          TARGET_URL="${{ secrets.RENDER_BACKEND_URL || 'https://post-matic.onrender.com' }}"
+          if [[ ! "$TARGET_URL" =~ ^https?:// ]]; then
+            TARGET_URL="https://$TARGET_URL"
+          fi
+          TARGET_URL="${TARGET_URL%/}"
+          DISPATCH_URL="$TARGET_URL/api/series/autopilot/dispatch"
+
+          echo "Invoking Autopilot Dispatch: $DISPATCH_URL"
+
+          # Prepare optional secret header
+          HEADER_SECRET=""
+          if [ -n "${{ secrets.AUTOPILOT_SECRET }}" ]; then
+            HEADER_SECRET="X-Autopilot-Secret: ${{ secrets.AUTOPILOT_SECRET }}"
+          fi
+
+          RESPONSE_FILE=$(mktemp)
+          if [ -n "$HEADER_SECRET" ]; then
+            HTTP_CODE=$(curl -s -w "%{http_code}" -o "$RESPONSE_FILE" --max-time 60 \
+              -X POST "$DISPATCH_URL" \
+              -H "Content-Type: application/json" \
+              -H "$HEADER_SECRET" || echo "000")
+          else
+            HTTP_CODE=$(curl -s -w "%{http_code}" -o "$RESPONSE_FILE" --max-time 60 \
+              -X POST "$DISPATCH_URL" \
+              -H "Content-Type: application/json" || echo "000")
+          fi
+
+          RESPONSE_BODY=$(cat "$RESPONSE_FILE")
+          echo "Dispatch HTTP Status: $HTTP_CODE"
+          echo "Response Body: $RESPONSE_BODY"
+
+          if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
+            echo "SUCCESS: Autopilot scheduler executed cleanly."
+          else
+            echo "ERROR: Autopilot dispatch failed with HTTP $HTTP_CODE"
+            exit 1
+          fi

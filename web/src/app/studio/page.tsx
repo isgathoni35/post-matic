@@ -68,6 +68,8 @@ export default function StudioPage() {
   const [customCharacters, setCustomCharacters] = useState<CustomCharacterPayload[]>([]);
   const [activeSeries, setActiveSeries] = useState<{ id: string; title: string; nextEpisode: number } | null>(null);
   const [selectedSeriesId, setSelectedSeriesId] = useState<string | null>(null);
+  const [musicTrack, setMusicTrack] = useState<string>("lofi_chill");
+  const [subtitleStyle, setSubtitleStyle] = useState<string>("hormozi_yellow");
 
   // Active Job and User Jobs List
   const [activeJob, setActiveJob] = useState<VideoJobResponse | null>(null);
@@ -87,6 +89,12 @@ export default function StudioPage() {
         setActiveView("studio");
         window.history.replaceState({}, "", "/studio");
       }
+
+      const viewParam = urlParams.get("view");
+      if (viewParam && ["studio", "series", "library", "queue", "social", "logs", "settings"].includes(viewParam)) {
+        setActiveView(viewParam as ActiveWorkspaceView);
+      }
+
 
       const connected = urlParams.get("connected");
       const channel = urlParams.get("channel");
@@ -242,6 +250,8 @@ export default function StudioPage() {
         characters: studioMode === "story" && customCharacters.length > 0 ? customCharacters : undefined,
         series_id: activeSeries?.id,
         episode_number: activeSeries?.nextEpisode,
+        music_track: musicTrack,
+        subtitle_style: subtitleStyle,
       });
 
       const normalizedResponse = normalizeJob(response);
@@ -346,6 +356,10 @@ export default function StudioPage() {
                 seriesTitle={activeSeries?.title}
                 seriesEpisode={activeSeries?.nextEpisode}
                 onClearSeries={() => setActiveSeries(null)}
+                musicTrack={musicTrack}
+                setMusicTrack={setMusicTrack}
+                subtitleStyle={subtitleStyle}
+                setSubtitleStyle={setSubtitleStyle}
               />
             )}
 
@@ -356,12 +370,14 @@ export default function StudioPage() {
                   onBack={() => setSelectedSeriesId(null)}
                   onStartEpisodeGeneration={handleStartEpisodeGeneration}
                   onSelectVideoJob={handleSelectJobById}
+                  onOpenSocialModal={() => setIsSocialModalOpen(true)}
                 />
               ) : (
                 <SeriesView
                   userId={user?.id}
                   onSelectSeriesDetail={(id) => setSelectedSeriesId(id)}
                   onStartEpisodeGeneration={handleStartEpisodeGeneration}
+                  onOpenSocialModal={() => setIsSocialModalOpen(true)}
                 />
               )
             )}

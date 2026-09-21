@@ -79,6 +79,7 @@ def generate_faceless_video(
     bgm_path: Optional[Union[Path, str, bool]] = None,
     cleanup_temp: bool = True,
     progress_callback: Optional[ProgressCallback] = None,
+    subtitle_style: str = "hormozi_yellow",
 ) -> VideoGenerationResult:
     """Execute the entire 5-stage automated video generation pipeline.
 
@@ -121,6 +122,7 @@ def generate_faceless_video(
         voice=voice,
         words_per_line=words_per_subtitle_line,
         aspect_ratio=aspect_ratio,
+        subtitle_style=subtitle_style,
     )
     print(f"      Audio duration: {tts_result.total_duration:.2f}s")
     report_progress("synthesizing", 50)
@@ -262,6 +264,7 @@ def generate_animated_story_video(
     cleanup_temp: bool = False,
     progress_callback: Optional[ProgressCallback] = None,
     series_context: Optional[str] = None,
+    subtitle_style: str = "hormozi_yellow",
 ) -> StoryGenerationResult:
     """Execute the end-to-end multi-character animated story video generation pipeline.
 
@@ -313,6 +316,7 @@ def generate_animated_story_video(
         story=story,
         words_per_line=words_per_subtitle_line,
         aspect_ratio="9:16",
+        subtitle_style=subtitle_style,
     )
     print(f"      Spoken dialogue duration: {tts_result.total_duration:.2f}s ({len(tts_result.sfx_cues)} SFX cues)")
     report_progress("synthesizing", 50)

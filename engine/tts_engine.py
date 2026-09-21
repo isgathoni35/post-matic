@@ -300,6 +300,83 @@ def format_ass_time(seconds: float) -> str:
     return f"{hours}:{minutes:02d}:{secs:02d}.{centis:02d}"
 
 
+SUBTITLE_STYLE_CONFIGS = {
+    "hormozi_yellow": {
+        "highlight_color": "&H0000FFFF",  # Bright Yellow (ABGR)
+        "primary_color": "&H00FFFFFF",    # Crisp White
+        "outline_color": "&H00000000",    # Black
+        "back_color": "&H80000000",
+        "bounce": True,
+        "scale_bump": 125,
+        "bounce_duration_ms": 120,
+    },
+    "hormozi_green": {
+        "highlight_color": "&H0039FF14",  # Neon Green (ABGR)
+        "primary_color": "&H00FFFFFF",
+        "outline_color": "&H00000000",
+        "back_color": "&H80000000",
+        "bounce": True,
+        "scale_bump": 125,
+        "bounce_duration_ms": 120,
+    },
+    "hormozi_cyan": {
+        "highlight_color": "&H00FFFF00",  # Neon Cyan (ABGR)
+        "primary_color": "&H00FFFFFF",
+        "outline_color": "&H00000000",
+        "back_color": "&H80000000",
+        "bounce": True,
+        "scale_bump": 125,
+        "bounce_duration_ms": 120,
+    },
+    "hormozi_red": {
+        "highlight_color": "&H000020FF",  # Vivid Coral Red (ABGR)
+        "primary_color": "&H00FFFFFF",
+        "outline_color": "&H00000000",
+        "back_color": "&H80000000",
+        "bounce": True,
+        "scale_bump": 125,
+        "bounce_duration_ms": 120,
+    },
+    "classic_white": {
+        "highlight_color": "&H00FFFFFF",
+        "primary_color": "&H00CCCCCC",
+        "outline_color": "&H00000000",
+        "back_color": "&H80000000",
+        "bounce": False,
+        "scale_bump": 100,
+        "bounce_duration_ms": 0,
+    },
+    # Aliases matching frontend UI wizard identifiers
+    "neon_cyan": {
+        "highlight_color": "&H00F8BD38",  # Cyber Neon Cyan #38BDF8 (ABGR)
+        "primary_color": "&H00FFFFFF",
+        "outline_color": "&H00000000",
+        "back_color": "&H80000000",
+        "bounce": True,
+        "scale_bump": 125,
+        "bounce_duration_ms": 120,
+    },
+    "lime_punch": {
+        "highlight_color": "&H0080DE4A",  # Electric Lime #4ADE80 (ABGR)
+        "primary_color": "&H00FFFFFF",
+        "outline_color": "&H00000000",
+        "back_color": "&H80000000",
+        "bounce": True,
+        "scale_bump": 125,
+        "bounce_duration_ms": 120,
+    },
+    "minimal_white": {
+        "highlight_color": "&H00FFFFFF",
+        "primary_color": "&H00A1A1AA",
+        "outline_color": "&H00000000",
+        "back_color": "&H80000000",
+        "bounce": False,
+        "scale_bump": 100,
+        "bounce_duration_ms": 0,
+    },
+}
+
+
 def create_ass_header(
     font_name: str = "Arial Black",
     font_size: Optional[int] = None,
@@ -347,25 +424,29 @@ def generate_ass_subtitles(
     words_per_line: int = 3,
     font_name: str = "Arial Black",
     font_size: Optional[int] = None,
-    highlight_color: str = "&H0000FFFF",  # Bright Yellow (ABGR)
-    primary_color: str = "&H00FFFFFF",    # Crisp White (ABGR)
+    highlight_color: Optional[str] = None,
+    primary_color: Optional[str] = None,
     margin_v: Optional[int] = None,
     aspect_ratio: str = "9:16",
+    subtitle_style: str = "hormozi_yellow",
 ) -> Path:
-    """Generate animated, word-highlighted ASS subtitles with strict scene boundary isolation.
+    """Generate animated, word-highlighted ASS subtitles with dynamic Hormozi pop bounce."""
+    cfg = SUBTITLE_STYLE_CONFIGS.get((subtitle_style or "").lower(), SUBTITLE_STYLE_CONFIGS["hormozi_yellow"])
+    effective_hl = highlight_color or cfg["highlight_color"]
+    effective_pri = primary_color or cfg["primary_color"]
+    is_bounce = cfg.get("bounce", True)
+    bump = cfg.get("scale_bump", 125)
+    bounce_ms = cfg.get("bounce_duration_ms", 120)
 
-    Groups words into short phrases (2-4 words) strictly within each scene,
-    preventing captions from straddling two distinct scenes across cuts.
-    """
     if not words:
-        output_file.write_text(create_ass_header(margin_v=margin_v, aspect_ratio=aspect_ratio), encoding="utf-8")
+        output_file.write_text(create_ass_header(margin_v=margin_v, aspect_ratio=aspect_ratio, primary_color=effective_pri, highlight_color=effective_hl), encoding="utf-8")
         return output_file
 
     lines = [create_ass_header(
         font_name=font_name,
         font_size=font_size,
-        primary_color=primary_color,
-        highlight_color=highlight_color,
+        primary_color=effective_pri,
+        highlight_color=effective_hl,
         margin_v=margin_v,
         aspect_ratio=aspect_ratio,
     )]
@@ -392,8 +473,13 @@ def generate_ass_subtitles(
                 for idx, w in enumerate(chunk):
                     cleaned_text = w.text.strip().upper()
                     if idx == active_idx:
-                        # Highlight active word in bright yellow with crisp white baseline
-                        formatted_words.append(f"{{\\c{highlight_color}&}}{cleaned_text}{{\\c{primary_color}&}}")
+                        # Highlight active word with animated Hormozi pop-bounce
+                        if is_bounce:
+                            formatted_words.append(
+                                f"{{\\fscx{bump}\\fscy{bump}\\t(0,{bounce_ms},\\fscx100\\fscy100)\\c{effective_hl}&}}{cleaned_text}{{\\fscx100\\fscy100\\c{effective_pri}&}}"
+                            )
+                        else:
+                            formatted_words.append(f"{{\\c{effective_hl}&}}{cleaned_text}{{\\c{effective_pri}&}}")
                     else:
                         formatted_words.append(cleaned_text)
 
@@ -411,20 +497,27 @@ def generate_story_ass_subtitles(
     words_per_line: int = 3,
     font_name: str = "Arial Black",
     font_size: Optional[int] = None,
-    highlight_color: str = "&H0000FFFF",  # Bright Yellow (ABGR)
+    highlight_color: Optional[str] = None,
     margin_v: Optional[int] = None,
     aspect_ratio: str = "9:16",
+    subtitle_style: str = "hormozi_yellow",
 ) -> Path:
-    """Generate animated ASS subtitles with per-character color coding and active-word yellow pop."""
+    """Generate animated ASS subtitles with per-character color coding and dynamic Hormozi pop bounce."""
+    cfg = SUBTITLE_STYLE_CONFIGS.get((subtitle_style or "").lower(), SUBTITLE_STYLE_CONFIGS["hormozi_yellow"])
+    effective_hl = highlight_color or cfg["highlight_color"]
+    is_bounce = cfg.get("bounce", True)
+    bump = cfg.get("scale_bump", 125)
+    bounce_ms = cfg.get("bounce_duration_ms", 120)
+
     if not words:
-        output_file.write_text(create_ass_header(margin_v=margin_v, aspect_ratio=aspect_ratio), encoding="utf-8")
+        output_file.write_text(create_ass_header(margin_v=margin_v, aspect_ratio=aspect_ratio, highlight_color=effective_hl), encoding="utf-8")
         return output_file
 
     lines = [create_ass_header(
         font_name=font_name,
         font_size=font_size,
         primary_color="&H00FFFFFF",
-        highlight_color=highlight_color,
+        highlight_color=effective_hl,
         margin_v=margin_v,
         aspect_ratio=aspect_ratio,
     )]
@@ -450,8 +543,13 @@ def generate_story_ass_subtitles(
                     cleaned_text = w.text.strip().upper()
                     char_ass_color = hex_to_ass_color(w.color_hex)
                     if idx == active_idx:
-                        # Active word highlighted in bright yellow, then returns to speaker's color
-                        formatted_words.append(f"{{\\c{highlight_color}&}}{cleaned_text}{{\\c{char_ass_color}&}}")
+                        # Active word highlighted with Hormozi pop bounce, then returns to speaker's color
+                        if is_bounce:
+                            formatted_words.append(
+                                f"{{\\fscx{bump}\\fscy{bump}\\t(0,{bounce_ms},\\fscx100\\fscy100)\\c{effective_hl}&}}{cleaned_text}{{\\fscx100\\fscy100\\c{char_ass_color}&}}"
+                            )
+                        else:
+                            formatted_words.append(f"{{\\c{effective_hl}&}}{cleaned_text}{{\\c{char_ass_color}&}}")
                     else:
                         formatted_words.append(f"{{\\c{char_ass_color}&}}{cleaned_text}")
 
@@ -551,6 +649,7 @@ def synthesize_script(
     output_dir: Optional[Path] = None,
     words_per_line: int = 3,
     aspect_ratio: str = "9:16",
+    subtitle_style: str = "hormozi_yellow",
 ) -> TTSResult:
     """Synthesize complete narration for all scenes in a VideoScript.
 
@@ -623,6 +722,7 @@ def synthesize_script(
         output_file=master_sub_path,
         words_per_line=words_per_line,
         aspect_ratio=aspect_ratio,
+        subtitle_style=subtitle_style,
     )
 
     total_duration = get_audio_duration(master_audio_path, fallback_duration=time_offset)
@@ -640,6 +740,7 @@ def synthesize_story_dialogue(
     output_dir: Optional[Path] = None,
     words_per_line: int = 3,
     aspect_ratio: str = "9:16",
+    subtitle_style: str = "hormozi_yellow",
 ) -> StoryTTSResult:
     """Synthesize multi-character dialogue for an AnimatedStoryScript.
 
@@ -749,6 +850,7 @@ def synthesize_story_dialogue(
         output_file=master_sub_path,
         words_per_line=words_per_line,
         aspect_ratio=aspect_ratio,
+        subtitle_style=subtitle_style,
     )
 
     total_duration = get_audio_duration(master_story_audio, fallback_duration=global_time)

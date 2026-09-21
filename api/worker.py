@@ -37,6 +37,8 @@ def execute_video_pipeline_job(
     characters: Optional[List[Any]] = None,
     series_id: Optional[str] = None,
     episode_number: Optional[int] = None,
+    music_track: Optional[str] = None,
+    subtitle_style: Optional[str] = "hormozi_yellow",
 ) -> None:
     """Execute the end-to-end 5-stage video pipeline in a background task.
 
@@ -46,16 +48,18 @@ def execute_video_pipeline_job(
     """
     selected_voice = voice or DEFAULT_VOICE
     logger.info(
-        "Starting background video generation job '%s' for topic '%s' (format: %s, platform: %s, series: %s, ep: %s)",
+        "Starting background video generation job '%s' for topic '%s' (format: %s, platform: %s, series: %s, ep: %s, music: %s, sub_style: %s)",
         job_id,
         topic,
         video_format,
         target_platform,
         series_id,
         episode_number,
+        music_track,
+        subtitle_style,
     )
 
-    # Preload Series Context if associated with a Series
+    # Preload Series Context and presets if associated with a Series
     series_context: Optional[str] = None
     if series_id:
         try:
@@ -64,6 +68,10 @@ def execute_video_pipeline_job(
             if series_data:
                 bible_json = series_data.get("bible_json") or {}
                 series_context = build_series_context_prompt(bible_json, next_episode_num=episode_number)
+                if not music_track:
+                    music_track = series_data.get("music_track") or bible_json.get("music_track")
+                if not subtitle_style or subtitle_style == "hormozi_yellow":
+                    subtitle_style = series_data.get("subtitle_style") or bible_json.get("subtitle_style") or "hormozi_yellow"
                 logger.info("[%s] Injected series context for series '%s' (Episode %s)", job_id, series_data.get("title"), episode_number)
         except Exception as s_err:
             logger.warning("[%s] Failed to load series context: %s", job_id, s_err)
@@ -91,6 +99,8 @@ def execute_video_pipeline_job(
                     mode=mode,
                     story_style=story_style,
                     characters=characters,
+                    music_track=music_track,
+                    subtitle_style=subtitle_style,
                 )
             )
             logger.info(
@@ -107,6 +117,16 @@ def execute_video_pipeline_job(
 
     # 2. Local Fallback Execution
     try:
+        # Resolve background music (URL, preset name, or local path)
+        resolved_bgm: Optional[Path] = None
+        if music_track and str(music_track).lower() not in ("none", "false", "off"):
+            try:
+                from engine.media_downloader import download_background_music
+                resolved_bgm = download_background_music(music_track)
+                logger.info("[%s] Resolved background music track: %s", job_id, resolved_bgm)
+            except Exception as bgm_err:
+                logger.warning("[%s] Failed to resolve background music '%s': %s", job_id, music_track, bgm_err)
+
         if mode == "story":
             logger.info("[%s] Executing Animated Story Pipeline (style: %s)...", job_id, story_style)
 
@@ -134,6 +154,8 @@ def execute_video_pipeline_job(
                 output_path=dest_output_path,
                 progress_callback=progress_cb,
                 series_context=series_context,
+                bgm_path=resolved_bgm,
+                subtitle_style=subtitle_style or "hormozi_yellow",
             )
             final_video_path = story_result.video_path
             file_size = final_video_path.stat().st_size
@@ -206,6 +228,7 @@ def execute_video_pipeline_job(
             voice=selected_voice,
             output_dir=tts_dir,
             aspect_ratio=aspect_ratio,
+            subtitle_style=subtitle_style or "hormozi_yellow",
         )
         update_video_job_record(
             job_id=job_id,
@@ -248,13 +271,14 @@ def execute_video_pipeline_job(
         dest_output_path = OUTPUT_DIR / output_filename
         render_work_dir = TEMP_DIR / "render" / job_id
 
-        logger.info("[%s] Stage 4/4: Assembling final %s video and burning subtitles...", job_id, video_format)
+        logger.info("[%s] Stage 4/4: Assembling final %s video and burning subtitles (BGM: %s)...", job_id, video_format, resolved_bgm.name if resolved_bgm else "None")
         final_video_path = render_video(
             downloaded_videos=downloaded_videos,
             tts_result=tts_result,
             output_path=dest_output_path,
             render_dir=render_work_dir,
             video_format=video_format,
+            bgm_path=resolved_bgm,
         )
 
         file_size = final_video_path.stat().st_size

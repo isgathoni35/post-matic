@@ -90,6 +90,14 @@ class VideoGenerateRequest(BaseModel):
         default=None,
         description="Episode sequence number within the series",
     )
+    music_track: Optional[str] = Field(
+        default=None,
+        description="Background music preset name or direct audio URL (e.g. TikTok sound or YouTube link)",
+    )
+    subtitle_style: Optional[str] = Field(
+        default="hormozi_yellow",
+        description="Subtitle animation style preset (e.g. 'hormozi_yellow', 'classic_white')",
+    )
 
 
 class PublishVideoRequest(BaseModel):
@@ -151,6 +159,16 @@ class CreateSeriesRequest(BaseModel):
     premise: Optional[str] = Field(default=None, description="Core series premise or narrative universe")
     world_rules: Optional[List[str]] = Field(default=None, description="Key rules and lore constraints")
     recurring_characters: Optional[List[Any]] = Field(default=None, description="Recurring cast members")
+    niche: Optional[str] = Field(default="scary_stories", description="Pre-engineered viral niche key")
+    art_style: Optional[str] = Field(default="cinematic_dark", description="Visual art style")
+    voice: Optional[str] = Field(default="en-US-BrianMultilingualNeural", description="Narrator voice")
+    music_track: Optional[str] = Field(default="cinematic_mystery", description="Background music preset")
+    subtitle_style: Optional[str] = Field(default="hormozi_yellow", description="Subtitle animation style")
+    autopilot_enabled: bool = Field(default=False, description="Whether automated daily posting is active")
+    post_frequency_per_day: int = Field(default=1, ge=1, le=3, description="Posts per day (1, 2, or 3)")
+    preferred_time_utc: str = Field(default="18:00", description="Target posting time in UTC (e.g. '18:00')")
+    target_platforms: List[str] = Field(default_factory=lambda: ["youtube"], description="Social platform targets")
+    require_approval: bool = Field(default=False, description="Whether manual approval is required before publishing")
 
 
 class UpdateSeriesBibleRequest(BaseModel):
@@ -159,6 +177,16 @@ class UpdateSeriesBibleRequest(BaseModel):
     world_rules: Optional[List[str]] = None
     tone: Optional[str] = None
     recurring_characters: Optional[List[Any]] = None
+    niche: Optional[str] = None
+    art_style: Optional[str] = None
+    voice: Optional[str] = None
+    music_track: Optional[str] = None
+    subtitle_style: Optional[str] = None
+    autopilot_enabled: Optional[bool] = None
+    post_frequency_per_day: Optional[int] = None
+    preferred_time_utc: Optional[str] = None
+    target_platforms: Optional[List[str]] = None
+    require_approval: Optional[bool] = None
 
 
 class SeriesResponse(BaseModel):
@@ -168,8 +196,28 @@ class SeriesResponse(BaseModel):
     title: str = Field(..., description="Series title")
     genre: Optional[str] = Field(default=None)
     tone: Optional[str] = Field(default=None)
+    niche: Optional[str] = Field(default="scary_stories")
+    art_style: Optional[str] = Field(default="cinematic_dark")
+    voice: Optional[str] = Field(default="en-US-BrianMultilingualNeural")
+    music_track: Optional[str] = Field(default="cinematic_mystery")
+    subtitle_style: Optional[str] = Field(default="hormozi_yellow")
+    autopilot_enabled: bool = Field(default=False)
+    post_frequency_per_day: int = Field(default=1)
+    preferred_time_utc: str = Field(default="18:00")
+    target_platforms: List[str] = Field(default_factory=lambda: ["youtube"])
+    require_approval: bool = Field(default=False)
+    last_posted_at: Optional[str] = Field(default=None)
+    next_post_at: Optional[str] = Field(default=None)
     bible_json: Optional[dict] = Field(default_factory=dict)
     episode_count: int = Field(default=0)
     created_at: str = Field(...)
     updated_at: str = Field(...)
     episodes: Optional[List[dict]] = Field(default=None)
+
+
+class AutopilotDispatchResponse(BaseModel):
+    """Result of an hourly autopilot scheduler execution."""
+    checked_count: int = Field(..., description="Total autopilot series evaluated")
+    dispatched_count: int = Field(..., description="Number of episodes queued for generation")
+    dispatched_jobs: List[dict] = Field(default_factory=list, description="List of created job metadata")
+

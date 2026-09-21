@@ -263,7 +263,7 @@ def burn_audio_and_subtitles(
         # Duck BGM underneath master narration (-22dB volume bed) with subtle fade-in and mix
         filter_parts.append(
             f"[2:a]volume={bgm_volume},afade=t=in:ss=0:d=1[bgm];"
-            f"[1:a][bgm]amix=inputs=2:duration=first:dropout_transition=2[aout]"
+            f"[1:a][bgm]amix=inputs=2:duration=first:dropout_transition=2:normalize=0[aout]"
         )
 
         cmd.extend([

@@ -28,6 +28,8 @@ async def dispatch_github_render_job(
     mode: str = "shorts",
     story_style: str = "anime",
     characters: Optional[Any] = None,
+    music_track: Optional[str] = None,
+    subtitle_style: Optional[str] = "hormozi_yellow",
 ) -> bool:
     """Trigger the GitHub Actions workflow via repository_dispatch to offload heavy rendering.
 
@@ -83,6 +85,8 @@ async def dispatch_github_render_job(
             "mode": mode or "shorts",
             "story_style": story_style or "anime",
             "characters": serialized_characters,
+            "music_track": music_track or "",
+            "subtitle_style": subtitle_style or "hormozi_yellow",
         },
     }
 

@@ -16,6 +16,9 @@ import {
   Save,
   Loader2,
   Plus,
+  Zap,
+  Power,
+  Radio,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,13 +27,18 @@ import {
   fetchSeriesDetail,
   updateSeriesBible,
   ShowBible,
+  triggerSeriesAutopilotNow,
+  toggleSeriesAutopilot,
 } from "@/lib/api";
+import { YouTubeIcon, TikTokIcon, InstagramIcon } from "@/components/social/social-icons";
+import { toast } from "sonner";
 
 interface SeriesDetailViewProps {
   seriesId: string;
   onBack: () => void;
   onStartEpisodeGeneration: (series: { id: string; title: string; nextEpisode: number }) => void;
   onSelectVideoJob?: (jobId: string) => void;
+  onOpenSocialModal?: () => void;
 }
 
 export function SeriesDetailView({
@@ -48,6 +56,8 @@ export function SeriesDetailView({
   const [editablePremise, setEditablePremise] = useState("");
   const [editableRules, setEditableRules] = useState("");
   const [editableTone, setEditableTone] = useState("");
+  const [isTriggeringNow, setIsTriggeringNow] = useState(false);
+  const [isTogglingAutopilot, setIsTogglingAutopilot] = useState(false);
 
   const loadDetail = async () => {
     setIsLoading(true);
@@ -94,6 +104,46 @@ export function SeriesDetailView({
     }
   };
 
+  const handleTriggerNow = async () => {
+    if (!series) return;
+    setIsTriggeringNow(true);
+    try {
+      const res = await triggerSeriesAutopilotNow(series.id);
+      toast.success(`⚡ Dispatched Episode #${res.job.episode_number}!`, {
+        description: `Generating '${res.job.topic?.slice(0, 50)}...' now in background pipeline.`,
+      });
+      loadDetail();
+    } catch (err: any) {
+      console.error("Failed to trigger series now:", err);
+      toast.error("Episode Trigger Failed", {
+        description: err.message || "Failed to trigger episode.",
+      });
+    } finally {
+      setIsTriggeringNow(false);
+    }
+  };
+
+  const isAutopilot = Boolean(
+    series?.autopilot_enabled ?? (series?.bible_json as any)?.autopilot_enabled ?? false
+  );
+
+  const handleToggleAutopilot = async () => {
+    if (!series) return;
+    setIsTogglingAutopilot(true);
+    const newStatus = !isAutopilot;
+    try {
+      await toggleSeriesAutopilot(series.id, newStatus);
+      setSeries((prev) => (prev ? { ...prev, autopilot_enabled: newStatus } : prev));
+      toast.success(newStatus ? "Autopilot Activated" : "Autopilot Paused");
+      loadDetail();
+    } catch (err: any) {
+      console.error("Failed to toggle autopilot:", err);
+      toast.error("Failed to update autopilot status");
+    } finally {
+      setIsTogglingAutopilot(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 space-y-3">
@@ -115,8 +165,11 @@ export function SeriesDetailView({
   }
 
   const nextEpNum = (series.episode_count || 0) + 1;
-  const bible = series.bible_json || {};
+  const bible = (series.bible_json as any) || {};
   const episodes = series.episodes || [];
+  const platforms = series.target_platforms || bible.target_platforms || ["youtube"];
+  const frequency = Number(series.post_frequency_per_day ?? bible.post_frequency_per_day ?? 1);
+  const preferredTime = String(series.preferred_time_utc ?? bible.preferred_time_utc ?? "18:00");
 
   return (
     <div className="w-full max-w-6xl mx-auto space-y-6">
@@ -146,21 +199,116 @@ export function SeriesDetailView({
           </div>
         </div>
 
-        <Button
-          variant="primary"
-          size="sm"
-          onClick={() =>
-            onStartEpisodeGeneration({
-              id: series.id,
-              title: series.title,
-              nextEpisode: nextEpNum,
-            })
-          }
-          className="h-9 text-xs font-semibold"
-        >
-          <Sparkles className="w-3.5 h-3.5 mr-1.5" />
-          <span>Produce Episode #{nextEpNum}</span>
-        </Button>
+        <div className="flex items-center gap-2">
+          {/* 1-Click Manual Trigger Override Button */}
+          <Button
+            variant="primary"
+            size="sm"
+            disabled={isTriggeringNow}
+            onClick={handleTriggerNow}
+            className="h-9 text-xs font-bold px-3 bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black border-none shadow-[0_0_15px_rgba(245,158,11,0.25)] flex items-center gap-1.5"
+            title="1-Click Override: Generate and dispatch the next episode immediately"
+          >
+            {isTriggeringNow ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-black" />
+            ) : (
+              <Zap className="w-3.5 h-3.5 text-black fill-black" />
+            )}
+            <span>{isTriggeringNow ? "Dispatching..." : `Trigger Ep #${nextEpNum} Now`}</span>
+          </Button>
+
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() =>
+              onStartEpisodeGeneration({
+                id: series.id,
+                title: series.title,
+                nextEpisode: nextEpNum,
+              })
+            }
+            className="h-9 text-xs font-semibold bg-white/[0.05] border-white/10"
+          >
+            <Sparkles className="w-3.5 h-3.5 mr-1.5 text-cyan-400" />
+            <span>Open Studio</span>
+          </Button>
+        </div>
+      </div>
+
+      {/* Autopilot Scheduling & Multi-Channel Health Banner */}
+      <div
+        className={`p-4 rounded-2xl border transition-all ${
+          isAutopilot
+            ? "border-emerald-500/30 bg-gradient-to-r from-emerald-950/30 via-zinc-950 to-zinc-950"
+            : "border-white/[0.08] pm-surface"
+        }`}
+      >
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              {isAutopilot ? (
+                <Badge
+                  variant="outline"
+                  className="border-emerald-500/40 bg-emerald-950/50 text-emerald-300 text-xs py-0.5 px-2.5 flex items-center gap-1.5 shadow-[0_0_12px_rgba(16,185,129,0.25)] font-semibold"
+                >
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                  </span>
+                  <span>AUTOPILOT: ACTIVE</span>
+                </Badge>
+              ) : (
+                <Badge variant="outline" className="border-white/10 text-zinc-500 text-xs py-0.5 px-2.5">
+                  Manual Creation Mode
+                </Badge>
+              )}
+
+              <span className="text-xs text-zinc-400 font-mono">
+                {frequency}x daily at {preferredTime} UTC
+              </span>
+            </div>
+
+            <p className="text-xs text-zinc-400 flex items-center gap-1.5 pt-0.5">
+              <Clock className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Next Scheduled Post:</span>
+              <strong className="text-zinc-200 font-mono">
+                {series.next_post_at ? new Date(series.next_post_at).toLocaleString() : "Due Now (Next Hourly Cron)"}
+              </strong>
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            {/* Publishing Channels */}
+            <div className="flex items-center gap-2 bg-black/40 px-3 py-1.5 rounded-lg border border-white/[0.06]">
+              <span className="text-[11px] text-zinc-400">Targets:</span>
+              {platforms.includes("youtube") && (
+                <YouTubeIcon className="w-4 h-4 text-red-500" title="YouTube Shorts" />
+              )}
+              {platforms.includes("tiktok") && (
+                <TikTokIcon className="w-4 h-4 text-cyan-400" title="TikTok" />
+              )}
+              {platforms.includes("instagram") && (
+                <InstagramIcon className="w-4 h-4 text-pink-400" title="Instagram Reels" />
+              )}
+            </div>
+
+            {/* Quick Autopilot Toggle */}
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={isTogglingAutopilot}
+              onClick={handleToggleAutopilot}
+              className={`h-8 text-xs font-medium border ${
+                isAutopilot
+                  ? "border-emerald-500/30 text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20"
+                  : "border-white/10 text-zinc-300 bg-white/[0.03] hover:border-white/20"
+              }`}
+            >
+              <Power className="w-3.5 h-3.5 mr-1.5" />
+              <span>{isAutopilot ? "Pause Autopilot" : "Activate Autopilot"}</span>
+            </Button>
+          </div>
+        </div>
       </div>
 
       {/* Show Bible Section */}

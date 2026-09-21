@@ -27,6 +27,8 @@ export interface GenerateVideoPayload {
   characters?: CustomCharacterPayload[];
   series_id?: string;
   episode_number?: number;
+  music_track?: string;
+  subtitle_style?: string;
 }
 
 export interface VideoJobResponse {
@@ -335,7 +337,30 @@ export interface SeriesItem {
   title: string;
   genre?: string | null;
   tone?: string | null;
-  bible_json?: ShowBible | null;
+  niche?: string | null;
+  art_style?: string | null;
+  voice?: string | null;
+  music_track?: string | null;
+  subtitle_style?: string | null;
+  autopilot_enabled?: boolean;
+  post_frequency_per_day?: number;
+  preferred_time_utc?: string;
+  target_platforms?: string[];
+  require_approval?: boolean;
+  last_posted_at?: string | null;
+  next_post_at?: string | null;
+  bible_json?: (ShowBible & {
+    niche?: string;
+    art_style?: string;
+    voice?: string;
+    music_track?: string;
+    subtitle_style?: string;
+    autopilot_enabled?: boolean;
+    post_frequency_per_day?: number;
+    preferred_time_utc?: string;
+    target_platforms?: string[];
+    require_approval?: boolean;
+  }) | null;
   episode_count: number;
   created_at: string;
   updated_at: string;
@@ -350,6 +375,16 @@ export interface CreateSeriesPayload {
   premise?: string;
   world_rules?: string[];
   recurring_characters?: any[];
+  niche?: string;
+  art_style?: string;
+  voice?: string;
+  music_track?: string;
+  subtitle_style?: string;
+  autopilot_enabled?: boolean;
+  post_frequency_per_day?: number;
+  preferred_time_utc?: string;
+  target_platforms?: string[];
+  require_approval?: boolean;
 }
 
 /**
@@ -421,4 +456,65 @@ export async function deleteSeries(seriesId: string): Promise<void> {
     throw new Error("Failed to delete series");
   }
 }
+
+export interface AutopilotDispatchResult {
+  checked_count: number;
+  dispatched_count: number;
+  dispatched_jobs: Array<{
+    series_id: string;
+    series_title: string;
+    job_id: string;
+    episode_number: number;
+    topic: string;
+    publish_youtube: boolean;
+    next_post_at: string;
+    last_posted_at: string;
+  }>;
+}
+
+/**
+ * Triggers global hourly autopilot evaluation across all due series.
+ */
+export async function triggerAutopilotDispatch(): Promise<AutopilotDispatchResult> {
+  const response = await fetch(`${API_BASE_URL}/api/series/autopilot/dispatch`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+  });
+  if (!response.ok) {
+    throw new Error("Failed to trigger autopilot dispatch");
+  }
+  return response.json();
+}
+
+/**
+ * 1-click manual override to immediately trigger the next episode of a specific series.
+ */
+export async function triggerSeriesAutopilotNow(seriesId: string): Promise<{
+  status: string;
+  message: string;
+  job: any;
+}> {
+  const response = await fetch(`${API_BASE_URL}/api/series/${seriesId}/autopilot/trigger`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+  });
+  if (!response.ok) {
+    throw new Error("Failed to trigger next episode for series");
+  }
+  return response.json();
+}
+
+/**
+ * Quick-toggles autopilot active/inactive for a specific series.
+ */
+export async function toggleSeriesAutopilot(seriesId: string, enabled: boolean): Promise<SeriesItem> {
+  const response = await fetch(`${API_BASE_URL}/api/series/${seriesId}/autopilot/toggle?enabled=${enabled}`, {
+    method: "PATCH",
+  });
+  if (!response.ok) {
+    throw new Error("Failed to toggle series autopilot");
+  }
+  return response.json();
+}
+
 

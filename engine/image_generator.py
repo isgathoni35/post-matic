@@ -33,8 +33,8 @@ def get_gemini_client(api_key: Optional[str] = None) -> genai.Client:
 
 STYLE_MODIFIERS = {
     "anime": (
-        "Japanese 2D anime masterwork keyframe, Studio Mappa and Ufotable aesthetic, "
-        "crisp cel-shaded lines, vibrant anime color palette, expressive features, "
+        "(2D Japanese anime illustration:1.5), studio MAPPA and Ufotable aesthetic, "
+        "crisp cel-shaded lines, vibrant anime color palette, expressive anime features, "
         "dynamic anime lighting, dramatic action lines, high resolution, 9:16 vertical composition, "
         "no watermark, no subtitles, no text, no photorealism, non-photorealistic 2D drawing"
     ),
@@ -44,15 +44,38 @@ STYLE_MODIFIERS = {
         "hyperdetailed textures, 9:16 vertical composition, no text, no watermark, stylized 3D CGI"
     ),
     "stickman": (
-        "Epic 2D stick figure martial arts action battle, Alan Becker animator vs animation aesthetic, "
-        "minimalist dark background, crisp glowing neon line art stick figures with solid circular blank heads, "
+        "(simple 2D stickman drawing:1.6), minimalist line art, pure line figures, blank circular head, "
+        "Alan Becker animator vs animation aesthetic, clean dark or white minimalist background, "
+        "crisp glowing neon line art stick figures with solid circular blank heads, "
         "fluid acrobatic fighting choreography, glowing energy combat trails, speed lines, "
-        "sharp focus, 9:16 vertical composition, no text, no watermark, no photorealism, no real humans"
+        "sharp 2D vector focus, 9:16 vertical composition, non-photorealistic:1.5, no text, no watermark, no photorealism, no real humans"
     ),
     "3d_cartoon": (
         "DreamWorks and Pixar 3D feature animation style, rich subsurface scattering, "
         "whimsical expressive character design, cinematic studio lighting, vibrant storybook textures, "
         "masterwork 3D render, 9:16 vertical composition, no text, no watermark, stylized cartoon design"
+    ),
+    "cinematic_dark": (
+        "Dark cinematic mystery, David Fincher and Denis Villeneuve aesthetic, moody low-key shadows, "
+        "atmospheric volumetric fog, high contrast, cinematic film grain, hyperdetailed 8k cinematography, "
+        "sharp focus, masterwork quality, 9:16 vertical composition, no text, no watermark, no captions"
+    ),
+    "mythic_epic": (
+        "Mythic epic fantasy masterwork, Peter Jackson and Zack Snyder aesthetic, cinematic golden hour lighting, "
+        "grand mythical architecture, crackling divine energy, volumetric god rays, hyperdetailed 8k resolution, "
+        "sharp focus, professional cinematography, 9:16 vertical composition, no text, no watermark"
+    ),
+    "modern_candid": (
+        "Modern cinematic candid aesthetic, hyperrealistic urban lifestyle, 35mm shallow depth of field, "
+        "authentic natural lighting, crisp high definition, 9:16 vertical composition, no text, no watermark"
+    ),
+    "noir_thriller": (
+        "Neo-noir thriller cinematography, moody deep shadows, high-contrast neon reflections on wet asphalt, "
+        "Michael Mann style, sleek high-tension composition, 8k resolution, 9:16 vertical composition, no text, no watermark"
+    ),
+    "heartwarming_cinematic": (
+        "Warm cinematic photography, golden hour natural rim lighting, emotional documentary style, "
+        "Kodak Portra 400 color tones, soft bokeh, heartwarming human empathy, 9:16 vertical composition, no text, no watermark"
     ),
     "realistic": (
         "Cinematic vertical 9:16 composition, photorealistic, 8k resolution, "
@@ -65,11 +88,11 @@ STYLE_MODIFIERS = {
 NEGATIVE_PROMPTS = {
     "stickman": (
         "photorealistic, real humans, realistic skin, human face, realistic anatomy, live action, "
-        "photography, clothing, denim, hair, real life footage, blurry, low quality, watermark, text"
+        "photography, clothing, denim, hair, real life footage, 3d render, blurry, low quality, watermark, text"
     ),
     "anime": (
         "photorealistic, real humans, live action, 3d render, photography, real life footage, "
-        "real skin, realistic eyes, blurry, low quality, watermark, text"
+        "real skin, realistic eyes, blurry, low quality, watermark, text, western comic"
     ),
     "donghua": (
         "photorealistic real humans, live action, 2D flat drawing, blurry, low quality, watermark, text"
@@ -77,10 +100,26 @@ NEGATIVE_PROMPTS = {
     "3d_cartoon": (
         "photorealistic real humans, live action, photography, real life footage, blurry, low quality, watermark, text"
     ),
+    "cinematic_dark": (
+        "bright cheerful colors, oversaturated, cartoon, 2d drawing, anime, blurry, low resolution, watermark, text"
+    ),
+    "mythic_epic": (
+        "modern buildings, cars, smartphones, cartoon, flat 2d, low resolution, blurry, watermark, text"
+    ),
+    "modern_candid": (
+        "cartoon, 3d render, anime, fantasy armor, sci-fi weapons, blurry, low resolution, watermark, text"
+    ),
+    "noir_thriller": (
+        "daylight sunshine, bright cheerful, cartoon, fantasy, anime, blurry, low resolution, watermark, text"
+    ),
+    "heartwarming_cinematic": (
+        "dark horror, gloomy, frightening, monsters, blood, cartoon, 3d render, anime, blurry, watermark, text"
+    ),
     "realistic": (
         "cartoon, 2d, drawing, anime, illustration, low resolution, blurry, watermark, text"
     ),
 }
+
 
 
 def generate_zero_opex_image(
@@ -140,13 +179,18 @@ def generate_zero_opex_image(
     return None
 
 
-def build_cinematic_prompt(visual_description: str, topic: Optional[str] = None) -> str:
-    """Construct an enhanced, photorealistic 9:16 prompt for Imagen 3."""
+def build_cinematic_prompt(
+    visual_description: str,
+    topic: Optional[str] = None,
+    style: str = "realistic",
+) -> str:
+    """Construct an enhanced, style-specific 9:16 prompt for SDXL/Imagen."""
     clean_desc = visual_description.strip()
     context_prefix = f"Topic context: {topic.strip()}. " if topic and topic.strip() else ""
 
-    enhancers = STYLE_MODIFIERS["realistic"]
-    neg_clause = NEGATIVE_PROMPTS.get("realistic", "")
+    style_key = style.lower() if style else "realistic"
+    enhancers = STYLE_MODIFIERS.get(style_key, STYLE_MODIFIERS["realistic"])
+    neg_clause = NEGATIVE_PROMPTS.get(style_key, NEGATIVE_PROMPTS.get("realistic", ""))
     neg_part = f" Avoid: {neg_clause}." if neg_clause else ""
     return f"{context_prefix}{clean_desc}. {enhancers}.{neg_part}"
 
@@ -159,6 +203,7 @@ def build_story_scene_prompt(
 ) -> str:
     """Construct an anchored, style-specific 9:16 prompt for animated story scenes."""
     clean_desc = visual_description.strip()
+
     env = environment_anchor.strip()
     chars = " | ".join([c.strip() for c in character_dna_list]) if character_dna_list else ""
 
@@ -181,8 +226,9 @@ def generate_ai_scene_image(
     api_key: Optional[str] = None,
     preferred_model: Optional[str] = None,
     aspect_ratio: str = "9:16",
+    style: str = "realistic",
 ) -> Optional[Path]:
-    """Generate a custom photorealistic image for a scene using Zero-OpEx AI engine with Imagen fallback."""
+    """Generate a custom styled visual keyframe for a scene using Zero-OpEx AI engine with Imagen fallback."""
     target_dir = output_dir or (TEMP_DIR / "media")
     target_dir.mkdir(parents=True, exist_ok=True)
     output_path = target_dir / f"scene_{scene_id}_ai_visual.jpg"
@@ -192,7 +238,7 @@ def generate_ai_scene_image(
         logger.info("Using cached AI visual for Scene %d: %s", scene_id, output_path)
         return output_path
 
-    prompt = build_cinematic_prompt(visual_description, topic)
+    prompt = build_cinematic_prompt(visual_description, topic, style=style)
 
     # 1. Primary: Fast Zero-OpEx AI Image Generation (SDXL Turbo)
     zero_opex_img = generate_zero_opex_image(

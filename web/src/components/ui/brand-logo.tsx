@@ -48,39 +48,49 @@ export function BrandIcon({
         <div className="absolute inset-0 rounded-[inherit] bg-gradient-to-tr from-indigo-500/15 via-violet-500/10 to-transparent blur-sm pointer-events-none" />
       )}
 
-      {/* Custom Interlocking Aperture Vector */}
+      {/* New Neon Infinity Play Logo */}
       <svg
         viewBox="0 0 32 32"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="relative z-10 w-[62%] h-[62%]"
+        className="relative z-10 w-[70%] h-[70%]"
       >
         <defs>
-          <linearGradient id="aperture-grad-1" x1="4" y1="4" x2="28" y2="28" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#ffffff" />
-            <stop offset="60%" stopColor="#e4e4e7" />
-            <stop offset="100%" stopColor="#a1a1aa" />
+          <linearGradient id="neon-purple" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#a855f7" />
+            <stop offset="100%" stopColor="#ec4899" />
           </linearGradient>
-          <linearGradient id="aperture-grad-2" x1="28" y1="4" x2="4" y2="28" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#ffffff" />
-            <stop offset="100%" stopColor="#6366f1" />
+          <linearGradient id="neon-cyan" x1="32" y1="32" x2="0" y2="0" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#06b6d4" />
+            <stop offset="100%" stopColor="#3b82f6" />
           </linearGradient>
         </defs>
-
-        {/* Continuous Loop Segments forming Aperture & Play Core */}
-        <path
-          d="M9 7C7.89543 7 7 7.89543 7 9V17.5C7 18.3284 7.67157 19 8.5 19H12.5C13.3284 19 14 18.3284 14 17.5V11C14 9.89543 14.8954 9 16 9H23C24.1046 9 25 8.10457 25 7C25 5.89543 24.1046 5 23 5H11C9.89543 5 9 5.89543 9 7Z"
-          fill="url(#aperture-grad-1)"
+        
+        {/* Infinity Left Loop (Purple) */}
+        <path 
+          d="M16 16 C 10 26, 3 22, 3 16 C 3 10, 10 6, 16 16 Z" 
+          stroke="url(#neon-purple)" 
+          strokeWidth="2.5" 
+          strokeLinecap="round" 
+          strokeLinejoin="round" 
+          className="drop-shadow-[0_0_4px_rgba(168,85,247,0.6)]" 
         />
-        <path
-          d="M23 25C24.1046 25 25 24.1046 25 23V14.5C25 13.6716 24.3284 13 23.5 13H19.5C18.6716 13 18 13.6716 18 14.5V21C18 22.1046 17.1046 23 16 23H9C7.89543 23 7 23.8954 7 25C7 26.1046 7.89543 27 9 27H21C22.1046 27 23 26.1046 23 25Z"
-          fill="url(#aperture-grad-1)"
-          opacity="0.85"
+        
+        {/* Infinity Right Loop (Cyan) */}
+        <path 
+          d="M16 16 C 22 6, 29 10, 29 16 C 29 22, 22 26, 16 16 Z" 
+          stroke="url(#neon-cyan)" 
+          strokeWidth="2.5" 
+          strokeLinecap="round" 
+          strokeLinejoin="round" 
+          className="drop-shadow-[0_0_4px_rgba(6,182,212,0.6)]" 
         />
-        {/* Dynamic Play Iris Center */}
-        <polygon
-          points="14,12 21,16 14,20"
-          fill="url(#aperture-grad-2)"
+        
+        {/* Play Button Center */}
+        <polygon 
+          points="13.5,11 20.5,16 13.5,21" 
+          fill="white" 
+          className="drop-shadow-[0_0_5px_rgba(255,255,255,0.7)]" 
         />
       </svg>
     </div>

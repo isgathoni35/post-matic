@@ -132,7 +132,7 @@ def mix_sfx_and_bgm(
     mix_str = "".join(mix_inputs)
     total_inputs = len(mix_inputs)
     filter_parts.append(
-        f"{mix_str}amix=inputs={total_inputs}:duration=first:dropout_transition=2[aout]"
+        f"{mix_str}amix=inputs={total_inputs}:duration=first:dropout_transition=2:normalize=0[aout]"
     )
 
     cmd.extend([

@@ -397,6 +397,108 @@ def fetch_script_media(
     return downloaded_videos
 
 
+def download_background_music(
+    source: Optional[str],
+    output_dir: Optional[Path] = None,
+    ffmpeg_bin: Optional[str] = None,
+) -> Optional[Path]:
+    """Resolve, download, or extract background music from a URL, preset name, or local path.
+
+    Supports:
+    - Direct TikTok sound/video URLs (e.g., https://www.tiktok.com/@... or https://vm.tiktok.com/...)
+    - YouTube / YouTube Shorts / Audio links (e.g., https://www.youtube.com/...)
+    - Direct audio URLs (.mp3, .wav, .m4a, .aac, .ogg)
+    - Local preset names ('cinematic_ambient', 'lofi_chill', etc.)
+    - Existing local file paths
+    """
+    if not source or not str(source).strip():
+        return None
+
+    clean_source = str(source).strip()
+
+    # Case 1: Direct local file path
+    local_path = Path(clean_source)
+    if local_path.exists() and local_path.is_file():
+        logger.info("Found local background music file: %s", local_path)
+        return local_path
+
+    # Case 2: Preset name in assets/audio/
+    preset_candidate = PROJECT_ROOT / "assets" / "audio" / f"{clean_source}.mp3"
+    if preset_candidate.exists():
+        logger.info("Matched BGM preset in assets/audio: %s", preset_candidate)
+        return preset_candidate
+    preset_candidate_direct = PROJECT_ROOT / "assets" / "audio" / clean_source
+    if preset_candidate_direct.exists() and preset_candidate_direct.is_file():
+        logger.info("Matched BGM direct file in assets/audio: %s", preset_candidate_direct)
+        return preset_candidate_direct
+
+    # Case 3: URL (TikTok, YouTube, Direct Audio Link)
+    if clean_source.startswith(("http://", "https://")):
+        import hashlib
+        import yt_dlp
+        from engine.video_renderer import get_ffmpeg_binary
+
+        target_dir = output_dir or (TEMP_DIR / "audio" / "bgm")
+        target_dir.mkdir(parents=True, exist_ok=True)
+
+        url_hash = hashlib.md5(clean_source.encode("utf-8")).hexdigest()[:12]
+        cached_file = target_dir / f"bgm_{url_hash}.mp3"
+        if cached_file.exists() and cached_file.stat().st_size > 1000:
+            logger.info("Using cached background music for '%s': %s", clean_source, cached_file)
+            return cached_file
+
+        ffmpeg_path = ffmpeg_bin or get_ffmpeg_binary()
+        output_template = str(target_dir / f"bgm_{url_hash}.%(ext)s")
+
+        ydl_opts = {
+            "format": "bestaudio/best",
+            "outtmpl": output_template,
+            "postprocessors": [{
+                "key": "FFmpegExtractAudio",
+                "preferredcodec": "mp3",
+                "preferredquality": "192",
+            }],
+            "ffmpeg_location": ffmpeg_path,
+            "quiet": True,
+            "no_warnings": True,
+            "noplaylist": True,
+            "socket_timeout": 30,
+        }
+
+        try:
+            logger.info("Downloading background music via yt-dlp from: %s", clean_source)
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                ydl.download([clean_source])
+
+            if cached_file.exists() and cached_file.stat().st_size > 0:
+                logger.info("Successfully extracted BGM to %s (%d bytes)", cached_file, cached_file.stat().st_size)
+                return cached_file
+
+            # Look for any file with this prefix in case yt-dlp saved it under another extension
+            candidates = list(target_dir.glob(f"bgm_{url_hash}.*"))
+            if candidates and candidates[0].stat().st_size > 0:
+                logger.info("Found extracted BGM file: %s", candidates[0])
+                return candidates[0]
+
+        except Exception as yt_err:
+            logger.warning("yt-dlp extraction failed for '%s': %s. Trying direct download...", clean_source, yt_err)
+            try:
+                download_file(clean_source, cached_file)
+                if cached_file.exists() and cached_file.stat().st_size > 0:
+                    logger.info("Successfully downloaded audio directly: %s", cached_file)
+                    return cached_file
+            except Exception as dl_err:
+                logger.error("Direct download fallback failed: %s", dl_err)
+
+    # Fallback: Default ambient BGM if available
+    default_bgm = PROJECT_ROOT / "assets" / "audio" / "cinematic_ambient.mp3"
+    if default_bgm.exists():
+        logger.info("Falling back to default background music: %s", default_bgm)
+        return default_bgm
+
+    return None
+
+
 if __name__ == "__main__":
     from engine.schema import Scene
     print("Testing Pexels Stock Video Downloader...")

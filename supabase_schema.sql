@@ -117,6 +117,18 @@ CREATE TABLE IF NOT EXISTS public.series (
     tone TEXT,
     bible_json JSONB DEFAULT '{}'::jsonb,
     episode_count INTEGER DEFAULT 0,
+    autopilot_enabled BOOLEAN DEFAULT false NOT NULL,
+    post_frequency_per_day INTEGER DEFAULT 1 NOT NULL CHECK (post_frequency_per_day BETWEEN 1 AND 3),
+    preferred_time_utc TEXT DEFAULT '18:00' NOT NULL,
+    target_platforms TEXT[] DEFAULT ARRAY['youtube']::TEXT[],
+    require_approval BOOLEAN DEFAULT false NOT NULL,
+    next_post_at TIMESTAMP WITH TIME ZONE,
+    last_posted_at TIMESTAMP WITH TIME ZONE,
+    niche TEXT DEFAULT 'scary_stories',
+    art_style TEXT DEFAULT 'cinematic_dark',
+    voice TEXT DEFAULT 'en-US-BrianMultilingualNeural',
+    music_track TEXT DEFAULT 'cinematic_mystery',
+    subtitle_style TEXT DEFAULT 'hormozi_yellow',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
@@ -127,6 +139,7 @@ ALTER TABLE public.video_jobs
     ADD COLUMN IF NOT EXISTS episode_number INTEGER;
 
 CREATE INDEX IF NOT EXISTS idx_series_user_id ON public.series(user_id);
+CREATE INDEX IF NOT EXISTS idx_series_autopilot_due ON public.series(autopilot_enabled, next_post_at);
 CREATE INDEX IF NOT EXISTS idx_video_jobs_series_id ON public.video_jobs(series_id);
 
 ALTER TABLE public.series ENABLE ROW LEVEL SECURITY;

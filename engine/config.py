@@ -42,6 +42,9 @@ INSTAGRAM_REDIRECT_URI = os.getenv("INSTAGRAM_REDIRECT_URI", "http://localhost:8
 GITHUB_PAT = os.getenv("GITHUB_PAT", "")
 GITHUB_REPO = os.getenv("GITHUB_REPO", "isgathoni35/post-matic")
 
+# Autopilot Scheduler Security
+AUTOPILOT_SECRET = os.getenv("AUTOPILOT_SECRET", "")
+
 # Gemini model fallback hierarchy
 GEMINI_MODELS = [
     "gemini-3.7-flash",

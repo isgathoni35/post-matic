@@ -24,6 +24,106 @@ Your mission is to craft scripts that sound 100% human, authentic, and high-rete
 6. Stock Search Keywords: Provide 2-4 concrete, visual, high-yield search keywords per scene (nouns, lighting, camera actions in stock libraries like Pexels). Avoid abstract buzzwords.
 """
 
+VIRAL_NICHE_CONFIGS = {
+    "scary_stories": {
+        "name": "Scary Stories & Creepypasta",
+        "hook_formula": (
+            "Scene 1 MUST deliver a chilling, curiosity-inducing hook within the first 3 seconds "
+            "(e.g. 'In October 2017, a hiker vanished off trail 9... what authorities recovered from his phone wasn't human.')."
+        ),
+        "tone_rules": (
+            "Dread, suspense, creeping mystery. Use short, breath-catching sentences. "
+            "Use ellipses (...) and em-dashes (—) for tense pauses. Never use upbeat or cheerful language. "
+            "End with an unsettling lingering question that forces comments."
+        ),
+        "visual_guidance": "Dark, fog-drenched woods, flickering flashlights, abandoned hallways, shadows moving in peripheral vision.",
+    },
+    "mythology": {
+        "name": "Mythology & Ancient Gods",
+        "hook_formula": (
+            "Scene 1 MUST open with a clash of titans or an ominous divine edict "
+            "(e.g. 'The gods didn't banish Prometheus for giving fire to humans. They banished him for what he stole next.')."
+        ),
+        "tone_rules": (
+            "Majestic, booming, awe-inspiring, fateful. Grand descriptive adjectives, mythic stakes, "
+            "and thunderous transitions. Emphasize ancient consequences and divine hubris."
+        ),
+        "visual_guidance": "Golden temples atop storm-swept mountains, crackling divine lightning, ancient marble ruins, ethereal auras.",
+    },
+    "school_gossip": {
+        "name": "School Gossip & Secret Confessions",
+        "hook_formula": (
+            "Scene 1 MUST ignite immediate dramatic conflict and relatable disbelief "
+            "(e.g. 'My best friend swore she was sick on Friday... until I saw her location at my boyfriend's apartment.')."
+        ),
+        "tone_rules": (
+            "Fast first-person monologue, high-energy conversational contractions ('she'd', 'I couldn't', 'wait for it'), "
+            "rapid-fire gossip pacing, interpersonal stakes, and an unresolved moral cliffhanger."
+        ),
+        "visual_guidance": "High school locker corridors, glowing smartphone text bubbles, classroom whispers, late-night suburban streets.",
+    },
+    "dark_history": {
+        "name": "Dark History & Unsolved Truths",
+        "hook_formula": (
+            "Scene 1 MUST shatter a widely held historical misconception with an unsettling counter-intuitive fact "
+            "(e.g. 'Every textbook tells you Napoleon died of illness in exile. But his autopsy hid a terrifying secret.')."
+        ),
+        "tone_rules": (
+            "Cold, forensic, investigative, sharp. Lay out chronological revelations like an elite documentary investigator. "
+            "Alternate factual evidence with shocking human details."
+        ),
+        "visual_guidance": "Sepia archival manuscripts, antique clocks, vintage European battlefields shrouded in smoke, classified dossier vaults.",
+    },
+    "heists": {
+        "name": "Heists & Masterminds",
+        "hook_formula": (
+            "Scene 1 MUST detail an impossible security breach with zero detection "
+            "(e.g. 'They walked out of the Antwerp diamond center with 100 million dollars in jewels. Not a single alarm tripped.')."
+        ),
+        "tone_rules": (
+            "Calculated, pulse-pounding, rhythmic clock-ticking tension. Break down the precision blueprint step-by-step. "
+            "Highlight the mastermind's psychological loophole."
+        ),
+        "visual_guidance": "Laser grids in fortified vaults, blueprint schematics on metallic desks, security camera feeds, gloved hands in shadow.",
+    },
+    "anime_lore": {
+        "name": "Anime Battles & Lore",
+        "hook_formula": (
+            "Scene 1 MUST present an unfathomable power feat or broken ability "
+            "(e.g. 'He spent 10 years mastering a forbidden blade stance... and in 0.4 seconds, dismantled an entire army.')."
+        ),
+        "tone_rules": (
+            "Adrenaline-fueled, dramatic hype, high-intensity vocal pacing. Emphasize power escalation, "
+            "philosophical clashes of ideals, and legendary techniques."
+        ),
+        "visual_guidance": "Glowing energy auras, lightning-fast katana strikes, dimensional rifts, cel-shaded Japanese battle keyframes.",
+    },
+    "kindness": {
+        "name": "Acts of Kindness & Hope",
+        "hook_formula": (
+            "Scene 1 MUST introduce an unsung hero facing heartbreaking odds "
+            "(e.g. 'He spent 30 years baking bread for neighborhood kids... until the morning his bakery burned to the ground.')."
+        ),
+        "tone_rules": (
+            "Warm, deeply empathetic, emotionally resonant crescendo. Build genuine tears and goosebumps, "
+            "culminating in an uplifting twist that inspires viewers to share."
+        ),
+        "visual_guidance": "Warm golden sunlight, humble storefronts, compassionate embraces, communities gathering, tears of gratitude.",
+    },
+    "stickman": {
+        "name": "Stickman Viral Drama & Action",
+        "hook_formula": (
+            "Scene 1 MUST launch straight into chaotic martial arts acrobatics or snappy comedic banter "
+            "(e.g. 'Red Stickman challenged the Grand Master with nothing but a wooden ruler. It did not go as planned.')."
+        ),
+        "tone_rules": (
+            "Fast-paced, witty, comedic banter, sudden martial arts escalation, kinetic cartoon timing, "
+            "and hilarious unexpected twist endings."
+        ),
+        "visual_guidance": "Minimalist clean background, glowing neon stick figure martial artists, acrobatic aerial kicks, energy trails.",
+    },
+}
+
 
 def get_gemini_client(api_key: Optional[str] = None) -> genai.Client:
     """Initialize and return a Google GenAI client."""
@@ -42,6 +142,7 @@ def generate_script(
     api_key: Optional[str] = None,
     preferred_model: Optional[str] = None,
     series_context: Optional[str] = None,
+    niche: Optional[str] = None,
 ) -> VideoScript:
     """Generate a structured video script using the Gemini API.
 
@@ -52,6 +153,7 @@ def generate_script(
         api_key: Optional override for Gemini API key.
         preferred_model: Optional override for preferred Gemini model.
         series_context: Optional Show Bible continuity context for episodic series.
+        niche: Optional pre-engineered viral niche key with retention formula.
 
     Returns:
         VideoScript: Strictly validated Pydantic model instance.
@@ -74,16 +176,27 @@ def generate_script(
 
     series_prefix = f"{series_context}\n\n" if series_context else ""
 
+    niche_clause = ""
+    if niche and niche.lower() in VIRAL_NICHE_CONFIGS:
+        cfg = VIRAL_NICHE_CONFIGS[niche.lower()]
+        niche_clause = (
+            f"\nVIRAL RETENTION NICHE DIRECTIVE ({cfg['name']}):\n"
+            f"- Hook Rule: {cfg['hook_formula']}\n"
+            f"- Pacing & Tone: {cfg['tone_rules']}\n"
+            f"- Visual Focus: {cfg['visual_guidance']}\n"
+        )
+
     prompt = f"""{series_prefix}Topic: {topic}
 Target Duration: approximately {target_duration} seconds.
 Target Scenes: exactly {num_scenes} scenes.
-Target Total Spoken Words: approximately {target_words} words across all {num_scenes} scenes (~{words_per_scene} words per scene).
+Target Total Spoken Words: approximately {target_words} words across all {num_scenes} scenes (~{words_per_scene} words per scene).{niche_clause}
 
 CRITICAL: The narration must be substantial enough to fill the full {target_duration}-second runtime when spoken aloud at a natural pace (~2.5 words per second). Each scene's narration should average {words_per_scene} words. Do NOT write terse one-liners.
 
 Generate a complete, captivating short-form video script with title, description, tags, and {num_scenes} scenes.
 Ensure the narration sounds like an engaging human narrator with contractions, expressive pauses (..., —, ?), and strong hooks.
 Ensure search_keywords are concrete visual search queries that yield great results on Pexels."""
+
 
     models_to_try = [preferred_model] if preferred_model else []
     for m in GEMINI_MODELS:
@@ -208,6 +321,7 @@ def generate_story_script(
     api_key: Optional[str] = None,
     preferred_model: Optional[str] = None,
     series_context: Optional[str] = None,
+    niche: Optional[str] = None,
 ) -> AnimatedStoryScript:
     """Generate a structured multi-character animated screenplay using the Gemini API.
 
@@ -220,6 +334,7 @@ def generate_story_script(
         api_key: Optional override for Gemini API key.
         preferred_model: Optional override for preferred Gemini model.
         series_context: Optional Show Bible continuity context for episodic series.
+        niche: Optional pre-engineered viral niche key with retention formula.
 
     Returns:
         AnimatedStoryScript: Strictly validated Pydantic model instance with cast, dialogue, and SFX cues.
@@ -245,6 +360,15 @@ def generate_story_script(
         cast_clause = "\nSTRICT CAST DIRECTIVE:\nThe screenplay MUST exclusively star the following user-defined cast:\n" + "\n".join(cast_lines) + "\nIn the returned 'characters' list, you MUST preserve these exact characters with their identical IDs, names, and visual DNA. All dialogue lines must be assigned to these characters using their exact 'speaker_id'.\n"
 
     series_prefix = f"{series_context}\n\n" if series_context else ""
+
+    niche_clause = ""
+    if niche and niche.lower() in VIRAL_NICHE_CONFIGS:
+        cfg = VIRAL_NICHE_CONFIGS[niche.lower()]
+        niche_clause = (
+            f"\nVIRAL RETENTION NICHE DIRECTIVE ({cfg['name']}):\n"
+            f"- Hook Rule: {cfg['hook_formula']}\n"
+            f"- Pacing & Banter: {cfg['tone_rules']}\n"
+        )
 
     style_directives = {
         "stickman": (
@@ -275,7 +399,7 @@ def generate_story_script(
     prompt = f"""{series_prefix}Topic: {topic}
 Animation Style: {style} (e.g. 'anime', 'donghua', 'stickman', or '3d_cartoon')
 Target Total Duration: approximately {target_duration} seconds.
-Target Scenes: exactly {num_scenes} scenes.{cast_clause}{style_block}
+Target Scenes: exactly {num_scenes} scenes.{cast_clause}{style_block}{niche_clause}
 
 Generate a complete, captivating multi-character animated screenplay with a full cast, multi-turn dialogue, embedded action SFX cues (such as punch_heavy, flight_whoosh, glass_clink, etc.), consistent character visual_dna anchors, and environment_anchor settings.
 Ensure the dialogue is punchy, authentic, comedic or intense according to the topic, and includes natural human contractions and expressive pauses."""

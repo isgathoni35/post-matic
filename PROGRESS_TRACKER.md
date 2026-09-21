@@ -38,3 +38,25 @@
 - [x] **Step 5.1:** Add root service health and metadata route (`GET /`) to FastAPI backend for Render deployment.
 - [x] **Step 5.2:** Connect FastAPI backend to GitHub Actions via `repository_dispatch` to offload heavy FFmpeg rendering to GitHub's free 7 GB RAM runner, avoiding Render 512 MB OOM crashes.
 - [x] **Step 5.3:** Implement autonomous 1-click & auto-publishing flow to YouTube Shorts (`POST /api/social/publish/{job_id}`) across both backend API and frontend Next.js console/library views.
+
+---
+
+### Phase 6: Autonomous SaaS Transformation (FacelessReels Parity & Supremacy)
+- [x] **Step 6.1:** Brand Overhaul & High-Converting FacelessReels-Style Landing Page (New Neon Glow Logo Redesign, Dark-mode glow aesthetic, infinite vertical video reel marquee, 3-column competitor comparison grid, "We actually get views" proof metrics, and mobile-responsive navigation).
+- [x] **Step 6.2:** 3-Step "Create a Series" Wizard with 8 Pre-Engineered Viral Niche Engines (Replace raw text prompt inputs with visual niche cards, strict SDXL prompt enforcement to prevent human-defaulting for anime/stickman, and fine-tuned viral retention prompt schemas and tone constraints).
+- [x] **Step 6.3:** Trending Audio & Enhanced Hormozi Subtitle Engine (Support for background music mixing with volume ducking, direct TikTok sound link parsing, and animated dynamic word-level highlight captions).
+- [x] **Step 6.4:** Zero-OpEx Autonomous Daily Autopilot Scheduler (Database schema migration for `series.autopilot_enabled`, `frequency`, `preferred_time_utc`, plus an hourly GitHub Actions cron / worker dispatcher that executes renders and publishes while the user sleeps).
+- [x] **Step 6.5:** Autopilot Dashboard & Social Multi-Channel Health Monitor (Refreshed series cards showing live `AUTOPILOT: ACTIVE` status, next scheduled post timestamp, connected TikTok/IG/YouTube account health using high-quality actual social icons globally, and 1-click manual trigger overrides).
+
+---
+
+### Phase 7: FacelessReels-Style Clean SaaS UI Redesign
+- [ ] **Step 7.1:** Foundation — Global Theme Switch to Light Mode (Redefine CSS variables in `globals.css` for white backgrounds, dark text, purple `#6c5ce7` accent. Update `layout.tsx` body classes. Ensure login page also adopts the light theme.)
+- [ ] **Step 7.2:** Navigation Header Redesign (White background, simplified 3-link nav centered, "Sign in with Google" outline button + solid purple "Get started" CTA on right. Remove neon glow from logo. Update `brand-logo.tsx`.)
+- [ ] **Step 7.3:** Hero Section — Centered Single-Column Layout (Replace 2-column grid+phone mockup with centered layout: avatar social proof row, bold centered headline, muted subtitle, "Perfect for" platform icons, single purple CTA button, subtext. Add subtle grid-pattern background with radial mask.)
+- [ ] **Step 7.4:** Video Showcase Marquee Cleanup (Clean white 9:16 thumbnail cards with rounded-xl, poster image + bottom niche label overlay. Remove view count badges and neon glow. Add doodle arrow annotation "Creates videos for any niche". Left/right gradient fade masks on white.)
+- [ ] **Step 7.5:** Social Proof — "We Actually Get Views" + Stat Counters (Centered heading + subtitle on white. Channel showcase carousel with TikTok-style analytics screenshots. Two large stat counters in purple text below — "X channels automated" / "Y videos autoposted".)
+- [ ] **Step 7.6:** Comparison Section — "Why Creators Choose Us" (3 clean white cards: "Hiring video editors" ❌, "Creating videos yourself" ❌, "PostMatic" ✅ with highlighted border. Subtle grey borders, no dark surfaces or neon glow.)
+- [ ] **Step 7.7:** Testimonials Marquee (NEW section — two-row opposite-direction scrolling testimonial cards. Each card: avatar/initial, name, 5 gold stars, short review text. Clean white cards with light border.)
+- [ ] **Step 7.8:** "How It Works" — Alternating Step Layout (3 steps with alternating text+screenshot layout on white. Colored step badges, green checkmark bullet points, app UI screenshots on alternating sides.)
+- [ ] **Step 7.9:** FAQ Accordion + Final CTA + Footer (Clean white accordion with light borders. Final CTA section with purple button. Simple footer with copyright and links.)

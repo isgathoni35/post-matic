@@ -53,6 +53,8 @@ async def generate_video_job(
         characters=payload.characters,
         series_id=payload.series_id,
         episode_number=payload.episode_number,
+        music_track=payload.music_track,
+        subtitle_style=payload.subtitle_style,
     )
     return job
 
