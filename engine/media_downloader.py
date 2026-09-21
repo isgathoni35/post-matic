@@ -224,22 +224,32 @@ def fetch_scene_media(
     target_dir = output_dir or (TEMP_DIR / "media")
     used = used_ids if used_ids is not None else set()
 
-    # Step 1: Search Pexels for stock video
-    search_result = search_pexels_video(
-        keywords=keywords,
-        min_duration=min(3.0, target_duration),
-        used_ids=used,
-        api_key=api_key,
-        video_format=video_format,
-    )
+    # Quarantine Pexels if the topic/scene requests stylized animation (stickman, anime, etc.)
+    # Pexels exclusively contains live-action humans and will ruin stylized video genres.
+    stylized_terms = {"stickman", "stick figure", "anime", "manga", "donghua", "3d_cartoon", "animation", "cel shaded"}
+    combined_desc = f"{topic or ''} {' '.join(keywords)} {visual_description or ''}".lower()
+    is_stylized = any(term in combined_desc for term in stylized_terms)
 
-    # Step 2: If stock video returned no match, try Google Imagen 3 AI visual generation
+    search_result = None
+
+    # Step 1: Search Pexels for stock video (ONLY for realistic/live-action content)
+    if not is_stylized:
+        search_result = search_pexels_video(
+            keywords=keywords,
+            min_duration=min(3.0, target_duration),
+            used_ids=used,
+            api_key=api_key,
+            video_format=video_format,
+        )
+    else:
+        logger.info("Scene %d is stylized animation (%s). Quarantining Pexels stock video to prevent real-human footage.", scene_id, topic)
+
+    # Step 2: AI Visual Generation via Zero-OpEx Engine / Imagen 3
     use_ai = enable_ai_fallback if enable_ai_fallback is not None else ENABLE_AI_IMAGE_FALLBACK
-    if not search_result and use_ai:
+    if (not search_result and use_ai) or is_stylized:
         prompt_desc = visual_description or (", ".join(keywords) if keywords else "cinematic visual")
         aspect_ratio = "16:9" if video_format == "long" else "9:16"
-        logger.info("Pexels returned 0 clips for Scene %d. Triggering Imagen 3 AI visual generation (%s)...", scene_id, aspect_ratio)
-        print(f"      [AI Visual Fallback] Generating {aspect_ratio} custom visual with Imagen 3 for Scene {scene_id}...", flush=True)
+        logger.info("Generating AI visual keyframe for Scene %d (%s, stylized=%s)...", scene_id, aspect_ratio, is_stylized)
 
         ai_image_path = generate_ai_scene_image(
             scene_id=scene_id,
@@ -259,15 +269,34 @@ def fetch_scene_media(
                 duration=target_duration,
                 width=target_w,
                 height=target_h,
-                download_url="ai://imagen-3",
+                download_url="ai://zero-opex",
                 keyword_used=prompt_desc[:50],
                 is_ai_generated=True,
                 source="imagen",
             )
-        logger.warning("AI image generation was unavailable for Scene %d. Proceeding to topic stock fallback.", scene_id)
+        logger.warning("AI image generation was unavailable for Scene %d. Proceeding to fallback.", scene_id)
 
-    # Step 3: Topic-anchored stock fallback (replaces generic nature/stars)
+    # Step 3: Fallback media resolution
     if not search_result:
+        if is_stylized:
+            from engine.pipeline import create_fallback_story_frame
+            fallback_img_path = target_dir / f"scene_{scene_id}_stylized_fallback.jpg"
+            detected_style = "stickman" if "stick" in combined_desc else ("anime" if "anime" in combined_desc else "donghua")
+            create_fallback_story_frame(scene_id, detected_style, fallback_img_path)
+            target_w, target_h = (1920, 1080) if video_format == "long" else (1080, 1920)
+            return DownloadedVideo(
+                scene_id=scene_id,
+                video_id=900000 + scene_id,
+                file_path=fallback_img_path,
+                duration=target_duration,
+                width=target_w,
+                height=target_h,
+                download_url="ai://procedural-stylized",
+                keyword_used=topic[:50] if topic else "stylized",
+                is_ai_generated=True,
+                source="imagen",
+            )
+
         topic_fallbacks: List[str] = []
         if topic and topic.strip():
             clean_top = re.sub(r"[^\w\s]", "", topic).strip()

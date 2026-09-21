@@ -144,6 +144,8 @@ def test_api_generate_triggers_background_task():
             mode="shorts",
             story_style="anime",
             characters=None,
+            series_id=None,
+            episode_number=None,
         )
 
 
@@ -179,6 +181,9 @@ def test_execute_video_pipeline_job_dispatches_to_github(mock_enabled, mock_disp
         privacy="unlisted",
         video_format="short",
         target_platform="youtube",
+        mode="shorts",
+        story_style="anime",
+        characters=None,
     )
 
 
@@ -214,4 +219,7 @@ def test_execute_video_pipeline_job_dispatches_long_format_to_github(mock_enable
         privacy="public",
         video_format="long",
         target_platform="youtube",
+        mode="shorts",
+        story_style="anime",
+        characters=None,
     )

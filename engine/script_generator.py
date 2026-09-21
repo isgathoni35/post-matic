@@ -246,10 +246,36 @@ def generate_story_script(
 
     series_prefix = f"{series_context}\n\n" if series_context else ""
 
+    style_directives = {
+        "stickman": (
+            "CRITICAL STYLE REQUIREMENT FOR STICKMAN:\n"
+            "- All characters MUST be 2D minimalist line stick figures (Alan Becker animator vs animation style).\n"
+            "- Characters have blank spherical heads, thin line bodies/limbs, and distinct neon or monochrome colors (e.g. 'Red Stickman: pure glowing neon-crimson line figure with circle head', 'Blue Stickman: pure glowing cyan-blue line figure with circle head').\n"
+            "- STRICTLY FORBIDDEN: DO NOT include human hair, realistic human skin, human eyes, denim jackets, or realistic clothing in any character's 'visual_dna'.\n"
+            "- In every scene's 'visual_description', depict dynamic stick figure acrobatic martial arts, combat maneuvers, or energy attacks—NEVER realistic human people."
+        ),
+        "anime": (
+            "CRITICAL STYLE REQUIREMENT FOR ANIME:\n"
+            "- All characters MUST be 2D Japanese anime cel-shaded illustrations (Studio MAPPA and Ufotable aesthetic).\n"
+            "- Visual DNA must emphasize stylized 2D anime hair, expressive anime features, and colorful anime attire.\n"
+            "- In every scene's 'visual_description', focus on dynamic 2D anime action lines, dramatic framing, and non-photorealistic illustrations—NEVER live-action or photorealistic humans."
+        ),
+        "donghua": (
+            "CRITICAL STYLE REQUIREMENT FOR DONGHUA:\n"
+            "- Characters MUST be stylized 3D Chinese cultivation fantasy (xianxia) animated characters with luminous martial auras, ethereal flowing robes, and CGI features."
+        ),
+        "3d_cartoon": (
+            "CRITICAL STYLE REQUIREMENT FOR 3D CARTOON:\n"
+            "- Characters MUST be stylized 3D cartoon characters with Pixar/DreamWorks exaggerated proportions, whimsical features, and vibrant storybook CGI textures."
+        ),
+    }
+    style_guide = style_directives.get(style.lower(), "")
+    style_block = f"\n\n{style_guide}\n" if style_guide else ""
+
     prompt = f"""{series_prefix}Topic: {topic}
 Animation Style: {style} (e.g. 'anime', 'donghua', 'stickman', or '3d_cartoon')
 Target Total Duration: approximately {target_duration} seconds.
-Target Scenes: exactly {num_scenes} scenes.{cast_clause}
+Target Scenes: exactly {num_scenes} scenes.{cast_clause}{style_block}
 
 Generate a complete, captivating multi-character animated screenplay with a full cast, multi-turn dialogue, embedded action SFX cues (such as punch_heavy, flight_whoosh, glass_clink, etc.), consistent character visual_dna anchors, and environment_anchor settings.
 Ensure the dialogue is punchy, authentic, comedic or intense according to the topic, and includes natural human contractions and expressive pauses."""

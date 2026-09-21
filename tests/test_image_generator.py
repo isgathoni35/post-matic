@@ -26,9 +26,10 @@ class TestImageGenerator(unittest.TestCase):
         self.assertIn("photorealistic", prompt)
         self.assertIn("no text", prompt)
 
+    @patch("engine.image_generator.generate_zero_opex_image", return_value=None)
     @patch("engine.image_generator.get_gemini_client")
-    def test_generate_ai_scene_image_success(self, mock_get_client):
-        """Verify successful generation writes image bytes to disk."""
+    def test_generate_ai_scene_image_success(self, mock_get_client, mock_zero_opex):
+        """Verify successful generation writes image bytes to disk when fallback to Imagen occurs."""
         mock_client = MagicMock()
         mock_get_client.return_value = mock_client
 
@@ -55,8 +56,9 @@ class TestImageGenerator(unittest.TestCase):
         self.assertTrue(res.exists())
         self.assertEqual(res.read_bytes(), fake_image_bytes)
 
+    @patch("engine.image_generator.generate_zero_opex_image", return_value=None)
     @patch("engine.image_generator.get_gemini_client")
-    def test_generate_ai_scene_image_handles_failure(self, mock_get_client):
+    def test_generate_ai_scene_image_handles_failure(self, mock_get_client, mock_zero_opex):
         """Verify errors or exhausted models gracefully return None."""
         mock_client = MagicMock()
         mock_get_client.return_value = mock_client
@@ -73,6 +75,31 @@ class TestImageGenerator(unittest.TestCase):
         )
 
         self.assertIsNone(res)
+
+    @patch("engine.image_generator.generate_zero_opex_image")
+    def test_generate_story_scene_image_prioritizes_zero_opex(self, mock_zero_opex):
+        """Verify story scene image generator uses zero-opex engine first."""
+        import tempfile
+        from engine.image_generator import generate_story_scene_image
+        tmp_dir = Path(tempfile.mkdtemp())
+        def fake_generate(prompt, output_path, **kwargs):
+            output_path.write_bytes(b"\xFF\xD8\xFF\xE0" + b"X" * 5000)
+            return output_path
+
+        mock_zero_opex.side_effect = fake_generate
+
+        res = generate_story_scene_image(
+            scene_id=1,
+            visual_description="Red stickman kicks Blue stickman",
+            environment_anchor="Dojo",
+            character_dna_list=["Red: neon stick figure"],
+            style="stickman",
+            output_dir=tmp_dir,
+        )
+
+        self.assertIsNotNone(res)
+        self.assertTrue(res.exists())
+        mock_zero_opex.assert_called_once()
 
 
 if __name__ == "__main__":

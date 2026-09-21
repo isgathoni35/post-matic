@@ -184,7 +184,7 @@ def generate_faceless_video(
 
 
 def create_fallback_story_frame(scene_id: int, style: str, output_path: Path) -> Path:
-    """Create a high-contrast themed backdrop if AI generation is temporarily unavailable."""
+    """Create a high-contrast themed stylized procedural frame if external AI is temporarily offline."""
     import subprocess
     import shutil
     import imageio_ffmpeg
@@ -192,25 +192,48 @@ def create_fallback_story_frame(scene_id: int, style: str, output_path: Path) ->
     ffmpeg_bin = shutil.which("ffmpeg") or imageio_ffmpeg.get_ffmpeg_exe()
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    color_map = {
-        "anime": "0x1a1a2e",
-        "donghua": "0x0f3460",
-        "stickman": "0x111111",
-        "3d_cartoon": "0x2d4059",
-    }
-    bg_color = color_map.get(style.lower(), "0x1e1e24")
+    style_clean = style.lower().strip()
+    if style_clean == "stickman":
+        # Draw dynamic neon stick figure martial artist using procedural geometry
+        # Alternate poses based on scene_id
+        shift = (scene_id % 3) * 60
+        vf = (
+            f"drawbox=x={480+shift}:y=480:w=120:h=120:color=0x38BDF8:t=fill,"  # Head
+            f"drawbox=x={530+shift}:y=600:w=20:h=320:color=0x38BDF8:t=fill,"   # Torso
+            f"drawbox=x={410+shift}:y=680:w=260:h=20:color=0x38BDF8:t=fill,"   # Arms (Punch pose)
+            f"drawbox=x={480+shift}:y=920:w=20:h=260:color=0x38BDF8:t=fill,"   # Left Leg
+            f"drawbox=x={580+shift}:y=920:w=20:h=260:color=0x38BDF8:t=fill,"   # Right Leg
+            f"drawbox=x=0:y=1180:w=1080:h=6:color=0x22C55E@0.5:t=fill"          # Neon Ground Plane
+        )
+        bg_color = "0x09090e"
+    elif style_clean == "anime":
+        # Anime speed lines & cinematic dark aesthetic
+        vf = (
+            "drawbox=x=100:y=0:w=6:h=1920:color=0x6366F1@0.4:t=fill,"
+            "drawbox=x=980:y=0:w=6:h=1920:color=0x6366F1@0.4:t=fill,"
+            "drawbox=x=0:y=940:w=1080:h=40:color=0xA855F7@0.3:t=fill"
+        )
+        bg_color = "0x0f0e17"
+    else:
+        color_map = {
+            "donghua": "0x0b132b",
+            "3d_cartoon": "0x1c1917",
+        }
+        bg_color = color_map.get(style_clean, "0x111118")
+        vf = "drawbox=x=0:y=960:w=1080:h=8:color=0x6366F1@0.3:t=fill"
 
     cmd = [
         ffmpeg_bin, "-y",
         "-f", "lavfi",
         "-i", f"color=c={bg_color}:s=1080x1920:d=1",
+        "-vf", vf,
         "-frames:v", "1",
         str(output_path),
     ]
     try:
         subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning("Procedural fallback frame generation error: %s", e)
     return output_path
 
 

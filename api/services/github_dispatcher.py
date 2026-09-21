@@ -25,6 +25,9 @@ async def dispatch_github_render_job(
     privacy: str = "public",
     video_format: str = "short",
     target_platform: str = "youtube",
+    mode: str = "shorts",
+    story_style: str = "anime",
+    characters: Optional[Any] = None,
 ) -> bool:
     """Trigger the GitHub Actions workflow via repository_dispatch to offload heavy rendering.
 
@@ -38,6 +41,9 @@ async def dispatch_github_render_job(
         privacy: YouTube privacy status ('public', 'unlisted', 'private').
         video_format: 'short' (9:16) or 'long' (16:9).
         target_platform: 'youtube', 'tiktok', or 'instagram'.
+        mode: 'shorts' or 'story'.
+        story_style: 'anime', 'donghua', 'stickman', or '3d_cartoon'.
+        characters: Optional list of custom character models or dicts.
 
     Returns:
         bool: True if dispatch was successfully received by GitHub (HTTP 204).
@@ -54,6 +60,14 @@ async def dispatch_github_render_job(
         "User-Agent": "PostMatic-Dispatcher/1.0",
     }
 
+    serialized_characters = []
+    if characters:
+        for c in characters:
+            if hasattr(c, "model_dump"):
+                serialized_characters.append(c.model_dump())
+            elif isinstance(c, dict):
+                serialized_characters.append(c)
+
     payload = {
         "event_type": "render_video",
         "client_payload": {
@@ -66,13 +80,18 @@ async def dispatch_github_render_job(
             "privacy": privacy or "public",
             "video_format": video_format or "short",
             "target_platform": target_platform or "youtube",
+            "mode": mode or "shorts",
+            "story_style": story_style or "anime",
+            "characters": serialized_characters,
         },
     }
 
     logger.info(
-        "Dispatching render job '%s' to GitHub Actions (%s)...",
+        "Dispatching render job '%s' to GitHub Actions (%s, mode: %s, style: %s)...",
         job_id,
         GITHUB_REPO,
+        mode,
+        story_style,
     )
 
     async with httpx.AsyncClient(timeout=20.0) as client:

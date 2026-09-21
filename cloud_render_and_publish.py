@@ -3,6 +3,7 @@
 import argparse
 import asyncio
 import logging
+import json
 from pathlib import Path
 import sys
 from typing import Optional
@@ -16,7 +17,7 @@ from api.db import get_social_accounts, update_video_job_record
 from api.schemas import VideoJobStatus
 from api.services.storage import upload_video_to_supabase, prune_expired_storage_videos
 from api.services.token_manager import ensure_valid_access_token
-from engine.pipeline import generate_faceless_video
+from engine.pipeline import generate_faceless_video, generate_animated_story_video
 from engine.social.youtube_uploader import upload_video_to_youtube
 from engine.tts_engine import DEFAULT_VOICE
 
@@ -42,6 +43,9 @@ def main():
     parser.add_argument("--format", "--video-format", dest="video_format", type=str, default="short", choices=["short", "long"], help="Video format: short (9:16) or long (16:9)")
     parser.add_argument("--platform", type=str, default="youtube", choices=["youtube", "tiktok", "instagram"], help="Target social platform")
     parser.add_argument("--access-token", type=str, default=None, help="Direct access token override")
+    parser.add_argument("--mode", type=str, default="shorts", choices=["shorts", "story"], help="Video generation mode ('shorts' or 'story')")
+    parser.add_argument("--story-style", "--style", dest="story_style", type=str, default="anime", choices=["anime", "donghua", "stickman", "3d_cartoon"], help="Style for animated story")
+    parser.add_argument("--characters", type=str, default=None, help="JSON serialized custom characters")
 
     args = parser.parse_args()
 
@@ -68,14 +72,41 @@ def main():
                 logger.warning("[%s] Failed updating progress milestone: %s", job_id, e)
 
     try:
-        logger.info("Starting cloud generation for topic: '%s' (format: %s)...", args.topic, args.video_format)
-        result = generate_faceless_video(
-            topic=args.topic,
-            target_duration=args.duration,
-            voice=args.voice,
-            video_format=args.video_format,
-            progress_callback=on_progress,
-        )
+        if args.mode == "story":
+            logger.info("Starting cloud animated story generation for topic: '%s' (style: %s)...", args.topic, args.story_style)
+            custom_characters = None
+            if args.characters:
+                try:
+                    custom_characters = json.loads(args.characters)
+                except Exception as e:
+                    logger.warning("Could not parse custom characters JSON: %s", e)
+
+            def story_progress(status_name: str, pct: int, payload: Optional[dict] = None):
+                status_enum = {
+                    "scripting": "scripting",
+                    "synthesizing": "synthesizing",
+                    "foley_mixing": "synthesizing",
+                    "sourcing_visuals": "sourcing_media",
+                    "rendering": "rendering",
+                }.get(status_name, "rendering")
+                on_progress(status_enum, pct, payload if status_name == "scripting" else None)
+
+            result = generate_animated_story_video(
+                topic=args.topic,
+                style=args.story_style,
+                target_duration=args.duration,
+                custom_characters=custom_characters,
+                progress_callback=story_progress,
+            )
+        else:
+            logger.info("Starting cloud generation for topic: '%s' (format: %s)...", args.topic, args.video_format)
+            result = generate_faceless_video(
+                topic=args.topic,
+                target_duration=args.duration,
+                voice=args.voice,
+                video_format=args.video_format,
+                progress_callback=on_progress,
+            )
 
         logger.info("Video generation completed: %s (%d bytes)", result.video_path, result.file_size_bytes)
 

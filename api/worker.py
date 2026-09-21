@@ -88,6 +88,9 @@ def execute_video_pipeline_job(
                     privacy=privacy,
                     video_format=video_format,
                     target_platform=target_platform,
+                    mode=mode,
+                    story_style=story_style,
+                    characters=characters,
                 )
             )
             logger.info(

@@ -57,6 +57,24 @@ on:
           - tiktok
           - instagram
         default: 'youtube'
+      mode:
+        description: 'Generation mode (shorts or story)'
+        required: false
+        type: choice
+        options:
+          - shorts
+          - story
+        default: 'shorts'
+      story_style:
+        description: 'Story style (anime, donghua, stickman, 3d_cartoon)'
+        required: false
+        type: choice
+        options:
+          - anime
+          - donghua
+          - stickman
+          - 3d_cartoon
+        default: 'anime'
 
   repository_dispatch:
     types: [render_video]
@@ -109,7 +127,9 @@ jobs:
               ${{ github.event.client_payload.publish_youtube && '--publish-youtube' || '' }} \
               --privacy "${{ github.event.client_payload.privacy || 'public' }}" \
               --format "${{ github.event.client_payload.video_format || 'short' }}" \
-              --platform "${{ github.event.client_payload.target_platform || 'youtube' }}"
+              --platform "${{ github.event.client_payload.target_platform || 'youtube' }}" \
+              --mode "${{ github.event.client_payload.mode || 'shorts' }}" \
+              --story-style "${{ github.event.client_payload.story_style || 'anime' }}"
           else
             python cloud_render_and_publish.py \
               --topic "${{ inputs.topic }}" \
@@ -120,7 +140,9 @@ jobs:
               ${{ inputs.publish_youtube && '--publish-youtube' || '' }} \
               --privacy "${{ inputs.privacy }}" \
               --format "${{ inputs.format }}" \
-              --platform "${{ inputs.platform }}"
+              --platform "${{ inputs.platform }}" \
+              --mode "${{ inputs.mode || 'shorts' }}" \
+              --story-style "${{ inputs.story_style || 'anime' }}"
           fi
 
       - name: Upload Output Video Artifact
