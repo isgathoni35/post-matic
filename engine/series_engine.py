@@ -487,7 +487,7 @@ def dispatch_due_autopilot_series(
 
         niche = series.get("niche") or bible.get("niche", "scary_stories")
         voice = series.get("voice") or bible.get("voice", "en-US-BrianMultilingualNeural")
-        music_track = series.get("music_track") or bible.get("music_track", "cinematic_mystery")
+        music_track = series.get("music_track") if series.get("music_track") is not None else bible.get("music_track", "cinematic_mystery")
         subtitle_style = series.get("subtitle_style") or bible.get("subtitle_style", "hormozi_yellow")
         story_style = series.get("art_style") or bible.get("art_style", "anime")
         mode = "story" if niche in ("stickman", "anime_lore") or "story" in str(series.get("genre", "")).lower() else "shorts"
@@ -639,7 +639,7 @@ def trigger_series_autopilot_now(
 
     niche = series.get("niche") or bible.get("niche", "scary_stories")
     voice = series.get("voice") or bible.get("voice", "en-US-BrianMultilingualNeural")
-    music_track = series.get("music_track") or bible.get("music_track", "cinematic_mystery")
+    music_track = series.get("music_track") if series.get("music_track") is not None else bible.get("music_track", "cinematic_mystery")
     subtitle_style = series.get("subtitle_style") or bible.get("subtitle_style", "hormozi_yellow")
     story_style = series.get("art_style") or bible.get("art_style", "anime")
     mode = "story" if niche in ("stickman", "anime_lore") or "story" in str(series.get("genre", "")).lower() else "shorts"

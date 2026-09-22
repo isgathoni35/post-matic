@@ -94,6 +94,18 @@ def main():
                 logger.warning("[%s] Failed updating progress milestone: %s", job_id, e)
 
     try:
+        # Resolve background music (URL, preset name, or local path)
+        resolved_bgm: Optional[Union[Path, str]] = None
+        if args.music_track and str(args.music_track).strip().lower() not in ("none", "false", "off", "no"):
+            try:
+                from engine.media_downloader import download_background_music
+                resolved_bgm = download_background_music(args.music_track)
+                logger.info("Resolved cloud background music track: %s", resolved_bgm)
+            except Exception as bgm_err:
+                logger.warning("Failed to resolve cloud background music '%s': %s", args.music_track, bgm_err)
+        elif args.music_track and str(args.music_track).strip().lower() in ("none", "false", "off", "no"):
+            resolved_bgm = "none"
+
         if args.mode == "story":
             logger.info("Starting cloud animated story generation for topic: '%s' (style: %s)...", args.topic, args.story_style)
             custom_characters = None
@@ -119,15 +131,19 @@ def main():
                 target_duration=args.duration,
                 custom_characters=custom_characters,
                 progress_callback=story_progress,
+                bgm_path=resolved_bgm,
+                subtitle_style=args.subtitle_style,
             )
         else:
-            logger.info("Starting cloud generation for topic: '%s' (format: %s)...", args.topic, args.video_format)
+            logger.info("Starting cloud generation for topic: '%s' (format: %s, music: %s)...", args.topic, args.video_format, resolved_bgm)
             result = generate_faceless_video(
                 topic=args.topic,
                 target_duration=args.duration,
                 voice=args.voice,
                 video_format=args.video_format,
                 progress_callback=on_progress,
+                bgm_path=resolved_bgm,
+                subtitle_style=args.subtitle_style,
             )
 
         logger.info("Video generation completed: %s (%d bytes)", result.video_path, result.file_size_bytes)

@@ -28,6 +28,7 @@ import {
   Film,
   Compass,
   Check,
+  VolumeX,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -197,8 +198,46 @@ export function StudioConsoleView({
       if (auditionAudioRef.current) {
         auditionAudioRef.current.pause();
       }
+      if (auditionMusicRef.current) {
+        auditionMusicRef.current.pause();
+      }
     };
   }, []);
+
+  // Music Audition playback state
+  const [auditionMusicId, setAuditionMusicId] = useState<string | null>(null);
+  const auditionMusicRef = useRef<HTMLAudioElement | null>(null);
+
+  const togglePlayMusicSample = (trackId: string, previewUrl: string | null, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!previewUrl) return;
+
+    if (auditionMusicId === trackId) {
+      if (auditionMusicRef.current) {
+        auditionMusicRef.current.pause();
+        auditionMusicRef.current.currentTime = 0;
+      }
+      setAuditionMusicId(null);
+    } else {
+      if (auditionMusicRef.current) {
+        auditionMusicRef.current.pause();
+        auditionMusicRef.current.currentTime = 0;
+      }
+      const audio = new Audio(previewUrl);
+      auditionMusicRef.current = audio;
+      setAuditionMusicId(trackId);
+
+      audio.play().catch((err) => {
+        console.warn("Music audition error:", err);
+        setAuditionMusicId(null);
+      });
+      audio.onended = () => setAuditionMusicId(null);
+      audio.onerror = () => {
+        console.warn(`Music audition sample failed to load for ${trackId}`);
+        setAuditionMusicId(null);
+      };
+    }
+  };
 
   const togglePlayVoiceSample = (voiceId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -973,20 +1012,45 @@ export function StudioConsoleView({
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {MUSIC_TRACKS.map((track) => {
                   const isSelected = musicTrack === track.id;
+                  const isPlaying = auditionMusicId === track.id;
                   return (
-                    <button
+                    <div
                       key={track.id}
-                      type="button"
                       onClick={() => setMusicTrack?.(track.id)}
-                      className={`p-2 rounded-lg border text-left transition-all ${
+                      className={`p-2 rounded-lg border text-left cursor-pointer transition-all flex items-center justify-between ${
                         isSelected
-                          ? "bg-purple-50/80 border-[#6c5ce7] text-slate-900 font-semibold shadow-2xs"
+                          ? "bg-purple-50/80 border-[#6c5ce7] text-slate-900 font-semibold shadow-2xs ring-1 ring-[#6c5ce7]"
                           : "bg-slate-50/70 border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-white"
                       }`}
                     >
-                      <p className="text-xs font-medium truncate">{track.name}</p>
-                      <p className="text-[10px] text-slate-500 truncate font-medium">{track.mood}</p>
-                    </button>
+                      <div className="space-y-0.5 min-w-0 pr-1">
+                        <div className="flex items-center gap-1">
+                          <p className="text-xs font-medium truncate">{track.name}</p>
+                          {isSelected && <Check className="w-3 h-3 text-[#6c5ce7] shrink-0" />}
+                        </div>
+                        <p className="text-[10px] text-slate-500 truncate font-medium">{track.mood}</p>
+                      </div>
+                      {track.previewUrl ? (
+                        <button
+                          type="button"
+                          onClick={(e) => togglePlayMusicSample(track.id, track.previewUrl, e)}
+                          className={`p-1.5 rounded-lg border transition-all shrink-0 ${
+                            isPlaying
+                              ? "bg-[#6c5ce7] text-white border-[#6c5ce7] animate-pulse"
+                              : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100 hover:text-slate-900 shadow-2xs"
+                          }`}
+                          title={isPlaying ? "Pause music preview" : "Audition music preview"}
+                        >
+                          {isPlaying ? (
+                            <Pause className="w-3 h-3" />
+                          ) : (
+                            <Play className="w-3 h-3 fill-current" />
+                          )}
+                        </button>
+                      ) : (
+                        <VolumeX className="w-3.5 h-3.5 text-slate-400 shrink-0" title="No background audio" />
+                      )}
+                    </div>
                   );
                 })}
               </div>

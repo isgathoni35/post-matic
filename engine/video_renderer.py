@@ -234,7 +234,8 @@ def burn_audio_and_subtitles(
     subtitle_path: Optional[Path],
     output_path: Path,
     bgm_path: Optional[Union[Path, str]] = None,
-    bgm_volume: float = 0.08,
+    bgm_volume: float = 0.15,
+    total_duration: Optional[float] = None,
     ffmpeg_bin: Optional[str] = None,
 ) -> Path:
     """Combine video track with master audio, optional ducked BGM, and burn ASS animated subtitles."""
@@ -260,9 +261,11 @@ def burn_audio_and_subtitles(
         else:
             v_map = "0:v"
 
-        # Duck BGM underneath master narration (-22dB volume bed) with subtle fade-in and mix
+        # Duck BGM underneath master narration (-16dB to -18dB volume bed) with smooth 1s fade-in and 2s fade-out
+        fade_out_st = max(1.0, (total_duration - 2.0)) if total_duration else None
+        fade_out_clause = f",afade=t=out:st={fade_out_st:.2f}:d=2" if fade_out_st else ""
         filter_parts.append(
-            f"[2:a]volume={bgm_volume},afade=t=in:ss=0:d=1[bgm];"
+            f"[2:a]volume={bgm_volume},afade=t=in:ss=0:d=1{fade_out_clause}[bgm];"
             f"[1:a][bgm]amix=inputs=2:duration=first:dropout_transition=2:normalize=0[aout]"
         )
 
@@ -319,7 +322,7 @@ def render_video(
     render_dir: Optional[Path] = None,
     video_format: str = "short",
     bgm_path: Optional[Union[Path, str, bool]] = None,
-    bgm_volume: float = 0.08,
+    bgm_volume: float = 0.15,
     progress_callback: Optional[Callable[[str, int], None]] = None,
 ) -> Path:
     """Orchestrates the entire FFmpeg rendering pipeline.
@@ -337,10 +340,13 @@ def render_video(
 
     # Resolve background music
     resolved_bgm: Optional[Path] = None
-    if bgm_path is False or (isinstance(bgm_path, str) and bgm_path.lower() in ("none", "false", "off")):
+    if bgm_path is False or (isinstance(bgm_path, str) and bgm_path.lower() in ("none", "false", "off", "no")):
         resolved_bgm = None
-    elif isinstance(bgm_path, (str, Path)) and Path(bgm_path).exists():
+    elif isinstance(bgm_path, (str, Path)) and Path(bgm_path).exists() and Path(bgm_path).is_file():
         resolved_bgm = Path(bgm_path)
+    elif isinstance(bgm_path, str) and bgm_path.strip():
+        from engine.media_downloader import download_background_music
+        resolved_bgm = download_background_music(bgm_path)
     elif bgm_path is None and DEFAULT_BGM_PATH.exists():
         resolved_bgm = DEFAULT_BGM_PATH
 
@@ -412,6 +418,7 @@ def render_video(
         output_path=final_output,
         bgm_path=resolved_bgm,
         bgm_volume=bgm_volume,
+        total_duration=total_audio_dur,
     )
 
     if progress_callback:

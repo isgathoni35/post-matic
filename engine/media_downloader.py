@@ -79,23 +79,73 @@ def select_best_video_file(video_files: List[dict], video_format: str = "short")
     return mp4_files[0]
 
 
+STOP_WORDS = {
+    "why", "how", "what", "when", "where", "who", "which", "whose",
+    "the", "a", "an", "is", "are", "was", "were", "be", "been", "being",
+    "in", "on", "at", "to", "for", "with", "about", "against", "between",
+    "into", "through", "during", "before", "after", "above", "below",
+    "from", "up", "down", "out", "over", "under", "again", "further",
+    "then", "once", "here", "there", "all", "any", "both", "each", "few",
+    "more", "most", "other", "some", "such", "no", "nor", "not", "only",
+    "own", "same", "so", "than", "too", "very", "can", "will", "just",
+    "should", "now", "and", "or", "but", "if", "because", "as", "until",
+    "while", "of", "that", "this", "these", "those", "am", "it", "its",
+}
+
+NON_VISUAL_WORDS = {
+    "truth", "truths", "secret", "secrets", "mystery", "mysteries", "revelation",
+    "revelations", "shocking", "unbelievable", "mindblowing", "insane",
+    "terrifying", "creepy", "crazy", "facts", "fact", "proof", "proven",
+    "conspiracy", "conspiracies", "hidden", "uncovered", "discovered",
+    "discovery", "concept", "perspective", "thought", "thoughts", "opinion",
+    "story", "stories", "legend", "untold", "viral", "shorts", "tiktok",
+    "fascinating", "incredible", "bizarre", "unexpected", "revealed",
+}
+
+
+def sanitize_keyword_phrase(phrase: str) -> str:
+    """Strip stop words and abstract non-visual hype words to isolate concrete visual nouns."""
+    clean = re.sub(r"[^\w\s]", "", phrase).strip()
+    words = [w.lower() for w in clean.split()]
+    filtered = [w for w in words if w not in STOP_WORDS and w not in NON_VISUAL_WORDS and len(w) > 1]
+    return " ".join(filtered[:3])
+
+
 def expand_search_queries(keywords: List[str]) -> List[str]:
-    """Expands list of keyword queries with simplified 1-3 word noun phrases."""
+    """Expands list of keyword queries with sanitized concrete noun phrases."""
     expanded: List[str] = []
     for kw in keywords:
         cleaned = kw.strip()
-        if not cleaned or cleaned in expanded:
+        if not cleaned:
             continue
-        expanded.append(cleaned)
+
+        # 1. Primary: Sanitize into concrete physical nouns
+        sanitized = sanitize_keyword_phrase(cleaned)
+        if sanitized and sanitized not in expanded:
+            expanded.append(sanitized)
+
+        # 2. Add original query if compact (<= 4 words)
         words = cleaned.split()
-        if len(words) > 3:
-            sub1 = " ".join(words[:2])
-            sub2 = " ".join(words[-2:])
-            if sub1 not in expanded:
-                expanded.append(sub1)
-            if sub2 not in expanded:
-                expanded.append(sub2)
+        if len(words) <= 4 and cleaned.lower() not in expanded:
+            expanded.append(cleaned)
+        elif len(words) > 4 and sanitized:
+            san_words = sanitized.split()
+            if len(san_words) >= 2:
+                pair = f"{san_words[0]} {san_words[1]}"
+                if pair not in expanded:
+                    expanded.append(pair)
+
     return expanded
+
+
+def _is_video_relevant(video: dict, query_terms: Set[str]) -> bool:
+    """Check if the Pexels video metadata contains relevant physical subject keywords."""
+    if not query_terms:
+        return True
+    url_slug = video.get("url", "").lower()
+    tags = [t.get("title", "").lower() if isinstance(t, dict) else str(t).lower() for t in video.get("tags", [])]
+    combined_meta = f"{url_slug} {' '.join(tags)}"
+    return any(term in combined_meta for term in query_terms if len(term) > 2)
 
 
 def search_pexels_video(
@@ -122,6 +172,8 @@ def search_pexels_video(
         if not cleaned_query:
             continue
 
+        query_tokens = set(sanitize_keyword_phrase(cleaned_query).split())
+
         try:
             logger.info("Searching Pexels for keyword (%s): '%s'", primary_orientation, cleaned_query)
             params = {
@@ -146,6 +198,10 @@ def search_pexels_video(
                 if duration < min_duration:
                     continue
 
+                # Verify visual relevance to query tokens
+                if query_tokens and not _is_video_relevant(video, query_tokens):
+                    continue
+
                 best_file = select_best_video_file(video.get("video_files", []), video_format=video_format)
                 if best_file:
                     return video, best_file, cleaned_query
@@ -157,6 +213,7 @@ def search_pexels_video(
     # Secondary pass: opposite orientation clips (FFmpeg center-crops / scales to canvas)
     for query in all_queries:
         cleaned_query = query.strip()
+        query_tokens = set(sanitize_keyword_phrase(cleaned_query).split())
         try:
             logger.info("Searching Pexels for keyword (%s fallback): '%s'", secondary_orientation, cleaned_query)
             params = {
@@ -172,6 +229,8 @@ def search_pexels_video(
                     if vid_id in used:
                         continue
                     if video.get("duration", 0) < min_duration:
+                        continue
+                    if query_tokens and not _is_video_relevant(video, query_tokens):
                         continue
                     best_file = select_best_video_file(video.get("video_files", []), video_format=video_format)
                     if best_file:
@@ -416,21 +475,33 @@ def download_background_music(
 
     clean_source = str(source).strip()
 
+    if clean_source.lower() in ("none", "false", "off", "no", "disabled", "null", "silent"):
+        logger.info("Background music explicitly disabled ('%s')", clean_source)
+        return None
+
     # Case 1: Direct local file path
     local_path = Path(clean_source)
     if local_path.exists() and local_path.is_file():
         logger.info("Found local background music file: %s", local_path)
         return local_path
 
+    # Preset alias mapping
+    PRESET_ALIASES = {
+        "cinematic_mystery": ["cinematic_mystery.mp3", "cinematic_ambient.mp3"],
+        "cinematic_ambient": ["cinematic_ambient.mp3", "cinematic_mystery.mp3"],
+        "epic_orchestral": ["epic_orchestral.mp3", "cinematic_ambient.mp3"],
+        "lofi_chill": ["lofi_chill.mp3"],
+        "phonk_tension": ["phonk_tension.mp3", "lofi_chill.mp3"],
+        "uplifting_emotional": ["uplifting_emotional.mp3", "cinematic_ambient.mp3"],
+    }
+
     # Case 2: Preset name in assets/audio/
-    preset_candidate = PROJECT_ROOT / "assets" / "audio" / f"{clean_source}.mp3"
-    if preset_candidate.exists():
-        logger.info("Matched BGM preset in assets/audio: %s", preset_candidate)
-        return preset_candidate
-    preset_candidate_direct = PROJECT_ROOT / "assets" / "audio" / clean_source
-    if preset_candidate_direct.exists() and preset_candidate_direct.is_file():
-        logger.info("Matched BGM direct file in assets/audio: %s", preset_candidate_direct)
-        return preset_candidate_direct
+    alias_candidates = PRESET_ALIASES.get(clean_source, [f"{clean_source}.mp3", clean_source])
+    for cand_name in alias_candidates:
+        cand_path = PROJECT_ROOT / "assets" / "audio" / cand_name
+        if cand_path.exists() and cand_path.is_file() and cand_path.stat().st_size > 1000:
+            logger.info("Matched BGM preset in assets/audio: %s", cand_path)
+            return cand_path
 
     # Case 3: URL (TikTok, YouTube, Direct Audio Link)
     if clean_source.startswith(("http://", "https://")):

@@ -23,6 +23,7 @@ import {
   HelpCircle,
   X,
   Loader2,
+  VolumeX,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -370,11 +371,12 @@ export const SUBTITLE_STYLES = [
 ];
 
 export const MUSIC_TRACKS = [
-  { id: "cinematic_mystery", name: "Cinematic Mystery", mood: "Dark, Suspenseful & Creeping" },
-  { id: "epic_orchestral", name: "Epic Orchestral", mood: "Grand Horns, Choirs & War Drums" },
-  { id: "lofi_chill", name: "Lofi Chill Beats", mood: "Mellow Vinyl, Nostalgic & Intimate" },
-  { id: "phonk_tension", name: "High-Tension Phonk", mood: "Aggressive Bass & Kinetic Energy" },
-  { id: "uplifting_emotional", name: "Uplifting Emotional", mood: "Inspiring Piano & Ambient Crescendo" },
+  { id: "none", name: "No Music (Narration Only)", mood: "Clean speech-only narration", previewUrl: null },
+  { id: "cinematic_mystery", name: "Cinematic Mystery", mood: "Dark, Suspenseful & Creeping", previewUrl: "/audio/music/cinematic_mystery.mp3" },
+  { id: "epic_orchestral", name: "Epic Orchestral", mood: "Grand Horns, Choirs & War Drums", previewUrl: "/audio/music/epic_orchestral.mp3" },
+  { id: "lofi_chill", name: "Lofi Chill Beats", mood: "Mellow Vinyl, Nostalgic & Intimate", previewUrl: "/audio/music/lofi_chill.mp3" },
+  { id: "phonk_tension", name: "High-Tension Phonk", mood: "Aggressive Bass & Kinetic Energy", previewUrl: "/audio/music/phonk_tension.mp3" },
+  { id: "uplifting_emotional", name: "Uplifting Emotional", mood: "Inspiring Piano & Ambient Crescendo", previewUrl: "/audio/music/uplifting_emotional.mp3" },
 ];
 
 export function CreateSeriesWizard({
@@ -400,6 +402,8 @@ export function CreateSeriesWizard({
   const [subtitleStyle, setSubtitleStyle] = useState("hormozi_yellow");
   const [musicTrack, setMusicTrack] = useState("cinematic_mystery");
   const [isPlayingAudioSample, setIsPlayingAudioSample] = useState(false);
+  const [playingMusicId, setPlayingMusicId] = useState<string | null>(null);
+  const musicAudioRef = useRef<HTMLAudioElement | null>(null);
 
   // Step 3: Autopilot Schedule & Distribution
   const [targetPlatforms, setTargetPlatforms] = useState<string[]>(["youtube", "tiktok"]);
@@ -456,9 +460,46 @@ export function CreateSeriesWizard({
     }
   };
 
-  // Cleanup speech synthesis on unmount/step change
+  // Audition Background Music Preview
+  const handlePlayMusicPreview = (trackId: string, previewUrl: string | null) => {
+    if (!previewUrl) return;
+
+    if (playingMusicId === trackId) {
+      if (musicAudioRef.current) {
+        musicAudioRef.current.pause();
+        musicAudioRef.current.currentTime = 0;
+      }
+      setPlayingMusicId(null);
+      return;
+    }
+
+    if (musicAudioRef.current) {
+      musicAudioRef.current.pause();
+      musicAudioRef.current.currentTime = 0;
+    }
+
+    const audio = new Audio(previewUrl);
+    musicAudioRef.current = audio;
+    setPlayingMusicId(trackId);
+
+    audio.play().catch((err) => {
+      console.warn("Music preview playback error:", err);
+      setPlayingMusicId(null);
+    });
+    audio.onended = () => setPlayingMusicId(null);
+    audio.onerror = () => {
+      console.warn(`Music preview failed to load: ${previewUrl}`);
+      setPlayingMusicId(null);
+    };
+  };
+
+  // Cleanup speech synthesis & music preview on unmount/step change
   useEffect(() => {
     return () => {
+      if (musicAudioRef.current) {
+        musicAudioRef.current.pause();
+        musicAudioRef.current = null;
+      }
       if (typeof window !== "undefined" && "speechSynthesis" in window) {
         window.speechSynthesis.cancel();
       }
@@ -915,21 +956,47 @@ export function CreateSeriesWizard({
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                   {MUSIC_TRACKS.map((track) => {
                     const isSelected = musicTrack === track.id;
+                    const isPlaying = playingMusicId === track.id;
                     return (
                       <div
                         key={track.id}
                         onClick={() => setMusicTrack(track.id)}
                         className={`p-2.5 rounded-lg border cursor-pointer transition-all flex items-center justify-between ${
                           isSelected
-                            ? "bg-purple-50 border-[#6c5ce7]"
+                            ? "bg-purple-50 border-[#6c5ce7] ring-1 ring-[#6c5ce7]"
                             : "bg-slate-50 border-slate-200 hover:bg-white"
                         }`}
                       >
-                        <div className="space-y-0.5">
-                          <p className="text-xs font-medium text-slate-900">{track.name}</p>
-                          <p className="text-[10px] text-slate-500">{track.mood}</p>
+                        <div className="space-y-0.5 min-w-0 pr-2">
+                          <div className="flex items-center gap-1.5">
+                            <p className="text-xs font-medium text-slate-900 truncate">{track.name}</p>
+                            {isSelected && <Check className="w-3.5 h-3.5 text-[#6c5ce7] shrink-0" />}
+                          </div>
+                          <p className="text-[10px] text-slate-500 truncate">{track.mood}</p>
                         </div>
-                        {isSelected && <Check className="w-3.5 h-3.5 text-[#6c5ce7] shrink-0 ml-2" />}
+                        {track.previewUrl ? (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handlePlayMusicPreview(track.id, track.previewUrl);
+                            }}
+                            className={`p-1.5 rounded-lg border transition-all shrink-0 ${
+                              isPlaying
+                                ? "bg-[#6c5ce7] text-white border-[#6c5ce7] animate-pulse"
+                                : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100 hover:text-slate-900 shadow-2xs"
+                            }`}
+                            title={isPlaying ? "Pause music preview" : "Audition music preview"}
+                          >
+                            {isPlaying ? (
+                              <Pause className="w-3 h-3" />
+                            ) : (
+                              <Play className="w-3 h-3 fill-current" />
+                            )}
+                          </button>
+                        ) : (
+                          <VolumeX className="w-3.5 h-3.5 text-slate-400 shrink-0" title="No background audio" />
+                        )}
                       </div>
                     );
                   })}

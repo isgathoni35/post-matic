@@ -118,14 +118,16 @@ def execute_video_pipeline_job(
     # 2. Local Fallback Execution
     try:
         # Resolve background music (URL, preset name, or local path)
-        resolved_bgm: Optional[Path] = None
-        if music_track and str(music_track).lower() not in ("none", "false", "off"):
+        resolved_bgm: Optional[Union[Path, str]] = None
+        if music_track and str(music_track).strip().lower() not in ("none", "false", "off", "no"):
             try:
                 from engine.media_downloader import download_background_music
                 resolved_bgm = download_background_music(music_track)
                 logger.info("[%s] Resolved background music track: %s", job_id, resolved_bgm)
             except Exception as bgm_err:
                 logger.warning("[%s] Failed to resolve background music '%s': %s", job_id, music_track, bgm_err)
+        elif music_track and str(music_track).strip().lower() in ("none", "false", "off", "no"):
+            resolved_bgm = "none"
 
         if mode == "story":
             logger.info("[%s] Executing Animated Story Pipeline (style: %s)...", job_id, story_style)

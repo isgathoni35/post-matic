@@ -21,7 +21,10 @@ Your mission is to craft scripts that sound 100% human, authentic, and high-rete
 3. Rhythm & Human Heartbeat: Alternate short, punchy sentence fragments (3-5 words) with smooth descriptive lines (8-12 words). Avoid monotonic run-on sentences.
 4. Scene Pacing: Each scene should contain 3-6 seconds of spoken narration (roughly 8-16 words per scene).
 5. Total Length: Total script duration should match the requested target duration.
-6. Stock Search Keywords: Provide 2-4 concrete, visual, high-yield search keywords per scene (nouns, lighting, camera actions in stock libraries like Pexels). Avoid abstract buzzwords.
+6. Stock Search Keywords: Provide 2-4 concrete, physical visual search queries per scene targeting stock libraries (Pexels).
+   - MUST be concrete physical objects, physical environments, or visible human actions (e.g. "deep sea submarine", "foggy forest night", "old book candlelight", "crowded airport terminal").
+   - NEVER use abstract non-visual words, metaphors, or emotions (FORBIDDEN: "truth", "secret", "mystery", "revelation", "shocking", "mind blowing", "unbelievable", "concept", "why", "how").
+   - Keep queries concise (2-4 words maximum) so stock video search algorithms return exact matches.
 """
 
 VIRAL_NICHE_CONFIGS = {
@@ -546,25 +549,32 @@ Ensure the dialogue is punchy, authentic, comedic or intense according to the to
 def _build_fallback_video_script(topic: str, target_duration: int = 25, num_scenes: int = 3) -> VideoScript:
     """Generate a high-retention fallback script when all cloud LLM endpoints hit 503/429."""
     clean_topic = topic.strip().strip("'\"")
-    words = [w for w in clean_topic.split() if w.isalnum()]
-    base_keywords = words[:3] if words else ["cinematic", "nature", "epic"]
-    kw_str = " ".join(base_keywords)
+    raw_words = [w for w in clean_topic.split() if w.isalnum()]
+    # Filter stopwords and abstract fluff from topic
+    topic_nouns = [
+        w.lower() for w in raw_words 
+        if len(w) > 2 and w.lower() not in {
+            "why", "how", "what", "when", "where", "who", "the", "about", 
+            "that", "this", "with", "from", "and", "for", "truth", "secret", "reveal"
+        }
+    ]
+    core_kw = " ".join(topic_nouns[:3]) if topic_nouns else "cinematic nature"
 
     scenes_data = [
         (
             f"Here's the wild truth about {clean_topic} that almost nobody talks about.",
-            f"Dramatic cinematic opening revealing the mysterious world of {clean_topic}",
-            [f"{kw_str} cinematic", f"{clean_topic} discovery", "dramatic lighting"]
+            f"Dramatic cinematic opening showcasing {clean_topic} in vivid detail",
+            [core_kw, f"{core_kw} close up", f"{core_kw} detail"]
         ),
         (
             f"When researchers explored deeper into {clean_topic}, what they uncovered defied every previous expectation.",
-            f"High-detail investigative visual showing the complex layers of {clean_topic}",
-            [f"{kw_str} macro", "scientific research", "fascinating revelation"]
+            f"High-detail investigative visual showing the core elements of {clean_topic}",
+            [f"{core_kw} macro", f"{core_kw} exploration", f"{core_kw} environment"]
         ),
         (
             f"This completely shifts our perspective on {clean_topic}. Which detail surprised you the most? Drop your thoughts below.",
-            f"Stunning panoramic conclusion with glowing ambient light and cinematic motion",
-            [f"{kw_str} aerial", "epic horizon", "inspiring landscape"]
+            f"Stunning panoramic view of {clean_topic} with dramatic natural lighting",
+            [f"{core_kw} aerial", f"{core_kw} wide shot", core_kw]
         )
     ]
 
