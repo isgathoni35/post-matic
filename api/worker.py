@@ -271,7 +271,13 @@ def execute_video_pipeline_job(
         dest_output_path = OUTPUT_DIR / output_filename
         render_work_dir = TEMP_DIR / "render" / job_id
 
-        logger.info("[%s] Stage 4/4: Assembling final %s video and burning subtitles (BGM: %s)...", job_id, video_format, resolved_bgm.name if resolved_bgm else "None")
+        def render_progress_cb(stage: str, pct: int):
+            update_video_job_record(
+                job_id=job_id,
+                status=VideoJobStatus.RENDERING,
+                progress_pct=pct,
+            )
+
         final_video_path = render_video(
             downloaded_videos=downloaded_videos,
             tts_result=tts_result,
@@ -279,6 +285,7 @@ def execute_video_pipeline_job(
             render_dir=render_work_dir,
             video_format=video_format,
             bgm_path=resolved_bgm,
+            progress_callback=render_progress_cb,
         )
 
         file_size = final_video_path.stat().st_size

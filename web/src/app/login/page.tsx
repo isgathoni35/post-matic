@@ -143,7 +143,7 @@ export default function LoginPage() {
         </div>
 
         {/* Footer info */}
-        <div className="flex items-center justify-between text-xs text-slate-400 border-t border-slate-200/80 pt-6 z-10 font-mono">
+        <div className="flex items-center justify-between text-xs text-slate-600 border-t border-slate-200/80 pt-6 z-10 font-mono font-medium">
           <span>Production-grade H.264 1080x1920</span>
           <span>Zero-OpEx Architecture</span>
         </div>
@@ -156,12 +156,12 @@ export default function LoginPage() {
           <div className="flex items-center justify-between pb-2">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-xs font-medium text-slate-700 hover:text-slate-900 transition-all group shadow-2xs"
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-700 hover:text-slate-900 transition-all group shadow-2xs"
             >
               <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform text-[#6c5ce7]" />
               <span>Back to Home</span>
             </Link>
-            <span className="text-[11px] font-mono text-slate-400 font-semibold tracking-wider">POST-MATIC</span>
+            <span className="text-[11px] font-mono text-slate-600 font-bold tracking-wider">POST-MATIC</span>
           </div>
 
           {/* Header Mobile Brand (lg:hidden) */}
@@ -173,7 +173,7 @@ export default function LoginPage() {
             <h2 className="text-2xl font-bold tracking-tight text-slate-900">
               {mode === "signin" ? "Sign in to Studio" : "Create Your Account"}
             </h2>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-slate-600 font-medium">
               {mode === "signin"
                 ? "Enter your credentials to access your studio workspace and video library."
                 : "Create a free account to start creating vertical video content on autopilot."}
@@ -188,7 +188,7 @@ export default function LoginPage() {
               className={`py-2 text-xs font-semibold rounded-lg transition-all ${
                 mode === "signin"
                   ? "bg-white text-slate-900 shadow-xs"
-                  : "text-slate-500 hover:text-slate-900"
+                  : "text-slate-600 hover:text-slate-900 font-medium"
               }`}
             >
               Sign In
@@ -199,7 +199,7 @@ export default function LoginPage() {
               className={`py-2 text-xs font-semibold rounded-lg transition-all ${
                 mode === "signup"
                   ? "bg-white text-slate-900 shadow-xs"
-                  : "text-slate-500 hover:text-slate-900"
+                  : "text-slate-600 hover:text-slate-900 font-medium"
               }`}
             >
               Create Account
@@ -239,7 +239,7 @@ export default function LoginPage() {
           {/* Divider */}
           <div className="relative flex items-center justify-center">
             <div className="w-full border-t border-slate-200" />
-            <span className="absolute px-3 bg-white text-[11px] text-slate-400 uppercase font-mono tracking-wider">
+            <span className="absolute px-3 bg-white text-[11px] text-slate-600 uppercase font-mono font-semibold tracking-wider">
               or email
             </span>
           </div>

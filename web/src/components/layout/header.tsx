@@ -28,7 +28,7 @@ export function Header({ onOpenSocialModal }: HeaderProps = {}) {
       <div className="flex items-center gap-3">
         <Link
           href="/"
-          className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-900 px-2.5 py-1.5 rounded-lg hover:bg-slate-100 transition-colors"
+          className="flex items-center gap-1.5 text-xs text-slate-700 hover:text-slate-900 px-2.5 py-1.5 rounded-lg hover:bg-slate-100 transition-colors font-medium"
         >
           <Home className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">Home</span>
@@ -53,7 +53,7 @@ export function Header({ onOpenSocialModal }: HeaderProps = {}) {
                 <span className="text-xs font-semibold text-slate-900 max-w-[130px] truncate leading-none">
                   {user.email?.split("@")[0]}
                 </span>
-                <span className="text-[10px] text-slate-500 font-medium mt-0.5">
+                <span className="text-[10px] text-slate-600 font-medium mt-0.5">
                   Creator Account
                 </span>
               </div>

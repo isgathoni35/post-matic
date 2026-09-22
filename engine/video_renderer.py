@@ -5,7 +5,7 @@ from pathlib import Path
 import shutil
 import subprocess
 import sys
-from typing import List, Optional, Union
+from typing import Callable, List, Optional, Union
 
 # Ensure project root is on sys.path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -271,7 +271,7 @@ def burn_audio_and_subtitles(
             "-map", v_map,
             "-map", "[aout]",
             "-c:v", "libx264",
-            "-preset", "medium",
+            "-preset", "fast",
             "-crf", "19",
             "-c:a", "aac",
             "-b:a", "192k",
@@ -298,7 +298,7 @@ def burn_audio_and_subtitles(
 
         cmd.extend([
             "-c:v", "libx264",
-            "-preset", "medium",
+            "-preset", "fast",
             "-crf", "19",
             "-c:a", "aac",
             "-b:a", "192k",
@@ -320,6 +320,7 @@ def render_video(
     video_format: str = "short",
     bgm_path: Optional[Union[Path, str, bool]] = None,
     bgm_volume: float = 0.08,
+    progress_callback: Optional[Callable[[str, int], None]] = None,
 ) -> Path:
     """Orchestrates the entire FFmpeg rendering pipeline.
 
@@ -365,6 +366,10 @@ def render_video(
             preceding_sum = sum(scene_durations.get(v.scene_id, 5.0) for v in downloaded_videos[:-1])
             dur = max(dur, total_audio_dur - preceding_sum + 0.3)
 
+        if progress_callback:
+            clip_pct = 85 + int((idx / max(1, total_scenes)) * 7)
+            progress_callback("rendering", clip_pct)
+
         norm_path = work_dir / f"scene_{vid.scene_id}_norm.mp4"
         logger.info(
             "Rendering Scene %d: trimming to %.2fs and resizing to %dx%d (%s)...",
@@ -384,11 +389,17 @@ def render_video(
         normalized_clips.append(norm_path)
 
     # Step 2: Concatenate normalized clips
+    if progress_callback:
+        progress_callback("rendering", 93)
+
     concat_video_path = work_dir / "concatenated_video.mp4"
     logger.info("Concatenating %d scene video clips...", len(normalized_clips))
     concatenate_clips(normalized_clips, concat_video_path)
 
     # Step 3: Overlay audio and burn subtitles
+    if progress_callback:
+        progress_callback("rendering", 96)
+
     logger.info(
         "Burning audio and ASS subtitles into final video: %s (BGM: %s)",
         final_output,
@@ -402,6 +413,9 @@ def render_video(
         bgm_path=resolved_bgm,
         bgm_volume=bgm_volume,
     )
+
+    if progress_callback:
+        progress_callback("rendering", 99)
 
     logger.info("Video rendering successfully completed: %s", final_output)
     return final_output

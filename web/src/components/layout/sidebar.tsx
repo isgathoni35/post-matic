@@ -79,7 +79,7 @@ export function Sidebar({
           "w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors duration-150",
           isActive
             ? "bg-purple-50 text-[#6c5ce7] font-semibold"
-            : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+            : "text-slate-700 hover:text-slate-900 hover:bg-slate-50 font-medium"
         )}
       >
         <div className="flex items-center gap-2.5">
@@ -90,7 +90,7 @@ export function Sidebar({
               isActive ? "bg-[#6c5ce7]" : "bg-transparent"
             )}
           />
-          <Icon className={cn("h-4 w-4 shrink-0", isActive ? "text-[#6c5ce7]" : "text-slate-400")} />
+          <Icon className={cn("h-4 w-4 shrink-0", isActive ? "text-[#6c5ce7]" : "text-slate-500")} />
           <span>{item.label}</span>
         </div>
         {item.badge && (
@@ -99,7 +99,7 @@ export function Sidebar({
               "text-[11px] font-mono tabular-nums px-2 py-0.5 rounded-full font-semibold",
               item.badgeType === "live"
                 ? "bg-amber-50 text-amber-700 border border-amber-200"
-                : "bg-slate-100 text-slate-600 border border-slate-200"
+                : "bg-slate-100 text-slate-700 font-bold border border-slate-200"
             )}
           >
             {item.badge}
@@ -114,7 +114,7 @@ export function Sidebar({
       <div className="flex-1 py-4 px-3 space-y-6 overflow-y-auto">
         {/* Primary: Create */}
         <div>
-          <p className="px-3 mb-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+          <p className="px-3 mb-1.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
             Create
           </p>
           <nav className="space-y-0.5">
@@ -127,7 +127,7 @@ export function Sidebar({
 
         {/* Secondary: Manage */}
         <div>
-          <p className="px-3 mb-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+          <p className="px-3 mb-1.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
             Manage
           </p>
           <nav className="space-y-0.5">
@@ -145,7 +145,7 @@ export function Sidebar({
             "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors duration-150",
             activeView === "settings"
               ? "bg-purple-50 text-[#6c5ce7] font-semibold"
-              : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+              : "text-slate-700 hover:text-slate-900 hover:bg-slate-50 font-medium"
           )}
         >
           <span
@@ -154,7 +154,7 @@ export function Sidebar({
               activeView === "settings" ? "bg-[#6c5ce7]" : "bg-transparent"
             )}
           />
-          <Settings className={cn("h-4 w-4 shrink-0", activeView === "settings" ? "text-[#6c5ce7]" : "text-slate-400")} />
+          <Settings className={cn("h-4 w-4 shrink-0", activeView === "settings" ? "text-[#6c5ce7]" : "text-slate-500")} />
           <span>Settings</span>
         </button>
       </div>

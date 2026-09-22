@@ -97,7 +97,7 @@ export function BrandLogo({
       {/* Wordmark and Badge */}
       {showWordmark && (
         <div className="flex items-center gap-2 leading-none">
-          <span className={cn("font-extrabold tracking-tight text-slate-900 dark:text-white font-sans", textSize)}>
+          <span className={cn("font-extrabold tracking-tight text-slate-900 font-sans", textSize)}>
             Post<span className="text-[#6c5ce7]">Matic</span>
           </span>
           {showBadge && (

@@ -45,7 +45,7 @@ export function JobQueueView({
       case "failed":
         return <Badge variant="destructive" className="text-[10px] font-mono">Failed</Badge>;
       case "pending":
-        return <Badge variant="outline" className="text-[10px] font-mono text-zinc-400">Queued</Badge>;
+        return <Badge variant="outline" className="text-[10px] font-mono text-slate-700 border-slate-300 bg-slate-100 font-semibold">Queued</Badge>;
       default:
         return (
           <Badge variant="primary" pulse className="text-[10px] font-mono">
@@ -58,24 +58,24 @@ export function JobQueueView({
   return (
     <div className="w-full max-w-6xl mx-auto space-y-6 animate-in fade-in duration-300">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/[0.06]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200/80">
         <div>
           <div className="flex items-center gap-2.5 mb-1">
-            <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
-              <Layers className="w-5 h-5 text-indigo-400" />
+            <h1 className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+              <Layers className="w-5 h-5 text-[#6c5ce7]" />
               <span>Pipeline Execution Queue</span>
             </h1>
             <Badge variant="primary" pulse className="text-[10px] font-mono font-semibold">
               Live Monitor
             </Badge>
           </div>
-          <p className="text-xs text-zinc-400">
+          <p className="text-xs text-slate-600 font-medium">
             Real-time status tracking for distributed video synthesis, media sourcing, and FFmpeg render jobs.
           </p>
         </div>
 
         {/* Filter Pills */}
-        <div className="flex items-center gap-1.5 p-1 rounded-lg bg-[#0c0c0e] border border-white/[0.06] overflow-x-auto no-scrollbar w-full sm:w-auto shrink-0">
+        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-100 border border-slate-200 overflow-x-auto no-scrollbar w-full sm:w-auto shrink-0">
           {[
             { id: "all", label: "All", count: jobs.length },
             {
@@ -98,10 +98,10 @@ export function JobQueueView({
               key={f.id}
               type="button"
               onClick={() => setStatusFilter(f.id)}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all whitespace-nowrap shrink-0 ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap shrink-0 ${
                 statusFilter === f.id
-                  ? "bg-white/[0.1] text-white font-semibold shadow-xs"
-                  : "text-zinc-400 hover:text-white"
+                  ? "bg-white text-slate-900 font-bold shadow-2xs"
+                  : "text-slate-700 hover:text-slate-900 font-medium"
               }`}
             >
               {f.label} ({f.count})
@@ -111,15 +111,15 @@ export function JobQueueView({
       </div>
 
       {/* Table Card */}
-      <div className="rounded-xl pm-surface border border-white/[0.06] overflow-hidden">
+      <div className="rounded-2xl bg-white border border-slate-200/80 shadow-2xs overflow-hidden">
         {filteredJobs.length === 0 ? (
           <div className="py-16 text-center space-y-4">
-            <div className="h-12 w-12 rounded-full bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-zinc-500 mx-auto">
+            <div className="h-12 w-12 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-500 mx-auto">
               <Layers className="h-6 w-6" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-white">No Jobs In This Queue</p>
-              <p className="text-xs text-zinc-500 mt-0.5">
+              <p className="text-sm font-semibold text-slate-900">No Jobs In This Queue</p>
+              <p className="text-xs text-slate-600 mt-0.5 font-medium">
                 Start a video generation job from the Studio Console to view live progress.
               </p>
             </div>
@@ -127,7 +127,7 @@ export function JobQueueView({
               variant="primary"
               size="sm"
               onClick={onNavigateToStudio}
-              className="text-xs font-semibold h-9 px-5"
+              className="text-xs font-semibold h-9 px-5 bg-[#6c5ce7] hover:bg-[#5b4bc4] text-white shadow-xs"
             >
               <Sparkles className="h-3.5 w-3.5 mr-1.5" />
               Go to Studio
@@ -137,17 +137,17 @@ export function JobQueueView({
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="border-b border-white/[0.06] bg-black/30 text-zinc-400 font-mono text-[11px] uppercase tracking-wider">
-                  <th className="py-3.5 px-4 font-semibold">Job ID</th>
-                  <th className="py-3.5 px-4 font-semibold">Prompt / Topic</th>
-                  <th className="py-3.5 px-4 font-semibold">Status</th>
-                  <th className="py-3.5 px-4 font-semibold">Progress</th>
-                  <th className="py-3.5 px-4 font-semibold">Duration</th>
-                  <th className="py-3.5 px-4 font-semibold">Timestamp</th>
-                  <th className="py-3.5 px-4 font-semibold text-right">Actions</th>
+                <tr className="border-b border-slate-200 bg-slate-50/90 text-slate-700 font-mono text-[11px] uppercase tracking-wider font-bold">
+                  <th className="py-3.5 px-4">Job ID</th>
+                  <th className="py-3.5 px-4">Prompt / Topic</th>
+                  <th className="py-3.5 px-4">Status</th>
+                  <th className="py-3.5 px-4">Progress</th>
+                  <th className="py-3.5 px-4">Duration</th>
+                  <th className="py-3.5 px-4">Timestamp</th>
+                  <th className="py-3.5 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/[0.04]">
+              <tbody className="divide-y divide-slate-100">
                 {filteredJobs.map((job, idx) => {
                   const jobId = job.job_id || (job as any).id || "";
                   const displayId = jobId ? jobId.slice(0, 8) : `job-${idx}`;
@@ -167,32 +167,32 @@ export function JobQueueView({
                   return (
                     <tr
                       key={jobId || `job-${idx}`}
-                      className="hover:bg-white/[0.02] transition-colors group"
+                      className="hover:bg-slate-50/70 transition-colors group"
                     >
-                      <td className="py-4 px-4 font-mono text-zinc-400 font-medium">
+                      <td className="py-4 px-4 font-mono text-slate-700 font-semibold">
                         #{displayId}
                       </td>
-                      <td className="py-4 px-4 font-medium text-white max-w-xs truncate">
+                      <td className="py-4 px-4 font-semibold text-slate-900 max-w-xs truncate">
                         {job.topic}
                       </td>
                       <td className="py-4 px-4">
                         {getStatusBadge(job.status)}
                       </td>
-                      <td className="py-4 px-4 font-mono text-zinc-300">
+                      <td className="py-4 px-4 font-mono text-slate-800">
                         <div className="flex items-center gap-2">
-                          <div className="w-16 h-1.5 rounded-full bg-white/[0.08] overflow-hidden">
+                          <div className="w-16 h-1.5 rounded-full bg-slate-200 overflow-hidden">
                             <div
-                              className="h-full bg-indigo-500 transition-all duration-300"
+                              className="h-full bg-[#6c5ce7] transition-all duration-300"
                               style={{ width: `${job.progress_pct}%` }}
                             />
                           </div>
-                          <span className="text-[10px]">{job.progress_pct}%</span>
+                          <span className="text-[10px] font-bold text-slate-800">{job.progress_pct}%</span>
                         </div>
                       </td>
-                      <td className="py-4 px-4 font-mono text-zinc-400">
+                      <td className="py-4 px-4 font-mono text-slate-700 font-medium">
                         {job.duration_seconds ? `${job.duration_seconds.toFixed(1)}s` : "-"}
                       </td>
-                      <td className="py-4 px-4 font-mono text-zinc-500 text-[11px]">
+                      <td className="py-4 px-4 font-mono text-slate-600 text-[11px] font-medium">
                         {timeStr}
                       </td>
                       <td className="py-4 px-4 text-right">
@@ -201,7 +201,7 @@ export function JobQueueView({
                             variant="secondary"
                             size="sm"
                             onClick={() => onSelectJob(job)}
-                            className="h-7 px-2.5 text-[11px] bg-white/[0.03] border-white/[0.06]"
+                            className="h-7 px-2.5 text-[11px] bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200/80"
                           >
                             <Film className="h-3 w-3 mr-1" />
                             Inspect
@@ -211,7 +211,6 @@ export function JobQueueView({
                     </tr>
                   );
                 })}
-
               </tbody>
             </table>
           </div>

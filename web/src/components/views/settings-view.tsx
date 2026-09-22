@@ -58,18 +58,18 @@ export function SettingsView({
   return (
     <div className="w-full max-w-6xl mx-auto space-y-6 animate-in fade-in duration-300">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/[0.06]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200/80">
         <div>
           <div className="flex items-center gap-2.5 mb-1">
-            <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
-              <Settings className="w-5 h-5 text-indigo-400" />
+            <h1 className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+              <Settings className="w-5 h-5 text-[#6c5ce7]" />
               <span>Studio & Account Settings</span>
             </h1>
-            <Badge variant="outline" className="text-[10px] font-mono font-semibold">
+            <Badge variant="outline" className="text-[10px] font-mono font-semibold border-slate-200 text-slate-600">
               Preferences
             </Badge>
           </div>
-          <p className="text-xs text-zinc-400">
+          <p className="text-xs text-slate-600 font-medium">
             Configure default synthesis parameters, API keys, and account security.
           </p>
         </div>
@@ -78,7 +78,7 @@ export function SettingsView({
           variant="primary"
           size="sm"
           onClick={handleSave}
-          className="text-xs h-9 font-semibold"
+          className="text-xs h-9 font-semibold bg-[#6c5ce7] hover:bg-[#5b4bc4] text-white shadow-xs"
         >
           <Save className="h-3.5 w-3.5 mr-1.5" />
           Save Preferences
@@ -86,43 +86,43 @@ export function SettingsView({
       </div>
 
       {/* Account Info Card */}
-      <div className="rounded-xl pm-surface border border-white/[0.06] p-5 space-y-4">
-        <div className="flex items-center gap-2 text-xs font-bold text-white uppercase tracking-wider">
-          <User className="h-4 w-4 text-zinc-400" />
+      <div className="rounded-2xl bg-white border border-slate-200/80 p-5 space-y-4 shadow-2xs">
+        <div className="flex items-center gap-2 text-xs font-bold text-slate-900 uppercase tracking-wider">
+          <User className="h-4 w-4 text-slate-500" />
           <span>Account Profile</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
           <div className="space-y-1.5">
-            <label className="text-zinc-400">Authenticated Email</label>
+            <label className="text-slate-800 font-semibold">Authenticated Email</label>
             <Input
               value={userEmail || "user@example.com"}
               readOnly
-              className="bg-[#0c0c0e] border-white/[0.06] text-zinc-300 cursor-not-allowed text-xs h-9"
+              className="bg-slate-50 border-slate-200 text-slate-900 font-medium cursor-not-allowed text-xs h-9"
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-zinc-400">User UUID</label>
+            <label className="text-slate-800 font-semibold">User UUID</label>
             <Input
               value={userId || "00000000-0000-0000-0000-000000000000"}
               readOnly
-              className="bg-[#0c0c0e] border-white/[0.06] text-zinc-500 font-mono cursor-not-allowed text-xs h-9"
+              className="bg-slate-50 border-slate-200 text-slate-700 font-mono font-medium cursor-not-allowed text-xs h-9"
             />
           </div>
         </div>
       </div>
 
       {/* Default Pipeline Presets */}
-      <div className="rounded-xl pm-surface border border-white/[0.06] p-5 space-y-5">
-        <div className="flex items-center gap-2 text-xs font-bold text-white uppercase tracking-wider">
-          <Cpu className="h-4 w-4 text-zinc-400" />
+      <div className="rounded-2xl bg-white border border-slate-200/80 p-5 space-y-5 shadow-2xs">
+        <div className="flex items-center gap-2 text-xs font-bold text-slate-900 uppercase tracking-wider">
+          <Cpu className="h-4 w-4 text-slate-500" />
           <span>Default Pipeline Presets</span>
         </div>
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <label className="text-xs text-zinc-300 font-medium flex items-center gap-1.5">
-              <Clock className="h-3.5 w-3.5 text-zinc-400" />
+            <label className="text-xs text-slate-800 font-semibold flex items-center gap-1.5">
+              <Clock className="h-3.5 w-3.5 text-slate-500" />
               Default Video Target Duration
             </label>
             <div className="grid grid-cols-4 gap-2.5">
@@ -131,10 +131,10 @@ export function SettingsView({
                   key={d}
                   type="button"
                   onClick={() => setDefaultDuration(d)}
-                  className={`py-2 px-3 rounded-lg border text-xs font-semibold transition-all ${
+                  className={`py-2 px-3 rounded-xl border text-xs font-semibold transition-all ${
                     defaultDuration === d
-                      ? "bg-indigo-500/15 border-indigo-500/40 text-indigo-300"
-                      : "bg-[#0c0c0e] border-white/[0.06] text-zinc-400 hover:text-white"
+                      ? "bg-[#6c5ce7] border-[#6c5ce7] text-white shadow-2xs"
+                      : "bg-slate-50 border-slate-200 text-slate-800 hover:bg-slate-100 font-semibold"
                   }`}
                 >
                   {d} seconds
@@ -143,18 +143,18 @@ export function SettingsView({
             </div>
           </div>
 
-          <div className="space-y-2 pt-3 border-t border-white/[0.04]">
-            <label className="text-xs text-zinc-300 font-medium flex items-center gap-1.5">
-              <Volume2 className="h-3.5 w-3.5 text-zinc-400" />
+          <div className="space-y-2 pt-3 border-t border-slate-100">
+            <label className="text-xs text-slate-800 font-semibold flex items-center gap-1.5">
+              <Volume2 className="h-3.5 w-3.5 text-slate-500" />
               Default Voice Actor (edge-tts)
             </label>
             <select
               value={defaultVoice}
               onChange={(e) => setDefaultVoice(e.target.value)}
-              className="w-full bg-[#0c0c0e] border border-white/[0.08] rounded-lg text-xs text-white p-2.5 focus:ring-1 focus:ring-indigo-500/40"
+              className="w-full bg-white border border-slate-200 rounded-xl text-xs text-slate-900 font-medium p-2.5 focus:ring-2 focus:ring-[#6c5ce7]/20 focus:border-[#6c5ce7] shadow-2xs"
             >
               {VOICES.map((v) => (
-                <option key={v.id} value={v.id} className="bg-zinc-900 text-white">
+                <option key={v.id} value={v.id} className="bg-white text-slate-900">
                   {v.name} ({v.role})
                 </option>
               ))}
@@ -162,20 +162,20 @@ export function SettingsView({
           </div>
 
           {/* AI Visual Fallback Toggle */}
-          <div className="pt-3 border-t border-white/[0.04]">
-            <label className="flex items-center justify-between p-3.5 rounded-lg bg-[#0c0c0e] border border-white/[0.06] hover:border-white/[0.12] transition-colors cursor-pointer group">
+          <div className="pt-3 border-t border-slate-100">
+            <label className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 border border-slate-200 hover:border-slate-300 transition-colors cursor-pointer group">
               <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-lg bg-white/[0.06] border border-white/[0.08] flex items-center justify-center text-zinc-300 shrink-0">
+                <div className="h-8 w-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-[#6c5ce7] shadow-2xs shrink-0">
                   <Sparkles className="h-4 w-4" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold text-white">AI Visual Generation (Google Imagen 3)</span>
-                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/[0.06] text-zinc-400 font-semibold border border-white/[0.08]">
+                    <span className="text-xs font-semibold text-slate-900">AI Visual Generation (Google Imagen 3)</span>
+                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white text-slate-700 font-bold border border-slate-200 shadow-2xs">
                       Zero-Drift
                     </span>
                   </div>
-                  <p className="text-[10px] text-zinc-400 mt-0.5">
+                  <p className="text-[11px] text-slate-600 mt-0.5 font-normal">
                     Synthesizes custom 9:16 cinematic visuals via Imagen 3 whenever Pexels has no matching video, animated with Ken Burns motion.
                   </p>
                 </div>
@@ -184,7 +184,7 @@ export function SettingsView({
                 type="checkbox"
                 checked={aiVisualsEnabled}
                 onChange={(e) => setAiVisualsEnabled(e.target.checked)}
-                className="h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-indigo-500 focus:ring-indigo-500/40 accent-indigo-500 cursor-pointer"
+                className="h-4 w-4 rounded border-slate-300 bg-white text-[#6c5ce7] focus:ring-[#6c5ce7]/20 accent-[#6c5ce7] cursor-pointer"
               />
             </label>
           </div>
@@ -192,13 +192,13 @@ export function SettingsView({
       </div>
 
       {/* Infrastructure & Services Health Matrix */}
-      <div className="rounded-xl pm-surface border border-white/[0.06] p-5 space-y-4">
+      <div className="rounded-2xl bg-white border border-slate-200/80 p-5 space-y-4 shadow-2xs">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs font-bold text-white uppercase tracking-wider">
-            <Shield className="h-4 w-4 text-emerald-400" />
+          <div className="flex items-center gap-2 text-xs font-bold text-slate-900 uppercase tracking-wider">
+            <Shield className="h-4 w-4 text-emerald-600" />
             <span>Infrastructure Health</span>
           </div>
-          <Badge variant="success" className="text-[10px] font-mono">100% Operational</Badge>
+          <Badge variant="success" className="text-[10px] font-mono font-bold">100% Operational</Badge>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
@@ -213,13 +213,13 @@ export function SettingsView({
           ].map((item, idx) => (
             <div
               key={idx}
-              className="p-3 rounded-lg bg-[#0c0c0e] border border-white/[0.04] flex items-center justify-between"
+              className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between"
             >
               <div>
-                <p className="font-semibold text-white">{item.service}</p>
-                <p className="text-[10px] text-zinc-500">{item.desc}</p>
+                <p className="font-semibold text-slate-900">{item.service}</p>
+                <p className="text-[11px] text-slate-600 font-medium">{item.desc}</p>
               </div>
-              <span className="flex items-center text-emerald-400 font-mono text-[11px] font-medium">
+              <span className="flex items-center text-emerald-600 font-mono text-[11px] font-semibold">
                 <CheckCircle2 className="h-3 w-3 mr-1" />
                 {item.status}
               </span>

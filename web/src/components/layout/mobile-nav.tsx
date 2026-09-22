@@ -165,13 +165,13 @@ export function MobileNav({
                 className={`relative flex flex-col items-center justify-center py-1 px-3 rounded-lg transition-all duration-200 ${
                   isActive
                     ? "text-[#6c5ce7]"
-                    : "text-slate-400 hover:text-slate-600 active:scale-95"
+                    : "text-slate-600 hover:text-slate-900 active:scale-95"
                 }`}
               >
                 <div className="relative">
                   <Icon
                     className={`h-5 w-5 transition-transform ${
-                      isActive ? "scale-110 text-[#6c5ce7] stroke-[2.2]" : "text-slate-400"
+                      isActive ? "scale-110 text-[#6c5ce7] stroke-[2.2]" : "text-slate-500"
                     }`}
                   />
                   {tab.badge && (
@@ -188,7 +188,7 @@ export function MobileNav({
                 </div>
                 <span
                   className={`text-[10px] tracking-tight mt-1 transition-all ${
-                    isActive ? "font-bold text-[#6c5ce7]" : "font-medium text-slate-500"
+                    isActive ? "font-bold text-[#6c5ce7]" : "font-semibold text-slate-600"
                   }`}
                 >
                   {tab.label}
@@ -209,21 +209,21 @@ export function MobileNav({
             className={`relative flex flex-col items-center justify-center py-1 px-3 rounded-lg transition-all duration-200 ${
               isMoreOpen || activeView === "settings" || activeView === "logs"
                 ? "text-[#6c5ce7]"
-                : "text-slate-400 hover:text-slate-600 active:scale-95"
+                : "text-slate-600 hover:text-slate-900 active:scale-95"
             }`}
           >
             <MoreHorizontal
               className={`h-5 w-5 transition-transform ${
                 isMoreOpen || activeView === "settings" || activeView === "logs"
                   ? "scale-110 text-[#6c5ce7] stroke-[2.2]"
-                  : "text-slate-400"
+                  : "text-slate-500"
               }`}
             />
             <span
               className={`text-[10px] tracking-tight mt-1 transition-all ${
                 isMoreOpen || activeView === "settings" || activeView === "logs"
                   ? "font-bold text-[#6c5ce7]"
-                  : "font-medium text-slate-500"
+                  : "font-semibold text-slate-600"
               }`}
             >
               More

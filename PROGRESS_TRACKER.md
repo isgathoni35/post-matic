@@ -70,6 +70,7 @@
 - [x] **Step 8.4:** Studio Console Creation Dashboard (Transform `studio-console-view.tsx` into a clean white 3-step wizard with purple step badges, light topic textarea, voice audition grid with purple active state, and clean real-time render monitor).
 - [x] **Step 8.5:** Series Ecosystem & Show Bible Detail Views (Transform `series-view.tsx` and `series-detail-view.tsx` with clean white series cards, emerald `AUTOPILOT: ACTIVE` pill, social health strip, and clean editable Show Bible universe lore textareas).
 - [x] **Step 8.6:** Render Library & Video Player Modal (Transform `render-library-view.tsx` with clean search bar, white 9:16 video thumbnail cards with duration badges, and a clean white video inspector modal with dark player).
-- [ ] **Step 8.7:** Social Multi-Channel Hub & OAuth Modal (Transform `social-channels-view.tsx` and `social-accounts-modal.tsx` to clean white cards, official platform brand accents, slate status boxes, and clean connection actions).
-- [ ] **Step 8.8:** Job Queue, Settings & Engine Telemetry (Transform `job-queue-view.tsx` table, `settings-view.tsx` preference cards, and `engine-logs-view.tsx` to clean white layout with embedded developer terminal).
+- [x] **Step 8.7:** Social Multi-Channel Hub & OAuth Modal (Transform `social-channels-view.tsx` and `social-accounts-modal.tsx` to clean white cards, official platform brand accents, slate status boxes, and clean connection actions).
+- [x] **Step 8.8:** Job Queue, Settings & Engine Telemetry (Transform `job-queue-view.tsx` table, `settings-view.tsx` preference cards, and `engine-logs-view.tsx` to clean white layout with embedded developer terminal).
+
 

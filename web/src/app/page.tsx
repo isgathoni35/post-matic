@@ -423,17 +423,17 @@ export default function LandingPage() {
         </p>
 
         {/* "Perfect for" Platform Icons */}
-        <div className="flex flex-wrap items-center justify-center gap-2.5 mb-9 text-xs text-slate-500 font-medium">
+        <div className="flex flex-wrap items-center justify-center gap-2.5 mb-9 text-xs text-slate-600 font-semibold">
           <span className="mr-1">Perfect for</span>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50 border border-slate-200/80 text-slate-700 text-xs font-semibold shadow-2xs">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50 border border-slate-200/80 text-slate-800 text-xs font-semibold shadow-2xs">
             <YouTubeIcon className="h-3.5 w-3.5 fill-[#FF0000]" />
             <span>YouTube Shorts</span>
           </div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50 border border-slate-200/80 text-slate-700 text-xs font-semibold shadow-2xs">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50 border border-slate-200/80 text-slate-800 text-xs font-semibold shadow-2xs">
             <TikTokIcon className="h-3.5 w-3.5 fill-[#000000]" />
             <span>TikTok</span>
           </div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50 border border-slate-200/80 text-slate-700 text-xs font-semibold shadow-2xs">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50 border border-slate-200/80 text-slate-800 text-xs font-semibold shadow-2xs">
             <InstagramIcon className="h-3.5 w-3.5 fill-[#E4405F]" />
             <span>Instagram Reels</span>
           </div>
@@ -451,7 +451,7 @@ export default function LandingPage() {
               <ArrowRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
             </Button>
           </Link>
-          <p className="text-xs text-slate-500 font-medium flex items-center justify-center gap-1.5">
+          <p className="text-xs text-slate-600 font-medium flex items-center justify-center gap-1.5">
             <Zap className="h-3 w-3 text-amber-500 fill-amber-500" />
             <span>Get your generated video in less than 5 minutes</span>
             <span className="text-slate-300">•</span>
@@ -460,13 +460,13 @@ export default function LandingPage() {
         </div>
 
         {/* Feature Checkmarks Row */}
-        <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2.5 text-xs font-medium text-slate-500 pt-6 border-t border-slate-200/60 max-w-2xl mx-auto w-full">
+        <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2.5 text-xs font-semibold text-slate-700 pt-6 border-t border-slate-200/60 max-w-2xl mx-auto w-full">
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+            <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
             <span>Zero video editing required</span>
           </div>
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+            <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
             <span>Autonomous daily auto-post</span>
           </div>
           <div className="flex items-center gap-2">
@@ -586,7 +586,7 @@ export default function LandingPage() {
                   </div>
                   <div>
                     <p className="text-xs font-bold text-slate-900">@daily.stoic.mind</p>
-                    <p className="text-[11px] text-slate-400">Dark Psychology Niche</p>
+                    <p className="text-[11px] text-slate-600 font-medium">Dark Psychology Niche</p>
                   </div>
                 </div>
                 <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60">
@@ -597,20 +597,20 @@ export default function LandingPage() {
               {/* View Count Banner */}
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 flex items-baseline justify-between">
                 <div>
-                  <span className="text-[10px] font-bold tracking-wider uppercase text-slate-400">Total Reel Views</span>
+                  <span className="text-[10px] font-bold tracking-wider uppercase text-slate-500">Total Reel Views</span>
                   <div className="text-3xl font-black text-slate-900 tracking-tight mt-0.5">1,420,890</div>
                 </div>
                 <div className="text-right">
-                  <span className="text-[10px] font-bold tracking-wider uppercase text-slate-400">Avg Retention</span>
+                  <span className="text-[10px] font-bold tracking-wider uppercase text-slate-500">Avg Retention</span>
                   <div className="text-sm font-bold text-emerald-600 mt-0.5">98.4%</div>
                 </div>
               </div>
 
               {/* SVG Retention Graph */}
               <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-[11px] font-semibold text-slate-500">
+                <div className="flex items-center justify-between text-[11px] font-semibold text-slate-600">
                   <span>Audience Retention Curve</span>
-                  <span className="text-purple-600 font-mono text-[10px]">Hook Held: 99.1%</span>
+                  <span className="text-purple-600 font-mono text-[10px] font-bold">Hook Held: 99.1%</span>
                 </div>
                 <div className="h-20 w-full rounded-lg bg-slate-50/80 border border-slate-100 p-2 flex flex-col justify-end relative overflow-hidden">
                   <svg className="w-full h-14 overflow-visible" viewBox="0 0 300 60" fill="none">
@@ -633,7 +633,7 @@ export default function LandingPage() {
                     {/* Hook Callout Marker */}
                     <circle cx="40" cy="8.5" r="3.5" fill="#6c5ce7" className="animate-pulse" />
                   </svg>
-                  <div className="flex justify-between text-[9px] font-mono text-slate-400 pt-1">
+                  <div className="flex justify-between text-[9px] font-mono text-slate-500 font-medium pt-1">
                     <span>0:00 (Hook)</span>
                     <span>0:18 (Climax)</span>
                     <span>0:34 (End)</span>
@@ -644,19 +644,19 @@ export default function LandingPage() {
               {/* Engagement Metrics Row */}
               <div className="grid grid-cols-4 gap-2 pt-1 border-t border-slate-100 text-center">
                 <div>
-                  <p className="text-[10px] text-slate-400 font-medium">Likes</p>
+                  <p className="text-[10px] text-slate-500 font-semibold">Likes</p>
                   <p className="text-xs font-bold text-slate-800 mt-0.5">142.8K</p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-slate-400 font-medium">Comments</p>
+                  <p className="text-[10px] text-slate-500 font-semibold">Comments</p>
                   <p className="text-xs font-bold text-slate-800 mt-0.5">3.4K</p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-slate-400 font-medium">Saves</p>
+                  <p className="text-[10px] text-slate-500 font-semibold">Saves</p>
                   <p className="text-xs font-bold text-slate-800 mt-0.5">28.6K</p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-slate-400 font-medium">Shares</p>
+                  <p className="text-[10px] text-slate-500 font-semibold">Shares</p>
                   <p className="text-xs font-bold text-slate-800 mt-0.5">19.1K</p>
                 </div>
               </div>
@@ -671,7 +671,7 @@ export default function LandingPage() {
                   </div>
                   <div>
                     <p className="text-xs font-bold text-slate-900">@cosmic_horizons</p>
-                    <p className="text-[11px] text-slate-400">Deep Space & Sci-Fi</p>
+                    <p className="text-[11px] text-slate-600 font-medium">Deep Space &amp; Sci-Fi</p>
                   </div>
                 </div>
                 <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60">
@@ -682,20 +682,20 @@ export default function LandingPage() {
               {/* View Count Banner */}
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 flex items-baseline justify-between">
                 <div>
-                  <span className="text-[10px] font-bold tracking-wider uppercase text-slate-400">Total Short Views</span>
+                  <span className="text-[10px] font-bold tracking-wider uppercase text-slate-500">Total Short Views</span>
                   <div className="text-3xl font-black text-slate-900 tracking-tight mt-0.5">2,840,310</div>
                 </div>
                 <div className="text-right">
-                  <span className="text-[10px] font-bold tracking-wider uppercase text-slate-400">Loop Rate</span>
+                  <span className="text-[10px] font-bold tracking-wider uppercase text-slate-500">Loop Rate</span>
                   <div className="text-sm font-bold text-emerald-600 mt-0.5">104.2%</div>
                 </div>
               </div>
 
               {/* SVG Retention Graph */}
               <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-[11px] font-semibold text-slate-500">
+                <div className="flex items-center justify-between text-[11px] font-semibold text-slate-600">
                   <span>Relative Viewer Retention</span>
-                  <span className="text-purple-600 font-mono text-[10px]">Over 100% Loop</span>
+                  <span className="text-purple-600 font-mono text-[10px] font-bold">Over 100% Loop</span>
                 </div>
                 <div className="h-20 w-full rounded-lg bg-slate-50/80 border border-slate-100 p-2 flex flex-col justify-end relative overflow-hidden">
                   <svg className="w-full h-14 overflow-visible" viewBox="0 0 300 60" fill="none">
@@ -717,7 +717,7 @@ export default function LandingPage() {
                     />
                     <circle cx="50" cy="4" r="3.5" fill="#6c5ce7" className="animate-pulse" />
                   </svg>
-                  <div className="flex justify-between text-[9px] font-mono text-slate-400 pt-1">
+                  <div className="flex justify-between text-[9px] font-mono text-slate-500 font-medium pt-1">
                     <span>0:00 (Hook)</span>
                     <span>0:24 (Story)</span>
                     <span>0:48 (Loop)</span>
@@ -728,19 +728,19 @@ export default function LandingPage() {
               {/* Engagement Metrics Row */}
               <div className="grid grid-cols-4 gap-2 pt-1 border-t border-slate-100 text-center">
                 <div>
-                  <p className="text-[10px] text-slate-400 font-medium">Likes</p>
+                  <p className="text-[10px] text-slate-500 font-semibold">Likes</p>
                   <p className="text-xs font-bold text-slate-800 mt-0.5">218.4K</p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-slate-400 font-medium">Comments</p>
+                  <p className="text-[10px] text-slate-500 font-semibold">Comments</p>
                   <p className="text-xs font-bold text-slate-800 mt-0.5">4.8K</p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-slate-400 font-medium">Shares</p>
+                  <p className="text-[10px] text-slate-500 font-semibold">Shares</p>
                   <p className="text-xs font-bold text-slate-800 mt-0.5">39.5K</p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-slate-400 font-medium">Subs +</p>
+                  <p className="text-[10px] text-slate-500 font-semibold">Subs +</p>
                   <p className="text-xs font-bold text-slate-800 mt-0.5">+14.2K</p>
                 </div>
               </div>
@@ -755,7 +755,7 @@ export default function LandingPage() {
                   </div>
                   <div>
                     <p className="text-xs font-bold text-slate-900">@history_mysteries</p>
-                    <p className="text-[11px] text-slate-400">History & Conspiracies</p>
+                    <p className="text-[11px] text-slate-600 font-medium">History &amp; Conspiracies</p>
                   </div>
                 </div>
                 <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60">
@@ -766,20 +766,20 @@ export default function LandingPage() {
               {/* View Count Banner */}
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 flex items-baseline justify-between">
                 <div>
-                  <span className="text-[10px] font-bold tracking-wider uppercase text-slate-400">Total Reel Plays</span>
+                  <span className="text-[10px] font-bold tracking-wider uppercase text-slate-500">Total Reel Plays</span>
                   <div className="text-3xl font-black text-slate-900 tracking-tight mt-0.5">915,400</div>
                 </div>
                 <div className="text-right">
-                  <span className="text-[10px] font-bold tracking-wider uppercase text-slate-400">Avg Watch Time</span>
+                  <span className="text-[10px] font-bold tracking-wider uppercase text-slate-500">Avg Watch Time</span>
                   <div className="text-sm font-bold text-emerald-600 mt-0.5">38.2s</div>
                 </div>
               </div>
 
               {/* SVG Retention Graph */}
               <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-[11px] font-semibold text-slate-500">
-                  <span>Plays & Watch Duration</span>
-                  <span className="text-purple-600 font-mono text-[10px]">91% Completion</span>
+                <div className="flex items-center justify-between text-[11px] font-semibold text-slate-600">
+                  <span>Plays &amp; Watch Duration</span>
+                  <span className="text-purple-600 font-mono text-[10px] font-bold">91% Completion</span>
                 </div>
                 <div className="h-20 w-full rounded-lg bg-slate-50/80 border border-slate-100 p-2 flex flex-col justify-end relative overflow-hidden">
                   <svg className="w-full h-14 overflow-visible" viewBox="0 0 300 60" fill="none">
@@ -801,7 +801,7 @@ export default function LandingPage() {
                     />
                     <circle cx="60" cy="10" r="3.5" fill="#6c5ce7" className="animate-pulse" />
                   </svg>
-                  <div className="flex justify-between text-[9px] font-mono text-slate-400 pt-1">
+                  <div className="flex justify-between text-[9px] font-mono text-slate-500 font-medium pt-1">
                     <span>0:00 (Hook)</span>
                     <span>0:21 (Plot)</span>
                     <span>0:42 (End)</span>
@@ -812,19 +812,19 @@ export default function LandingPage() {
               {/* Engagement Metrics Row */}
               <div className="grid grid-cols-4 gap-2 pt-1 border-t border-slate-100 text-center">
                 <div>
-                  <p className="text-[10px] text-slate-400 font-medium">Likes</p>
+                  <p className="text-[10px] text-slate-500 font-semibold">Likes</p>
                   <p className="text-xs font-bold text-slate-800 mt-0.5">87.2K</p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-slate-400 font-medium">Comments</p>
+                  <p className="text-[10px] text-slate-500 font-semibold">Comments</p>
                   <p className="text-xs font-bold text-slate-800 mt-0.5">1.9K</p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-slate-400 font-medium">Saves</p>
+                  <p className="text-[10px] text-slate-500 font-semibold">Saves</p>
                   <p className="text-xs font-bold text-slate-800 mt-0.5">34.1K</p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-slate-400 font-medium">Shares</p>
+                  <p className="text-[10px] text-slate-500 font-semibold">Shares</p>
                   <p className="text-xs font-bold text-slate-800 mt-0.5">12.8K</p>
                 </div>
               </div>
@@ -920,7 +920,7 @@ export default function LandingPage() {
                     <div className="h-2.5 w-2.5 rounded-full bg-slate-300" />
                     <div className="h-2.5 w-2.5 rounded-full bg-slate-300" />
                   </div>
-                  <span className="text-[11px] font-mono text-slate-400 font-medium">Step 1 of 3: Select Engine</span>
+                  <span className="text-[11px] font-mono text-slate-700 font-bold">Step 1 of 3: Select Engine</span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 pt-1">
@@ -928,28 +928,28 @@ export default function LandingPage() {
                     <div className="h-2 w-2 rounded-full bg-[#6c5ce7] absolute top-2.5 right-2.5" />
                     <span className="text-[10px] font-mono font-bold text-[#6c5ce7] uppercase">Active Engine</span>
                     <p className="text-xs font-bold text-slate-900">Dark Psychology</p>
-                    <p className="text-[10px] text-slate-500">Curiosity &amp; Mindset</p>
+                    <p className="text-[10px] text-slate-600 font-medium">Curiosity &amp; Mindset</p>
                   </div>
-                  <div className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-xs space-y-1.5 opacity-80">
-                    <span className="text-[10px] font-mono font-bold text-slate-400 uppercase">Available</span>
-                    <p className="text-xs font-bold text-slate-800">Deep Sea Secrets</p>
-                    <p className="text-[10px] text-slate-400">Ocean &amp; Mysteries</p>
+                  <div className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-xs space-y-1.5">
+                    <span className="text-[10px] font-mono font-bold text-slate-600 uppercase">Available</span>
+                    <p className="text-xs font-bold text-slate-900">Deep Sea Secrets</p>
+                    <p className="text-[10px] text-slate-600 font-medium">Ocean &amp; Mysteries</p>
                   </div>
-                  <div className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-xs space-y-1.5 opacity-80">
-                    <span className="text-[10px] font-mono font-bold text-slate-400 uppercase">Available</span>
-                    <p className="text-xs font-bold text-slate-800">Ancient Rome</p>
-                    <p className="text-[10px] text-slate-400">Historical Facts</p>
+                  <div className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-xs space-y-1.5">
+                    <span className="text-[10px] font-mono font-bold text-slate-600 uppercase">Available</span>
+                    <p className="text-xs font-bold text-slate-900">Ancient Rome</p>
+                    <p className="text-[10px] text-slate-600 font-medium">Historical Facts</p>
                   </div>
-                  <div className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-xs space-y-1.5 opacity-80">
-                    <span className="text-[10px] font-mono font-bold text-slate-400 uppercase">Available</span>
-                    <p className="text-xs font-bold text-slate-800">Cosmic Horrors</p>
-                    <p className="text-[10px] text-slate-400">Deep Space Lore</p>
+                  <div className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-xs space-y-1.5">
+                    <span className="text-[10px] font-mono font-bold text-slate-600 uppercase">Available</span>
+                    <p className="text-xs font-bold text-slate-900">Cosmic Horrors</p>
+                    <p className="text-[10px] text-slate-600 font-medium">Deep Space Lore</p>
                   </div>
                 </div>
 
-                <div className="p-3 rounded-xl bg-white border border-slate-200 text-xs text-slate-600 font-mono flex items-center justify-between">
-                  <span className="text-[11px] text-slate-500">Schema: 3s Pattern Interrupt + Loop Hook</span>
-                  <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200/60">Calibrated</span>
+                <div className="p-3 rounded-xl bg-white border border-slate-200 text-xs text-slate-700 font-mono flex items-center justify-between">
+                  <span className="text-[11px] text-slate-600 font-medium">Schema: 3s Pattern Interrupt + Loop Hook</span>
+                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200/70">Calibrated</span>
                 </div>
               </div>
             </div>
@@ -966,7 +966,7 @@ export default function LandingPage() {
                     <div className="h-2.5 w-2.5 rounded-full bg-slate-300" />
                     <div className="h-2.5 w-2.5 rounded-full bg-slate-300" />
                   </div>
-                  <span className="text-[11px] font-mono text-slate-400 font-medium">Step 2 of 3: Audio &amp; Caption Studio</span>
+                  <span className="text-[11px] font-mono text-slate-700 font-bold">Step 2 of 3: Audio &amp; Caption Studio</span>
                 </div>
 
                 {/* Script Pacing Snippet */}
@@ -975,7 +975,7 @@ export default function LandingPage() {
                     <span className="text-[10px] font-mono font-bold text-purple-600 uppercase">[0:00 - 0:03] Pattern Interrupt Hook</span>
                     <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">98% Retention</span>
                   </div>
-                  <p className="text-xs text-slate-700 italic">
+                  <p className="text-xs text-slate-800 italic font-medium">
                     &ldquo;At 36,000 feet deep, the ocean pressure can crush a titanium submarine like a soda can...&rdquo;
                   </p>
                 </div>
@@ -992,12 +992,12 @@ export default function LandingPage() {
                       </div>
                       <div>
                         <p className="font-bold text-slate-900 group-hover:text-[#6c5ce7] transition-colors">Brian Multilingual (Studio V2)</p>
-                        <p className="text-[10px] text-slate-500">Conversational Viral Narrator • Tap to audition</p>
+                        <p className="text-[10px] text-slate-600 font-medium">Conversational Viral Narrator • Tap to audition</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-1.5 text-xs text-purple-600 font-medium">
-                      <Volume2 className={`h-4 w-4 ${isPlayingAudio ? "animate-pulse text-purple-600" : "text-slate-400"}`} />
-                      <span className="text-[11px] font-mono">{isPlayingAudio ? "Playing" : "Audition"}</span>
+                      <Volume2 className={`h-4 w-4 ${isPlayingAudio ? "animate-pulse text-purple-600" : "text-slate-500"}`} />
+                      <span className="text-[11px] font-mono font-bold">{isPlayingAudio ? "Playing" : "Audition"}</span>
                     </div>
                   </div>
 
@@ -1089,7 +1089,7 @@ export default function LandingPage() {
                     <div className="h-2.5 w-2.5 rounded-full bg-slate-300" />
                     <div className="h-2.5 w-2.5 rounded-full bg-slate-300" />
                   </div>
-                  <span className="text-[11px] font-mono text-slate-400 font-medium">Step 3 of 3: Autopilot Deployment</span>
+                  <span className="text-[11px] font-mono text-slate-700 font-bold">Step 3 of 3: Autopilot Deployment</span>
                 </div>
 
                 <div className="p-4 rounded-xl bg-white border border-slate-200 space-y-3 shadow-xs">
@@ -1125,7 +1125,7 @@ export default function LandingPage() {
                   <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
                     <div className="h-full bg-gradient-to-r from-[#6c5ce7] to-emerald-500 rounded-full w-full" />
                   </div>
-                  <div className="flex items-center justify-between text-[10px] text-slate-400">
+                  <div className="flex items-center justify-between text-[10px] text-slate-600 font-medium">
                     <span>1080x1920 60FPS Video Ready</span>
                     <span className="text-emerald-600 font-bold">1-Click Auto Dispatch</span>
                   </div>
@@ -1150,7 +1150,7 @@ export default function LandingPage() {
             <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
               Stop wasting hours on <span className="text-[#6c5ce7]">tedious editing</span>
             </h2>
-            <p className="text-sm sm:text-base text-slate-500 leading-relaxed">
+            <p className="text-sm sm:text-base text-slate-600 font-medium leading-relaxed">
               Compare the recurring monthly cost, turnaround latency, and creative burnout of traditional production methods.
             </p>
           </div>
@@ -1163,15 +1163,15 @@ export default function LandingPage() {
                   <span className="text-xs font-mono font-bold text-rose-600 uppercase tracking-wider bg-rose-50 px-2.5 py-1 rounded-full border border-rose-200/60">
                     Freelance Editors
                   </span>
-                  <span className="text-xs font-bold text-slate-400 line-through">
+                  <span className="text-xs font-bold text-slate-500 line-through">
                     $1,500+/mo
                   </span>
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-slate-900">Hiring Freelancers</h3>
-                  <p className="text-xs text-slate-500 mt-1">High overhead and unpredictable turnaround delays.</p>
+                  <p className="text-xs text-slate-600 font-medium mt-1">High overhead and unpredictable turnaround delays.</p>
                 </div>
-                <ul className="space-y-3 text-xs text-slate-600">
+                <ul className="space-y-3 text-xs text-slate-700 font-medium">
                   <li className="flex items-start gap-2.5">
                     <X className="h-4 w-4 text-rose-500 shrink-0 mt-0.5" />
                     <span>Costly $50–$200 per single 60s video</span>
@@ -1204,41 +1204,41 @@ export default function LandingPage() {
             <div className="p-7 rounded-2xl bg-white border border-slate-200/90 shadow-lg shadow-slate-100/80 space-y-6 flex flex-col justify-between hover:border-slate-300 transition-all">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono font-bold text-slate-600 uppercase tracking-wider bg-slate-100 px-2.5 py-1 rounded-full border border-slate-200">
+                  <span className="text-xs font-mono font-bold text-slate-700 uppercase tracking-wider bg-slate-100 px-2.5 py-1 rounded-full border border-slate-200">
                     DIY Editing
                   </span>
-                  <span className="text-xs font-bold text-slate-400">
+                  <span className="text-xs font-bold text-slate-600">
                     15+ hrs/week
                   </span>
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-slate-900">Doing It Yourself</h3>
-                  <p className="text-xs text-slate-500 mt-1">Trading nights and weekends for slow channel growth.</p>
+                  <p className="text-xs text-slate-600 font-medium mt-1">Trading nights and weekends for slow channel growth.</p>
                 </div>
-                <ul className="space-y-3 text-xs text-slate-600">
+                <ul className="space-y-3 text-xs text-slate-700 font-medium">
                   <li className="flex items-start gap-2.5">
-                    <X className="h-4 w-4 text-slate-400 shrink-0 mt-0.5" />
+                    <X className="h-4 w-4 text-slate-500 shrink-0 mt-0.5" />
                     <span>Browsing Reddit &amp; TikTok 3 hours for ideas</span>
                   </li>
                   <li className="flex items-start gap-2.5">
-                    <X className="h-4 w-4 text-slate-400 shrink-0 mt-0.5" />
+                    <X className="h-4 w-4 text-slate-500 shrink-0 mt-0.5" />
                     <span>Recording voiceovers with awkward retakes</span>
                   </li>
                   <li className="flex items-start gap-2.5">
-                    <X className="h-4 w-4 text-slate-400 shrink-0 mt-0.5" />
+                    <X className="h-4 w-4 text-slate-500 shrink-0 mt-0.5" />
                     <span>Downloading B-roll clips from 5 different sites</span>
                   </li>
                   <li className="flex items-start gap-2.5">
-                    <X className="h-4 w-4 text-slate-400 shrink-0 mt-0.5" />
+                    <X className="h-4 w-4 text-slate-500 shrink-0 mt-0.5" />
                     <span>Manually timing subtitle keyframes in CapCut</span>
                   </li>
                   <li className="flex items-start gap-2.5">
-                    <X className="h-4 w-4 text-slate-400 shrink-0 mt-0.5" />
+                    <X className="h-4 w-4 text-slate-500 shrink-0 mt-0.5" />
                     <span>Creator burnout leading to abandoned channels</span>
                   </li>
                 </ul>
               </div>
-              <div className="pt-4 border-t border-slate-100 flex items-center gap-2 text-xs font-semibold text-slate-500">
+              <div className="pt-4 border-t border-slate-100 flex items-center gap-2 text-xs font-semibold text-slate-600">
                 <X className="h-4 w-4" />
                 <span>Exhausting and unscalable</span>
               </div>
@@ -1461,13 +1461,13 @@ export default function LandingPage() {
                     {faq.q}
                   </span>
                   <ChevronDown
-                    className={`h-5 w-5 text-slate-400 shrink-0 transition-transform duration-200 ${
+                    className={`h-5 w-5 text-slate-500 shrink-0 transition-transform duration-200 ${
                       openFaq === i ? "rotate-180 text-[#6c5ce7]" : ""
                     }`}
                   />
                 </button>
                 {openFaq === i && (
-                  <div className="px-5 sm:px-6 pb-5 pt-0 text-xs sm:text-sm text-slate-600 leading-relaxed pl-10 border-t border-slate-100 pt-3">
+                  <div className="px-5 sm:px-6 pb-5 pt-0 text-xs sm:text-sm text-slate-700 font-medium leading-relaxed pl-10 border-t border-slate-100 pt-3">
                     {faq.a}
                   </div>
                 )}
@@ -1489,7 +1489,7 @@ export default function LandingPage() {
           <h2 className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
             Ready to launch your <span className="text-[#6c5ce7]">automated video channel?</span>
           </h2>
-          <p className="text-sm sm:text-base text-slate-500 max-w-xl mx-auto leading-relaxed">
+          <p className="text-sm sm:text-base text-slate-600 font-medium max-w-xl mx-auto leading-relaxed">
             Create high-retention vertical videos with zero camera gear, zero voice recording, and zero editing software.
           </p>
           <div className="pt-3">
@@ -1502,25 +1502,25 @@ export default function LandingPage() {
               </Button>
             </Link>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-6 pt-2 text-xs text-slate-400 font-medium">
-            <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-500" /> Instant Cloud Setup</span>
-            <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-500" /> No Credit Card Required</span>
-            <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-500" /> $0 Operational Cost</span>
+          <div className="flex flex-wrap items-center justify-center gap-6 pt-2 text-xs text-slate-600 font-semibold">
+            <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-600 stroke-[2.5]" /> Instant Cloud Setup</span>
+            <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-600 stroke-[2.5]" /> No Credit Card Required</span>
+            <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-600 stroke-[2.5]" /> $0 Operational Cost</span>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-slate-200/80 bg-white py-12 px-6 sm:px-12 text-xs text-slate-500">
+      <footer className="border-t border-slate-200/80 bg-white py-12 px-6 sm:px-12 text-xs text-slate-600">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="flex flex-col sm:flex-row items-center gap-4">
             <BrandLogo size="sm" badgeText="Studio" />
             <span className="hidden sm:inline text-slate-300">|</span>
-            <span className="text-slate-400 text-xs">
+            <span className="text-slate-600 text-xs font-medium">
               © {new Date().getFullYear()} PostMatic. All rights reserved.
             </span>
           </div>
-          <div className="flex items-center gap-6 text-slate-600 font-medium">
+          <div className="flex items-center gap-6 text-slate-700 font-semibold">
             <a href="#how-it-works" className="hover:text-[#6c5ce7] transition-colors">How It Works</a>
             <a href="#showcase" className="hover:text-[#6c5ce7] transition-colors">Showcase</a>
             <a href="#faq" className="hover:text-[#6c5ce7] transition-colors">FAQ</a>

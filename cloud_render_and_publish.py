@@ -46,8 +46,30 @@ def main():
     parser.add_argument("--mode", type=str, default="shorts", choices=["shorts", "story"], help="Video generation mode ('shorts' or 'story')")
     parser.add_argument("--story-style", "--style", dest="story_style", type=str, default="anime", choices=["anime", "donghua", "stickman", "3d_cartoon"], help="Style for animated story")
     parser.add_argument("--characters", type=str, default=None, help="JSON serialized custom characters")
+    parser.add_argument("--music-track", type=str, default=None, help="Background music preset name or URL")
+    parser.add_argument("--subtitle-style", type=str, default="hormozi_yellow", help="Subtitle visual preset style")
+    parser.add_argument("--options-json", type=str, default=None, help="JSON serialized options dict containing nested settings")
 
     args = parser.parse_args()
+
+    # Unpack nested options if passed via --options-json
+    if args.options_json:
+        try:
+            opts = json.loads(args.options_json)
+            if isinstance(opts, dict):
+                if opts.get("privacy"): args.privacy = opts["privacy"]
+                if opts.get("video_format"): args.video_format = opts["video_format"]
+                if opts.get("target_platform"): args.platform = opts["target_platform"]
+                if opts.get("mode"): args.mode = opts["mode"]
+                if opts.get("story_style"): args.story_style = opts["story_style"]
+                if opts.get("characters") and not args.characters:
+                    args.characters = json.dumps(opts["characters"])
+                if opts.get("music_track") and not args.music_track:
+                    args.music_track = opts["music_track"]
+                if opts.get("subtitle_style") and not args.subtitle_style:
+                    args.subtitle_style = opts["subtitle_style"]
+        except Exception as opt_err:
+            logger.warning("Could not parse options-json: %s", opt_err)
 
     job_id = args.job_id
     if job_id:

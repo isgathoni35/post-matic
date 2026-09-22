@@ -156,8 +156,9 @@ def generate_faceless_video(
         output_path=dest_output,
         video_format=video_format,
         bgm_path=bgm_path,
+        progress_callback=lambda stage, pct: report_progress(stage, pct),
     )
-    report_progress("rendering", 95)
+    report_progress("rendering", 98)
 
     elapsed = time.time() - start_time
     file_size = final_video.stat().st_size

@@ -125,11 +125,13 @@ jobs:
               --job-id "${{ github.event.client_payload.job_id }}" \
               --user-id "${{ github.event.client_payload.user_id }}" \
               ${{ github.event.client_payload.publish_youtube && '--publish-youtube' || '' }} \
-              --privacy "${{ github.event.client_payload.privacy || 'public' }}" \
-              --format "${{ github.event.client_payload.video_format || 'short' }}" \
-              --platform "${{ github.event.client_payload.target_platform || 'youtube' }}" \
-              --mode "${{ github.event.client_payload.mode || 'shorts' }}" \
-              --story-style "${{ github.event.client_payload.story_style || 'anime' }}"
+              --privacy "${{ github.event.client_payload.options.privacy || github.event.client_payload.privacy || 'public' }}" \
+              --format "${{ github.event.client_payload.options.video_format || github.event.client_payload.video_format || 'short' }}" \
+              --platform "${{ github.event.client_payload.options.target_platform || github.event.client_payload.target_platform || 'youtube' }}" \
+              --mode "${{ github.event.client_payload.options.mode || github.event.client_payload.mode || 'shorts' }}" \
+              --story-style "${{ github.event.client_payload.options.story_style || github.event.client_payload.story_style || 'anime' }}" \
+              --music-track "${{ github.event.client_payload.options.music_track || github.event.client_payload.music_track || '' }}" \
+              --subtitle-style "${{ github.event.client_payload.options.subtitle_style || github.event.client_payload.subtitle_style || 'hormozi_yellow' }}"
           else
             python cloud_render_and_publish.py \
               --topic "${{ inputs.topic }}" \

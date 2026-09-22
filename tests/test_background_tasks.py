@@ -146,6 +146,8 @@ def test_api_generate_triggers_background_task():
             characters=None,
             series_id=None,
             episode_number=None,
+            music_track=None,
+            subtitle_style="hormozi_yellow",
         )
 
 
@@ -184,6 +186,8 @@ def test_execute_video_pipeline_job_dispatches_to_github(mock_enabled, mock_disp
         mode="shorts",
         story_style="anime",
         characters=None,
+        music_track=None,
+        subtitle_style="hormozi_yellow",
     )
 
 
@@ -222,4 +226,6 @@ def test_execute_video_pipeline_job_dispatches_long_format_to_github(mock_enable
         mode="shorts",
         story_style="anime",
         characters=None,
+        music_track=None,
+        subtitle_style="hormozi_yellow",
     )

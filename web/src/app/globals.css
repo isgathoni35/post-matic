@@ -1,11 +1,16 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @layer base {
   :root {
     /* Core Backgrounds - clean light SaaS palette */
     --background: #ffffff;
     --background-subtle: #f8fafc;
     --background-raised: #ffffff;
+
+    /* Core Foreground Typography */
+    --foreground: #0f172a;
 
     /* Cards */
     --card: #ffffff;
@@ -23,9 +28,9 @@
     --secondary-hover: #e2e8f0;
     --secondary-foreground: #1e293b;
 
-    /* Muted text and surfaces */
+    /* Muted text and surfaces - high contrast slate-600 */
     --muted: #f8fafc;
-    --muted-foreground: #64748b;
+    --muted-foreground: #475569;
 
     /* Accent matches primary */
     --accent: #6c5ce7;
@@ -53,6 +58,7 @@
     --background-subtle: #111115;
     --background-raised: #16161a;
 
+    --foreground: #f8fafc;
     --card: #111115;
     --card-foreground: #f0f0f2;
     --popover: #1a1a1f;
@@ -67,7 +73,7 @@
     --secondary-foreground: #d4d4d8;
 
     --muted: #18181c;
-    --muted-foreground: #71717a;
+    --muted-foreground: #94a3b8;
 
     --accent: #6c5ce7;
     --accent-foreground: #ffffff;
@@ -90,6 +96,7 @@
   --color-background: var(--background);
   --color-background-subtle: var(--background-subtle);
   --color-background-raised: var(--background-raised);
+  --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
@@ -125,13 +132,12 @@ html {
 
 body {
   background-color: var(--background);
-  color: var(--card-foreground);
+  color: var(--foreground);
   font-family: var(--font-sans);
   overflow-x: hidden;
   max-width: 100vw;
   width: 100%;
   position: relative;
-  letter-spacing: -0.012em;
 }
 
 /* ─────────────────────────────────────────────

@@ -396,8 +396,8 @@ export function StudioConsoleView({
               currentStep === 1
                 ? "bg-purple-50 text-[#6c5ce7] shadow-xs"
                 : topic.trim()
-                ? "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
-                : "text-slate-400 hover:text-slate-600"
+                ? "text-slate-700 hover:text-slate-900 hover:bg-slate-50"
+                : "text-slate-600 hover:text-slate-900"
             }`}
           >
             <span
@@ -405,8 +405,8 @@ export function StudioConsoleView({
                 currentStep === 1
                   ? "bg-[#6c5ce7] text-white"
                   : topic.trim()
-                  ? "bg-slate-200 text-slate-700"
-                  : "bg-slate-100 text-slate-400"
+                  ? "bg-slate-200 text-slate-800"
+                  : "bg-slate-100 text-slate-600 border border-slate-200"
               }`}
             >
               1
@@ -414,7 +414,7 @@ export function StudioConsoleView({
             <span>Idea & Format</span>
           </button>
 
-          <ChevronRight className="w-4 h-4 text-slate-300 hidden sm:block" />
+          <ChevronRight className="w-4 h-4 text-slate-400 hidden sm:block" />
 
           {/* Step 2 Tab */}
           <button
@@ -426,8 +426,8 @@ export function StudioConsoleView({
               currentStep === 2
                 ? "bg-purple-50 text-[#6c5ce7] shadow-xs"
                 : !topic.trim()
-                ? "opacity-40 cursor-not-allowed text-slate-300"
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                ? "cursor-not-allowed text-slate-500 font-medium"
+                : "text-slate-700 hover:text-slate-900 hover:bg-slate-50"
             }`}
           >
             <span
@@ -435,8 +435,8 @@ export function StudioConsoleView({
                 currentStep === 2
                   ? "bg-[#6c5ce7] text-white"
                   : topic.trim()
-                  ? "bg-slate-200 text-slate-700"
-                  : "bg-slate-100 text-slate-400"
+                  ? "bg-slate-200 text-slate-800"
+                  : "bg-slate-100 text-slate-600 border border-slate-200"
               }`}
             >
               2
@@ -444,7 +444,7 @@ export function StudioConsoleView({
             <span>Voice & Settings</span>
           </button>
 
-          <ChevronRight className="w-4 h-4 text-slate-300 hidden sm:block" />
+          <ChevronRight className="w-4 h-4 text-slate-400 hidden sm:block" />
 
           {/* Step 3 Tab */}
           <button
@@ -456,8 +456,8 @@ export function StudioConsoleView({
               currentStep === 3
                 ? "bg-purple-50 text-[#6c5ce7] shadow-xs"
                 : !activeJob
-                ? "opacity-40 cursor-not-allowed text-slate-300"
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                ? "cursor-not-allowed text-slate-500 font-medium"
+                : "text-slate-700 hover:text-slate-900 hover:bg-slate-50"
             }`}
           >
             <span
@@ -466,7 +466,7 @@ export function StudioConsoleView({
                   ? "bg-[#6c5ce7] text-white"
                   : activeJob?.status === "completed"
                   ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                  : "bg-slate-100 text-slate-400"
+                  : "bg-slate-100 text-slate-600 border border-slate-200"
               }`}
             >
               3
@@ -476,7 +476,7 @@ export function StudioConsoleView({
         </div>
 
         {/* Quick Mode Indicator */}
-        <div className="hidden md:flex items-center gap-2 text-xs text-slate-400 font-medium">
+        <div className="hidden md:flex items-center gap-2 text-xs text-slate-600 font-semibold">
           <span>{studioMode === "shorts" ? "Faceless" : "Story"} Mode</span>
           <span>•</span>
           <span>{videoFormat === "short" ? "9:16 Vertical" : "16:9 Landscape"}</span>
@@ -562,17 +562,17 @@ export function StudioConsoleView({
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-sm font-semibold text-slate-900">Video Topic & Narrative Prompt</h3>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-slate-600 font-medium">
                   Describe what your video is about. Be as specific or conceptual as you like.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={toggleDictation}
-                className={`p-2 rounded-lg transition-colors flex items-center gap-1.5 text-xs font-medium ${
+                className={`p-2 rounded-lg transition-colors flex items-center gap-1.5 text-xs font-semibold ${
                   isDictating
                     ? "bg-rose-50 text-rose-600 border border-rose-200"
-                    : "bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200"
+                    : "bg-slate-100 text-slate-700 hover:text-slate-900 hover:bg-slate-200"
                 }`}
                 title={isDictating ? "Stop voice dictation" : "Speak your prompt"}
               >
@@ -601,7 +601,7 @@ export function StudioConsoleView({
               className="min-h-[160px] resize-y bg-slate-50/50 border-slate-200 focus:bg-white focus:border-[#6c5ce7] focus:ring-1 focus:ring-[#6c5ce7] text-slate-900 text-sm leading-relaxed p-4 rounded-xl placeholder:text-slate-400"
             />
 
-            <div className="flex items-center justify-between text-xs text-slate-400 pt-1">
+            <div className="flex items-center justify-between text-xs text-slate-600 font-medium pt-1">
               <span>{topic.trim().split(/\s+/).filter(Boolean).length} words</span>
               <span>{topic.length} characters</span>
             </div>
@@ -630,12 +630,12 @@ export function StudioConsoleView({
           {/* Quick Summary Bar */}
           <div className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 border border-slate-200">
             <div className="flex items-center gap-3 overflow-hidden">
-              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Concept:</span>
-              <p className="text-xs text-slate-800 font-medium truncate max-w-md sm:max-w-xl">{topic}</p>
+              <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">Concept:</span>
+              <p className="text-xs text-slate-900 font-medium truncate max-w-md sm:max-w-xl">{topic}</p>
             </div>
             <button
               onClick={() => setCurrentStep(1)}
-              className="text-xs text-[#6c5ce7] hover:underline transition-colors ml-3 whitespace-nowrap font-medium"
+              className="text-xs text-[#6c5ce7] hover:underline transition-colors ml-3 whitespace-nowrap font-semibold"
             >
               Edit Idea
             </button>
@@ -646,11 +646,11 @@ export function StudioConsoleView({
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-sm font-semibold text-slate-900">Narrator & Voice Profile</h3>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-slate-600 font-medium">
                   Select the neural voice actor that best matches your video's pacing and atmosphere.
                 </p>
               </div>
-              <span className="text-xs text-slate-400">Tap play to audition sample</span>
+              <span className="text-xs text-slate-600 font-medium">Tap play to audition sample</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
@@ -671,7 +671,7 @@ export function StudioConsoleView({
                     <div className="flex items-center gap-2.5 min-w-0">
                       <div
                         className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 ${
-                          isSelected ? "bg-[#6c5ce7] text-white" : "bg-slate-200 text-slate-600"
+                          isSelected ? "bg-[#6c5ce7] text-white" : "bg-slate-200 text-slate-700"
                         }`}
                       >
                         {v.initials}
@@ -679,11 +679,11 @@ export function StudioConsoleView({
                       <div className="min-w-0">
                         <div className="flex items-center gap-1.5">
                           <span className="text-xs font-semibold text-slate-900 truncate">{v.name}</span>
-                          <span className="text-[10px] text-slate-500 px-1 py-0.5 rounded bg-slate-100 font-medium">
+                          <span className="text-[10px] text-slate-600 px-1 py-0.5 rounded bg-slate-100 font-medium border border-slate-200/80">
                             {v.badge}
                           </span>
                         </div>
-                        <p className="text-[11px] text-slate-500 truncate">{v.role}</p>
+                        <p className="text-[11px] text-slate-600 truncate font-medium">{v.role}</p>
                       </div>
                     </div>
 
@@ -693,7 +693,7 @@ export function StudioConsoleView({
                       className={`w-7 h-7 rounded-full flex items-center justify-center transition-colors shrink-0 ${
                         isAuditioning
                           ? "bg-[#6c5ce7] text-white animate-pulse"
-                          : "bg-slate-100 text-slate-500 hover:text-slate-900 hover:bg-slate-200"
+                          : "bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200"
                       }`}
                       title={isAuditioning ? "Stop audio sample" : "Audition voice"}
                     >
@@ -710,8 +710,8 @@ export function StudioConsoleView({
             {/* Duration Selector */}
             <div className="bg-white p-5 rounded-xl border border-slate-200/80 shadow-xs space-y-3">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-medium text-slate-700 flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5 text-slate-400" />
+                <label className="text-xs font-semibold text-slate-800 flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-slate-500" />
                   <span>Target Duration</span>
                 </label>
                 <span className="text-xs text-[#6c5ce7] font-semibold">{targetDuration} seconds</span>
@@ -843,7 +843,7 @@ export function StudioConsoleView({
                 </div>
 
                 {customCharacters.length === 0 ? (
-                  <p className="text-xs text-slate-400 italic">
+                  <p className="text-xs text-slate-500 italic font-medium">
                     No custom characters added. The AI will invent dynamic characters automatically for the story.
                   </p>
                 ) : (
@@ -863,7 +863,7 @@ export function StudioConsoleView({
                         </button>
 
                         <div>
-                          <label className="text-[10px] text-slate-500 font-medium block mb-1">Character Name</label>
+                          <label className="text-[10px] text-slate-600 font-semibold block mb-1">Character Name</label>
                           <input
                             type="text"
                             value={char.name}
@@ -874,7 +874,7 @@ export function StudioConsoleView({
                         </div>
 
                         <div>
-                          <label className="text-[10px] text-slate-500 font-medium block mb-1">Assigned Voice</label>
+                          <label className="text-[10px] text-slate-600 font-semibold block mb-1">Assigned Voice</label>
                           <select
                             value={char.voice || VOICES[0].id}
                             onChange={(e) => handleUpdateCharacter(idx, "voice", e.target.value)}
@@ -889,7 +889,7 @@ export function StudioConsoleView({
                         </div>
 
                         <div>
-                          <label className="text-[10px] text-slate-500 font-medium block mb-1">Visual Prompt Notes</label>
+                          <label className="text-[10px] text-slate-600 font-semibold block mb-1">Visual Prompt Notes</label>
                           <input
                             type="text"
                             value={char.visual_notes || ""}
@@ -900,12 +900,12 @@ export function StudioConsoleView({
                         </div>
 
                         <div>
-                          <label className="text-[10px] text-slate-500 font-medium block mb-1">Reference Portrait</label>
+                          <label className="text-[10px] text-slate-600 font-semibold block mb-1">Reference Portrait</label>
                           <input
                             type="file"
                             accept="image/*"
                             onChange={(e) => handleImageFileChange(idx, e)}
-                            className="text-[10px] text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-[10px] file:bg-slate-200 file:text-slate-700"
+                            className="text-[10px] text-slate-600 file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-[10px] file:bg-slate-200 file:text-slate-700 font-medium"
                           />
                         </div>
                       </div>
@@ -926,7 +926,7 @@ export function StudioConsoleView({
                     Hormozi Kinetic Pop
                   </Badge>
                 </h3>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-slate-600 font-medium">
                   Dynamic word-level highlight animation and ducked background audio.
                 </p>
               </div>
@@ -934,7 +934,7 @@ export function StudioConsoleView({
 
             {/* Subtitle Style Selector */}
             <div className="space-y-2">
-              <label className="text-xs font-medium text-slate-700 block">Subtitle Animation Preset</label>
+              <label className="text-xs font-semibold text-slate-800 block">Subtitle Animation Preset</label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {SUBTITLE_STYLES.map((sub) => {
                   const isSelected = subtitleStyle === sub.id;
@@ -946,7 +946,7 @@ export function StudioConsoleView({
                       className={`p-2.5 rounded-lg border text-left transition-all flex items-center justify-between ${
                         isSelected
                           ? "bg-amber-50/80 border-amber-400 text-slate-900 shadow-2xs"
-                          : "bg-slate-50/70 border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-white"
+                          : "bg-slate-50/70 border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-white font-medium"
                       }`}
                     >
                       <div className="flex items-center gap-2">
@@ -966,8 +966,8 @@ export function StudioConsoleView({
             {/* Background Music Presets & Trending Audio Link */}
             <div className="space-y-2 pt-2 border-t border-slate-100">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-medium text-slate-700">Background Music Track</label>
-                <span className="text-[11px] text-slate-400">Auto-ducked (-22dB) under narration</span>
+                <label className="text-xs font-semibold text-slate-800">Background Music Track</label>
+                <span className="text-[11px] text-slate-500 font-medium">Auto-ducked (-22dB) under narration</span>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -980,12 +980,12 @@ export function StudioConsoleView({
                       onClick={() => setMusicTrack?.(track.id)}
                       className={`p-2 rounded-lg border text-left transition-all ${
                         isSelected
-                          ? "bg-purple-50/80 border-[#6c5ce7] text-slate-900 font-medium shadow-2xs"
-                          : "bg-slate-50/70 border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-white"
+                          ? "bg-purple-50/80 border-[#6c5ce7] text-slate-900 font-semibold shadow-2xs"
+                          : "bg-slate-50/70 border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-white"
                       }`}
                     >
                       <p className="text-xs font-medium truncate">{track.name}</p>
-                      <p className="text-[10px] text-slate-400 truncate">{track.mood}</p>
+                      <p className="text-[10px] text-slate-500 truncate font-medium">{track.mood}</p>
                     </button>
                   );
                 })}
@@ -994,7 +994,7 @@ export function StudioConsoleView({
               {/* Direct TikTok / YouTube sound link input */}
               <div className="pt-2">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-[11px] text-slate-600 font-medium">Or Paste TikTok / YouTube Trending Sound Link:</span>
+                  <span className="text-[11px] text-slate-700 font-medium">Or Paste TikTok / YouTube Trending Sound Link:</span>
                   {musicTrack && musicTrack.startsWith("http") && (
                     <span className="text-[10px] text-teal-600 font-medium flex items-center gap-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" />
@@ -1023,12 +1023,12 @@ export function StudioConsoleView({
                 onChange={(e) => setAutoPublishYouTube(e.target.checked)}
                 className="w-4 h-4 rounded border-slate-300 bg-white text-red-600 focus:ring-red-500 cursor-pointer"
               />
-              <label htmlFor="auto-pub" className="text-xs text-slate-700 font-medium cursor-pointer flex items-center gap-1.5">
+              <label htmlFor="auto-pub" className="text-xs text-slate-800 font-semibold cursor-pointer flex items-center gap-1.5">
                 <YouTubeIcon className="h-3.5 w-3.5 text-red-600 fill-current" />
                 <span>Automatically publish to YouTube once rendered</span>
               </label>
             </div>
-            <span className="text-[11px] text-slate-400">Requires connected YouTube channel</span>
+            <span className="text-[11px] text-slate-500 font-medium">Requires connected YouTube channel</span>
           </div>
 
           {/* Step 2 Actions */}
@@ -1089,13 +1089,13 @@ export function StudioConsoleView({
                     </Badge>
                   )}
                 </div>
-                <p className="text-xs text-slate-500 mt-0.5">{getStageName(activeJob?.status)}</p>
+                <p className="text-xs text-slate-600 font-medium mt-0.5">{getStageName(activeJob?.status)}</p>
               </div>
 
               {activeJob && (
                 <div className="text-right">
                   <span className="text-lg font-bold text-slate-900">{activeJob.progress_pct}%</span>
-                  <span className="text-xs text-slate-400 block">completed</span>
+                  <span className="text-xs text-slate-500 font-medium block">completed</span>
                 </div>
               )}
             </div>
@@ -1118,17 +1118,17 @@ export function StudioConsoleView({
 
             {/* Pipeline Stage Indicators */}
             {isRendering && (
-              <div className="grid grid-cols-4 gap-2 pt-1 text-[11px] text-slate-400">
-                <span className={activeJob?.status === "scripting" ? "text-[#6c5ce7] font-semibold" : ""}>
+              <div className="grid grid-cols-4 gap-2 pt-1 text-[11px] text-slate-500 font-medium">
+                <span className={activeJob?.status === "scripting" ? "text-[#6c5ce7] font-bold" : ""}>
                   1. Scripting
                 </span>
-                <span className={activeJob?.status === "synthesizing" ? "text-[#6c5ce7] font-semibold" : ""}>
+                <span className={activeJob?.status === "synthesizing" ? "text-[#6c5ce7] font-bold" : ""}>
                   2. Voiceover
                 </span>
-                <span className={activeJob?.status === "sourcing_media" ? "text-[#6c5ce7] font-semibold" : ""}>
+                <span className={activeJob?.status === "sourcing_media" ? "text-[#6c5ce7] font-bold" : ""}>
                   3. Visuals
                 </span>
-                <span className={activeJob?.status === "rendering" ? "text-[#6c5ce7] font-semibold" : ""}>
+                <span className={activeJob?.status === "rendering" ? "text-[#6c5ce7] font-bold" : ""}>
                   4. Assembly
                 </span>
               </div>
@@ -1201,9 +1201,9 @@ export function StudioConsoleView({
                 <Loader2 className="w-8 h-8 text-[#6c5ce7] animate-spin" />
                 <div className="space-y-1">
                   <p className="text-sm font-semibold text-slate-900">Engine Processing</p>
-                  <p className="text-xs text-slate-500 max-w-xs">{getStageName(activeJob?.status)}</p>
+                  <p className="text-xs text-slate-600 font-medium max-w-xs">{getStageName(activeJob?.status)}</p>
                 </div>
-                <div className="text-[11px] text-slate-400 font-medium">
+                <div className="text-[11px] text-slate-600 font-medium">
                   Zero-OpEx compute pipeline active
                 </div>
               </div>
@@ -1212,7 +1212,7 @@ export function StudioConsoleView({
                 <AlertCircle className="w-10 h-10 text-rose-500 mx-auto" />
                 <div className="space-y-1">
                   <p className="text-sm font-semibold text-slate-900">Video Generation Failed</p>
-                  <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                  <p className="text-xs text-slate-600 font-medium max-w-sm mx-auto">
                     {activeJob?.error_message || "An error occurred during video rendering."}
                   </p>
                 </div>
@@ -1220,15 +1220,15 @@ export function StudioConsoleView({
                   variant="secondary"
                   size="sm"
                   onClick={() => setCurrentStep(2)}
-                  className="rounded-lg text-xs bg-slate-100 hover:bg-slate-200 text-slate-800"
+                  className="rounded-lg text-xs bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold"
                 >
                   Return to Settings
                 </Button>
               </div>
             ) : (
               <div className="text-center py-12 space-y-3">
-                <Film className="w-10 h-10 text-slate-300 mx-auto" />
-                <p className="text-sm font-medium text-slate-500">No active render job</p>
+                <Film className="w-10 h-10 text-slate-400 mx-auto" />
+                <p className="text-sm font-semibold text-slate-600">No active render job</p>
                 <Button
                   variant="primary"
                   size="sm"
