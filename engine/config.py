@@ -47,11 +47,13 @@ AUTOPILOT_SECRET = os.getenv("AUTOPILOT_SECRET", "")
 
 # Gemini model fallback hierarchy
 GEMINI_MODELS = [
-    "gemini-2.5-flash",
+    "gemini-3-flash-preview",
     "gemini-3.7-flash",
     "gemini-3.6-flash",
     "gemini-3.5-flash",
-    "gemini-2.5-pro",
+    "gemini-3.8-flash",
+    "gemma-4-26b-a4b-it",
+    "gemini-flash-lite-latest",
     "gemini-flash-latest",
 ]
 

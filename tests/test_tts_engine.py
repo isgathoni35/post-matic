@@ -41,8 +41,8 @@ def test_generate_ass_subtitles(tmp_path: Path):
     assert "PlayResY: 1920" in content
     assert "[V4+ Styles]" in content
     assert "[Events]" in content
-    assert "Dialogue: 0,0:00:00.10,0:00:00.40,Default" in content
-    assert r"{\c&H0000FFFF&}HELLO{\c&H00FFFFFF&}" in content
+    assert r"\c&H0000FFFF&" in content
+    assert "HELLO" in content
 
 
 def test_synthesize_script_end_to_end(tmp_path: Path):

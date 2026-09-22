@@ -6,7 +6,7 @@ from google import genai
 from google.genai import types
 
 from engine.config import GEMINI_API_KEY, GEMINI_MODELS
-from engine.schema import VideoScript, AnimatedStoryScript, Character
+from engine.schema import VideoScript, Scene, AnimatedStoryScript, StoryScene, DialogueLine, SFXCue, Character
 
 logger = logging.getLogger(__name__)
 
@@ -135,6 +135,18 @@ def get_gemini_client(api_key: Optional[str] = None) -> genai.Client:
     return genai.Client(api_key=key)
 
 
+def _clean_json_str(raw: str) -> str:
+    """Strip markdown backticks and clean JSON text string."""
+    raw = raw.strip()
+    if raw.startswith("```json"):
+        raw = raw[7:]
+    elif raw.startswith("```"):
+        raw = raw[3:]
+    if raw.endswith("```"):
+        raw = raw[:-3]
+    return raw.strip()
+
+
 def generate_script(
     topic: str,
     target_duration: int = 30,
@@ -211,6 +223,33 @@ Ensure search_keywords are concrete visual search queries that yield great resul
         while retries <= max_retries:
             try:
                 logger.info("Attempting script generation with model: %s (attempt %d)", model_name, retries + 1)
+                
+                if model_name.startswith("gemma"):
+                    gemma_prompt = (
+                        f"You are a viral video scriptwriter. Topic: '{topic}'.\n"
+                        f"Create a captivating {target_duration}-second script with exactly {num_scenes} scenes.\n"
+                        "Return ONLY a valid JSON object matching this exact schema without any markdown formatting or commentary outside the JSON block:\n"
+                        "{\n"
+                        '  "title": "Short catchy title",\n'
+                        '  "description": "Engaging description with hashtags",\n'
+                        '  "tags": ["tag1", "tag2", "tag3"],\n'
+                        '  "scenes": [\n'
+                        '    {\n'
+                        '      "scene_id": 1,\n'
+                        '      "narration": "Natural spoken conversational narration with contractions.",\n'
+                        '      "visual_description": "Clear cinematic visual description.",\n'
+                        '      "search_keywords": ["keyword 1", "keyword 2"]\n'
+                        '    }\n'
+                        '  ]\n'
+                        "}\n"
+                    )
+                    response = client.models.generate_content(
+                        model=model_name,
+                        contents=gemma_prompt,
+                    )
+                    cleaned = _clean_json_str(response.text or "")
+                    return VideoScript.model_validate_json(cleaned)
+
                 response = client.models.generate_content(
                     model=model_name,
                     contents=prompt,
@@ -232,13 +271,18 @@ Ensure search_keywords are concrete visual search queries that yield great resul
 
                 # Fallback: parse text as JSON into Pydantic model
                 if response.text:
-                    return VideoScript.model_validate_json(response.text)
+                    cleaned = _clean_json_str(response.text)
+                    return VideoScript.model_validate_json(cleaned)
 
                 raise ValueError("Empty response received from Gemini API.")
 
             except Exception as e:
                 err_msg = str(e)
-                if retries < max_retries and any(err in err_msg for err in ["503", "429", "UNAVAILABLE", "Quota"]):
+                if "RESOURCE_EXHAUSTED" in err_msg:
+                    logger.warning("Model '%s' quota exhausted, falling back to next candidate model immediately.", model_name)
+                    last_error = e
+                    break
+                if retries < max_retries and any(err in err_msg for err in ["503", "429", "UNAVAILABLE"]):
                     sleep_time = 2.0 * (2 ** retries)
                     logger.warning("Model '%s' returned 503/429. Retrying in %.1f seconds...", model_name, sleep_time)
                     time.sleep(sleep_time)
@@ -249,9 +293,8 @@ Ensure search_keywords are concrete visual search queries that yield great resul
                 last_error = e
                 break
 
-    raise RuntimeError(
-        f"Failed to generate script across all candidate models. Last error: {last_error}"
-    )
+    logger.warning("All LLM candidate models exhausted or unavailable (%s). Activating high-retention fallback script generator for topic: '%s'", last_error, topic)
+    return _build_fallback_video_script(topic=topic, target_duration=target_duration, num_scenes=num_scenes)
 
 
 STORY_SYSTEM_INSTRUCTION = """You are an award-winning animation director and screenplay writer for viral animated short videos across YouTube Shorts, TikTok, and Instagram Reels.
@@ -417,6 +460,39 @@ Ensure the dialogue is punchy, authentic, comedic or intense according to the to
         while retries <= max_retries:
             try:
                 logger.info("Attempting story script generation with model: %s (attempt %d)", model_name, retries + 1)
+                
+                if model_name.startswith("gemma"):
+                    gemma_prompt = (
+                        f"Topic: '{topic}'. Animation Style: '{style}'.\n"
+                        f"Duration: approximately {target_duration} seconds. Target scenes: {num_scenes}.\n"
+                        "Output ONLY a valid JSON object matching this AnimatedStoryScript schema without any markdown or commentary outside the JSON block:\n"
+                        "{\n"
+                        '  "title": "Title here",\n'
+                        '  "description": "Description here",\n'
+                        '  "tags": ["tag1", "tag2"],\n'
+                        '  "characters": [\n'
+                        '    {"id": "char1", "name": "Name", "voice": "en-US-BrianMultilingualNeural", "pitch": "+0Hz", "rate": "+0%", "visual_dna": "Visual appearance"}\n'
+                        '  ],\n'
+                        '  "scenes": [\n'
+                        '    {\n'
+                        '      "scene_id": 1,\n'
+                        '      "dialogues": [\n'
+                        '        {"speaker_id": "char1", "text": "Dialogue text", "action_sfx": "punch_heavy"}\n'
+                        '      ],\n'
+                        '      "visual_description": "Scene visual action",\n'
+                        '      "environment_anchor": "Dark alley at night"\n'
+                        '    }\n'
+                        '  ]\n'
+                        "}\n"
+                    )
+                    response = client.models.generate_content(
+                        model=model_name,
+                        contents=gemma_prompt,
+                    )
+                    cleaned = _clean_json_str(response.text or "")
+                    story = AnimatedStoryScript.model_validate_json(cleaned)
+                    return _reconcile_characters(story, custom_characters)
+
                 response = client.models.generate_content(
                     model=model_name,
                     contents=prompt,
@@ -439,14 +515,19 @@ Ensure the dialogue is punchy, authentic, comedic or intense according to the to
 
                 # Fallback: parse text as JSON into Pydantic model
                 if response.text:
-                    story = AnimatedStoryScript.model_validate_json(response.text)
+                    cleaned = _clean_json_str(response.text)
+                    story = AnimatedStoryScript.model_validate_json(cleaned)
                     return _reconcile_characters(story, custom_characters)
 
                 raise ValueError("Empty response received from Gemini API.")
 
             except Exception as e:
                 err_msg = str(e)
-                if retries < max_retries and any(err in err_msg for err in ["503", "429", "UNAVAILABLE", "Quota"]):
+                if "RESOURCE_EXHAUSTED" in err_msg:
+                    logger.warning("Story model '%s' quota exhausted, falling back to next candidate model immediately.", model_name)
+                    last_error = e
+                    break
+                if retries < max_retries and any(err in err_msg for err in ["503", "429", "UNAVAILABLE"]):
                     sleep_time = 2.0 * (2 ** retries)
                     logger.warning("Model '%s' returned 503/429. Retrying in %.1f seconds...", model_name, sleep_time)
                     time.sleep(sleep_time)
@@ -457,8 +538,122 @@ Ensure the dialogue is punchy, authentic, comedic or intense according to the to
                 last_error = e
                 break
 
-    raise RuntimeError(
-        f"Failed to generate story script across all candidate models. Last error: {last_error}"
+    logger.warning("All story LLM candidate models exhausted or unavailable (%s). Activating fallback story script generator for topic: '%s'", last_error, topic)
+    fallback_story = _build_fallback_story_script(topic=topic, target_duration=target_duration, num_scenes=num_scenes, style=style, custom_characters=custom_characters)
+    return _reconcile_characters(fallback_story, custom_characters)
+
+
+def _build_fallback_video_script(topic: str, target_duration: int = 25, num_scenes: int = 3) -> VideoScript:
+    """Generate a high-retention fallback script when all cloud LLM endpoints hit 503/429."""
+    clean_topic = topic.strip().strip("'\"")
+    words = [w for w in clean_topic.split() if w.isalnum()]
+    base_keywords = words[:3] if words else ["cinematic", "nature", "epic"]
+    kw_str = " ".join(base_keywords)
+
+    scenes_data = [
+        (
+            f"Here's the wild truth about {clean_topic} that almost nobody talks about.",
+            f"Dramatic cinematic opening revealing the mysterious world of {clean_topic}",
+            [f"{kw_str} cinematic", f"{clean_topic} discovery", "dramatic lighting"]
+        ),
+        (
+            f"When researchers explored deeper into {clean_topic}, what they uncovered defied every previous expectation.",
+            f"High-detail investigative visual showing the complex layers of {clean_topic}",
+            [f"{kw_str} macro", "scientific research", "fascinating revelation"]
+        ),
+        (
+            f"This completely shifts our perspective on {clean_topic}. Which detail surprised you the most? Drop your thoughts below.",
+            f"Stunning panoramic conclusion with glowing ambient light and cinematic motion",
+            [f"{kw_str} aerial", "epic horizon", "inspiring landscape"]
+        )
+    ]
+
+    selected_scenes = []
+    for i in range(max(3, num_scenes)):
+        tmpl_idx = i % len(scenes_data)
+        narr, vis, kws = scenes_data[tmpl_idx]
+        selected_scenes.append(
+            Scene(
+                scene_id=i + 1,
+                narration=narr,
+                visual_description=vis,
+                search_keywords=kws,
+            )
+        )
+
+    title = f"The Untold Truth About {clean_topic.title()}"[:100]
+    desc = f"Uncovering the mind-blowing secrets of {clean_topic}. Watch until the end! #shorts #viral #facts"
+    tags = [w.lower() for w in words if len(w) > 3][:6] + ["shorts", "viral", "documentary"]
+
+    return VideoScript(
+        title=title,
+        description=desc,
+        tags=tags,
+        scenes=selected_scenes,
+    )
+
+
+def _build_fallback_story_script(
+    topic: str,
+    target_duration: int = 30,
+    num_scenes: int = 3,
+    style: str = "anime",
+    custom_characters: Optional[List[Character]] = None,
+) -> AnimatedStoryScript:
+    """Generate a fallback multi-character screenplay when all LLMs hit 503/429."""
+    chars = custom_characters or [
+        Character(
+            id="char1",
+            name="Protagonist",
+            voice="en-US-BrianMultilingualNeural",
+            visual_dna=f"Dynamic stylized {style} hero with determined expression",
+            subtitle_color="#22C55E",
+        ),
+        Character(
+            id="char2",
+            name="Rival",
+            voice="en-US-ChristopherNeural",
+            visual_dna=f"Formidable {style} rival with glowing battle aura",
+            subtitle_color="#F59E0B",
+        ),
+    ]
+    spk1 = chars[0].id
+    spk2 = chars[1].id if len(chars) > 1 else chars[0].id
+
+    scenes = []
+    for i in range(max(3, num_scenes)):
+        scenes.append(
+            StoryScene(
+                scene_id=i + 1,
+                dialogue=[
+                    DialogueLine(
+                        line_id=1,
+                        speaker_id=spk1,
+                        text=f"This is where the real battle begins for {topic}!",
+                        emotion="urgent",
+                        sfx=[SFXCue(sound_effect="punch_heavy", offset_seconds=0.5, volume=1.0)],
+                    ),
+                    DialogueLine(
+                        line_id=2,
+                        speaker_id=spk2,
+                        text="You have no idea what you're up against.",
+                        emotion="intense",
+                        sfx=[SFXCue(sound_effect="flight_whoosh", offset_seconds=0.2, volume=0.8)],
+                    ),
+                ],
+                visual_description=f"Cinematic {style} action sequence showcasing intense struggle and energy clash",
+                environment_anchor=f"Dramatic storm-lit battle arena overlooking {topic}",
+                camera_movement="dramatic_zoom",
+            )
+        )
+
+    return AnimatedStoryScript(
+        title=f"The Legend of {topic.title()}"[:100],
+        description=f"An epic {style} showdown about {topic}. Watch until the shocking ending! #shorts #anime",
+        tags=[w.lower() for w in topic.split() if len(w) > 3][:5] + [style, "animation", "shorts"],
+        style=style,
+        characters=chars,
+        scenes=scenes,
     )
 
 
