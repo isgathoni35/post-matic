@@ -650,10 +650,23 @@ async def publish_video_to_social(
         if local_candidate.exists():
             video_path = local_candidate
 
+    # If video is stored remotely on Supabase Storage CDN, download it locally for upload
+    if (not video_path or not video_path.exists()) and job.video_url and job.video_url.startswith("http"):
+        try:
+            import urllib.request
+            OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+            dl_dest = OUTPUT_DIR / f"video_{job_id}.mp4"
+            logger.info("Downloading remote video from CDN '%s' to '%s' for social publish...", job.video_url, dl_dest)
+            urllib.request.urlretrieve(job.video_url, dl_dest)
+            if dl_dest.exists():
+                video_path = dl_dest
+        except Exception as dl_err:
+            logger.warning("Failed to download remote video from CDN: %s", dl_err)
+
     if not video_path or not video_path.exists():
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Rendered video file not found on disk for upload.",
+            detail="Rendered video file not found on disk or remote storage for upload.",
         )
 
     effective_user_id = payload.user_id or getattr(job, "user_id", None)
