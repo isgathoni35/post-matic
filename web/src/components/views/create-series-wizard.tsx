@@ -995,7 +995,9 @@ export function CreateSeriesWizard({
                             )}
                           </button>
                         ) : (
-                          <VolumeX className="w-3.5 h-3.5 text-slate-400 shrink-0" title="No background audio" />
+                          <span title="No background audio" className="inline-flex">
+                            <VolumeX className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          </span>
                         )}
                       </div>
                     );
